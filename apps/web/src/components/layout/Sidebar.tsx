@@ -72,11 +72,44 @@ const roleNavItems: Record<string, NavItem[]> = {
 };
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
-    const { user, logout } = useAuthStore();
-    const userRole = user?.roles?.[0] || 'STUDENT';
-    const navItems = roleNavItems[userRole] || roleNavItems.STUDENT;
+    const { user, logout, hasHydrated } = useAuthStore();
 
-    if (!isOpen) return null;
+    // Prevent hydration mismatch / flash of content
+    // Render skeleton/loading state instead of null to maintain layout
+    if (!hasHydrated) {
+        return (
+            <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 z-40">
+                <div className="flex flex-col h-full">
+                    <div className="p-6 border-b border-slate-200">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-slate-100 rounded-lg animate-pulse" />
+                            <div>
+                                <div className="h-4 w-24 bg-slate-100 rounded animate-pulse mb-1" />
+                                <div className="h-3 w-16 bg-slate-100 rounded animate-pulse" />
+                            </div>
+                        </div>
+                    </div>
+                    <nav className="flex-1 overflow-y-auto p-4">
+                        <ul className="space-y-1">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <li key={i}>
+                                    <div className="w-full flex items-center gap-3 px-4 py-3 rounded-lg">
+                                        <div className="w-5 h-5 bg-slate-100 rounded animate-pulse" />
+                                        <div className="h-4 w-24 bg-slate-100 rounded animate-pulse" />
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                </div>
+            </aside>
+        );
+    }
+
+    const userRole = user?.roles?.[0];
+    const navItems = userRole && roleNavItems[userRole] ? roleNavItems[userRole] : [];
+
+    if (!navItems.length) return null;
 
     return (
         <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 z-40">

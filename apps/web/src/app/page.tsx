@@ -7,10 +7,37 @@ import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
 import { FacultyDashboard } from '@/components/dashboard/FacultyDashboard';
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, hasHydrated } = useAuthStore();
 
-  // Default to STUDENT if no role found, though login flow should ensure role
-  const userRole = user?.roles?.[0] || 'STUDENT';
+  // Loading state for hydration
+  if (!hasHydrated) {
+    return (
+      <DashboardLayout>
+        <div className="flex h-[50vh] w-full items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+            <p className="mt-2 text-sm text-slate-500">Loading dashboard...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Default to nothing if no role found to prevent flashing unauthorized content
+  const userRole = user?.roles?.[0];
+
+  if (!userRole) {
+    return (
+      <DashboardLayout>
+        <div className="flex h-[50vh] w-full items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+            <p className="mt-2 text-sm text-slate-500">Verifying session...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const renderDashboard = () => {
     switch (userRole) {

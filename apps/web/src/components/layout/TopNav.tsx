@@ -18,8 +18,8 @@ const roleLabels: Record<string, string> = {
 
 export function TopNav({ onMenuToggle }: TopNavProps) {
     const { user } = useAuthStore();
-    const userRole = user?.roles?.[0] || 'STUDENT';
-    const roleLabel = roleLabels[userRole] || 'User';
+    const userRole = user?.roles?.[0];
+    const roleLabel = userRole && roleLabels[userRole] ? roleLabels[userRole] : 'User';
 
     return (
         <header className="sticky top-0 z-30 bg-white border-b border-slate-200">

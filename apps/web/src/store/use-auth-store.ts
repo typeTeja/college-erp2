@@ -17,6 +17,7 @@ interface AuthState {
     login: (credentials: any) => Promise<void>;
     logout: () => void;
     checkAuth: () => void;
+    hasHydrated: boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             isAuthenticated: false,
+            hasHydrated: false,
 
             login: async (credentials) => {
                 const formData = new URLSearchParams();
@@ -72,8 +74,13 @@ export const useAuthStore = create<AuthState>()(
             },
         }),
         {
-            name: 'auth-storage', // name of the item in the storage (must be unique)
-            partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }), // only persist user and status
+            name: 'auth-storage',
+            partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    state.hasHydrated = true;
+                }
+            },
         }
     )
 );
