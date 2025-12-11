@@ -1,42 +1,58 @@
 version: '3.8'
 
 services:
-  # FastAPI Backend
   api:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
     container_name: college-erp-api
     restart: always
+    env_file:
+      - ./apps/api/.env
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL} # your remote MySQL URL
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
       REFRESH_TOKEN_EXPIRE_DAYS: 7
     networks:
       - erp-network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/docs" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
 
-  # Next.js Frontend
   web:
     build:
       context: ./apps/web
       dockerfile: Dockerfile
     container_name: college-erp-web
     restart: always
+    env_file:
+      - ./apps/web/.env
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NODE_ENV: production
     depends_on:
       - api
     networks:
       - erp-network
+    ports:
+      - "3000:3000"
+    command: "npm start"
 
-  # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
     container_name: college-erp-nginx
     restart: always
+    depends_on:
+      - web
+      - api
     ports:
       - "80:80"
       - "443:443"
@@ -44,16 +60,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/logs:/var/log/nginx
-    depends_on:
-      - web
-      - api
     networks:
       - erp-network
 
 networks:
   erp-network:
     driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local
