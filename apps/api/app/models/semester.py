@@ -1,0 +1,19 @@
+from typing import TYPE_CHECKING, List, Optional
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from .program_year import ProgramYear
+    from .subject import Subject
+
+class Semester(SQLModel, table=True):
+    """Semester within a program year"""
+    id: Optional[int] = Field(default=None, primary_key=True)
+    program_year_id: int = Field(foreign_key="program_year.id", index=True)
+    semester_number: int  # 1 or 2 (for each year)
+    name: str  # e.g., "Semester 1", "Semester 2"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    
+    # Relationships
+    program_year: "ProgramYear" = Relationship(back_populates="semesters")
+    subjects: List["Subject"] = Relationship(back_populates="semester")

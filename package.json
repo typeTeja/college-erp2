@@ -1,0 +1,25 @@
+{
+    "name": "college-erp-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev:api": "cd apps/api && uvicorn app.main:app --reload",
+        "dev:web": "npm run dev --workspace=@college-erp/web",
+        "build": "npm run build --workspaces",
+        "test": "npm run test --workspaces"
+    },
+    "devDependencies": {
+        "eslint": "latest",
+        "prettier": "latest",
+        "turbo": "latest",
+        "typescript": "latest"
+    },
+    "dependencies": {
+        "@types/bcrypt": "^6.0.0",
+        "bcrypt": "^6.0.0"
+    }
+}
