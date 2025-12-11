@@ -3,9 +3,10 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install only what your stack requires (NO MySQL system deps needed)
+# Install only what your stack requires (curl is for healthchecks)
 RUN apt-get update && apt-get install -y \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies first for Docker layer caching
