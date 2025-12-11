@@ -1,0 +1,86 @@
+[
+    {
+        "hotels": [
+            {
+                "name": "Taj Krishna",
+                "address": "Banjara Hills, Hyderabad",
+                "contact_person": "Mr. Rajesh",
+                "phone": "9876599001",
+                "email": "events@tajkrishna.com",
+                "default_pay_rate": 800,
+                "is_active": true
+            },
+            {
+                "name": "ITC Kohenur",
+                "address": "Hitech City, Hyderabad",
+                "contact_person": "Ms. Sunita",
+                "phone": "9876599002",
+                "email": "hr@itckohenur.com",
+                "default_pay_rate": 900,
+                "is_active": true
+            },
+            {
+                "name": "Novotel Convention Centre",
+                "address": "Kondapur, Hyderabad",
+                "contact_person": "Mr. Ali",
+                "phone": "9876599003",
+                "email": "banquets@novotel.com",
+                "default_pay_rate": 750,
+                "is_active": true
+            },
+            {
+                "name": "Marriott Hotel",
+                "address": "Tank Bund, Hyderabad",
+                "contact_person": "Ms. Grace",
+                "phone": "9876599004",
+                "email": "events@marriott.com",
+                "default_pay_rate": 850,
+                "is_active": true
+            },
+            {
+                "name": "Sheraton",
+                "address": "Gachibowli, Hyderabad",
+                "contact_person": "Mr. Vikram",
+                "phone": "9876599005",
+                "email": "bookings@sheraton.com",
+                "default_pay_rate": 800,
+                "is_active": true
+            }
+        ],
+        "requests": [
+            {
+                "hotel_index": 0,
+                "event_name": "Wedding Reception",
+                "event_date_offset": 5,
+                "event_time": "18:00",
+                "duration_hours": 6,
+                "vacancies": 20,
+                "pay_amount": 900,
+                "transport_provided": true,
+                "status": "OPEN"
+            },
+            {
+                "hotel_index": 1,
+                "event_name": "Corporate Gala Dinner",
+                "event_date_offset": 7,
+                "event_time": "19:00",
+                "duration_hours": 5,
+                "vacancies": 15,
+                "pay_amount": 1000,
+                "transport_provided": true,
+                "status": "APPROVED"
+            },
+            {
+                "hotel_index": 2,
+                "event_name": "Medical Conference Lunch",
+                "event_date_offset": -2,
+                "event_time": "11:00",
+                "duration_hours": 8,
+                "vacancies": 25,
+                "pay_amount": 800,
+                "transport_provided": false,
+                "status": "COMPLETED"
+            }
+        ]
+    }
+]

@@ -10,7 +10,10 @@ from app.models.odc import ODCHotel, ODCRequest, StudentODCApplication, ODCStatu
 from app.schemas.odc import (
     ODCHotelCreate, ODCHotelRead,
     ODCRequestCreate, ODCRequestRead,
-    ApplicationRead, SelectionUpdate
+    ApplicationRead, SelectionUpdate,
+    StudentFeedbackSubmit, HotelFeedbackSubmit, FeedbackRead,
+    BillingCreate, BillingRead, BillingMarkPaid,
+    PayoutRead, PayoutBatchProcess, PayoutSummary
 )
 from app.services.odc_service import ODCService
 
@@ -94,3 +97,96 @@ def select_students(
     """Bulk update application status (Select/Reject) (Admin only)"""
     service = ODCService(session)
     return service.update_selections(selection_data)
+
+# --- Feedback ---
+
+@router.post("/applications/{application_id}/student-feedback", response_model=ApplicationRead)
+def submit_student_feedback(
+    application_id: int,
+    feedback_data: StudentFeedbackSubmit,
+    session: Session = Depends(get_session),
+    current_student: Student = Depends(get_current_active_student)
+):
+    """Submit student feedback for attended ODC event (Student only)"""
+    service = ODCService(session)
+    try:
+        return service.submit_student_feedback(application_id, current_student.id, feedback_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/applications/{application_id}/hotel-feedback", response_model=ApplicationRead)
+def submit_hotel_feedback(
+    application_id: int,
+    feedback_data: HotelFeedbackSubmit,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Submit hotel/admin feedback for student (Admin only)"""
+    service = ODCService(session)
+    try:
+        return service.submit_hotel_feedback(application_id, feedback_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# --- Billing ---
+
+@router.post("/billing", response_model=BillingRead)
+def generate_billing(
+    billing_data: BillingCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Generate billing/invoice for completed ODC event (Admin only)"""
+    service = ODCService(session)
+    try:
+        return service.generate_billing(billing_data.request_id, current_user.id, billing_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/billing", response_model=List[BillingRead])
+def list_billings(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """List all billings (Admin only)"""
+    service = ODCService(session)
+    return service.get_billings()
+
+@router.put("/billing/{billing_id}/mark-paid", response_model=BillingRead)
+def mark_billing_paid(
+    billing_id: int,
+    payment_data: BillingMarkPaid,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Mark billing as paid (Admin only)"""
+    service = ODCService(session)
+    try:
+        return service.mark_billing_paid(billing_id, payment_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# --- Payouts ---
+
+@router.get("/payouts/pending", response_model=List[ApplicationRead])
+def get_pending_payouts(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Get all pending payouts (Admin only)"""
+    service = ODCService(session)
+    return service.get_pending_payouts()
+
+@router.post("/payouts/process", response_model=List[PayoutRead])
+def process_payouts(
+    payout_data: PayoutBatchProcess,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Process batch payouts (Admin only)"""
+    service = ODCService(session)
+    try:
+        return service.process_payouts(current_user.id, payout_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+

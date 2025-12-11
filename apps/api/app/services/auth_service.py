@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime, timedelta
-from sqlmodel import Session, select
+from sqlmodel import Session, select, or_
 from app.models.user import User
 from app.models.role import Role
 from app.models.user_role import UserRole
@@ -16,7 +16,13 @@ class AuthService:
     
     def authenticate_user(self, username: str, password: str) -> Optional[User]:
         """Authenticate user with username and password"""
-        statement = select(User).where(User.username == username)
+        # Allow login validation by username OR email
+        statement = select(User).where(
+            or_(
+                User.username == username,
+                User.email == username
+            )
+        )
         user = self.session.exec(statement).first()
         
         if not user:

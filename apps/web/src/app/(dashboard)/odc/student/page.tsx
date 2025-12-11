@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { odcService } from '@/lib/services/odc-service';
+import { odcService } from '@/utils/odc-service';
 import { ODCRequest, ODCStatus } from '@/types/odc';
 
 export default function StudentOpportunitiesPage() {
@@ -15,7 +15,8 @@ export default function StudentOpportunitiesPage() {
     const loadRequests = async () => {
         setIsLoading(true);
         try {
-            const data = await odcService.getRequests(ODCStatus.OPEN);
+            const allRequests = await odcService.getRequests();
+            const data = allRequests.filter(r => r.status === ODCStatus.OPEN);
             setRequests(data);
         } catch (error) {
             console.error('Failed to load opportunities', error);

@@ -1,0 +1,122 @@
+[
+    {
+        "role_name": "SUPER_ADMIN",
+        "users": [
+            {
+                "email": "admin@college.edu",
+                "full_name": "Super Admin",
+                "password": "password123",
+                "mobile": "9999999999",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "PRINCIPAL",
+        "users": [
+            {
+                "email": "principal@college.edu",
+                "full_name": "Dr. Principal",
+                "password": "password123",
+                "mobile": "9888888888",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "ADMISSION_OFFICER",
+        "users": [
+            {
+                "email": "admissions@college.edu",
+                "full_name": "Admission Officer",
+                "password": "password123",
+                "mobile": "9777777777",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "SSE",
+        "users": [
+            {
+                "email": "sse@college.edu",
+                "full_name": "Student Support Exec",
+                "password": "password123",
+                "mobile": "9666666666",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "ACCOUNTS",
+        "users": [
+            {
+                "email": "accounts@college.edu",
+                "full_name": "Accounts Manager",
+                "password": "password123",
+                "mobile": "9555555555",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "LIBRARIAN",
+        "users": [
+            {
+                "email": "library@college.edu",
+                "full_name": "Librarian",
+                "password": "password123",
+                "mobile": "9444444444",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "WARDEN",
+        "users": [
+            {
+                "email": "warden@college.edu",
+                "full_name": "Hostel Warden",
+                "password": "password123",
+                "mobile": "9333333333",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "SECURITY",
+        "users": [
+            {
+                "email": "security@college.edu",
+                "full_name": "Chief Security",
+                "password": "password123",
+                "mobile": "9222222222",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "EXAM_CELL",
+        "users": [
+            {
+                "email": "examcell@college.edu",
+                "full_name": "Exam Controller",
+                "password": "password123",
+                "mobile": "9111111111",
+                "is_active": true
+            }
+        ]
+    },
+    {
+        "role_name": "ODC_COORDINATOR",
+        "users": [
+            {
+                "email": "odc@college.edu",
+                "full_name": "Placement Officer",
+                "password": "password123",
+                "mobile": "9000000000",
+                "is_active": true
+            }
+        ]
+    }
+]
