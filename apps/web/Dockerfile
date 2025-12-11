@@ -1,50 +1,59 @@
 FROM node:20-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+# ========================
+# 1️⃣ DEPENDENCIES INSTALL
+# ========================
+FROM base AS deps
+WORKDIR /app
 
-# Install dependencies - use npm install if lock file doesn't exist
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+# COPY ONLY WEB PACKAGE FILES
+COPY apps/web/package.json apps/web/package-lock.json* ./apps/web/
 
-# Rebuild the source code only when needed
+RUN cd apps/web && \
+    if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+
+# ========================
+# 2️⃣ BUILDER
+# ========================
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+# Copy full repo for build
 COPY . .
 
-# Set build-time environment variables
+# Copy dependencies installed earlier
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN cd apps/web && npm run build
 
-# Build the application
-RUN npm run build
 
-# Production image, copy all the files and run next
+# ========================
+# 3️⃣ RUNNER (PRODUCTION)
+# ========================
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Create user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files
-COPY --from=builder /app/public ./public
+# Copy standalone build
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy public folder SAFELY (no error if missing)
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
