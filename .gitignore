@@ -103,3 +103,7 @@ cover/
 .dmypy.json
 dmypy.json
 .pyre/
+*.tsbuildinfo
+
+# Deployment
+deployment-errors.txt
