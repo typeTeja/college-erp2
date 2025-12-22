@@ -6,8 +6,7 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'standalone',
-    outputFileTracingRoot: path.join(__dirname, '../../'),
+    // Standard build output
 };
 
 export default nextConfig;
