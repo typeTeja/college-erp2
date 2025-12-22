@@ -1,0 +1,272 @@
+[
+    {
+        "full_name": "Aarav Patel",
+        "email": "aarav.p@student.college.edu",
+        "program_code": "BHM",
+        "year": 1,
+        "semester": 1,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Vivaan Singh",
+        "email": "vivaan.s@student.college.edu",
+        "program_code": "BHM",
+        "year": 1,
+        "semester": 1,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Aditya Sharma",
+        "email": "aditya.s@student.college.edu",
+        "program_code": "BHM",
+        "year": 1,
+        "semester": 1,
+        "section": "B",
+        "hostel": true
+    },
+    {
+        "full_name": "Vihaan Gupta",
+        "email": "vihaan.g@student.college.edu",
+        "program_code": "BHM",
+        "year": 1,
+        "semester": 1,
+        "section": "B",
+        "hostel": false
+    },
+    {
+        "full_name": "Arjun Kumar",
+        "email": "arjun.k@student.college.edu",
+        "program_code": "BHM",
+        "year": 2,
+        "semester": 3,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Sai Krishna",
+        "email": "sai.k@student.college.edu",
+        "program_code": "BHM",
+        "year": 2,
+        "semester": 3,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Reyansh Reddy",
+        "email": "reyansh.r@student.college.edu",
+        "program_code": "BHM",
+        "year": 2,
+        "semester": 3,
+        "section": "B",
+        "hostel": false
+    },
+    {
+        "full_name": "Ayaan Khan",
+        "email": "ayaan.k@student.college.edu",
+        "program_code": "BHM",
+        "year": 2,
+        "semester": 3,
+        "section": "B",
+        "hostel": false
+    },
+    {
+        "full_name": "Ishaan Rao",
+        "email": "ishaan.r@student.college.edu",
+        "program_code": "BHM",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Shaurya Verma",
+        "email": "shaurya.v@student.college.edu",
+        "program_code": "BHM",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Atharv Nair",
+        "email": "atharv.n@student.college.edu",
+        "program_code": "BHM",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Dhruv Malhotra",
+        "email": "dhruv.m@student.college.edu",
+        "program_code": "BCT",
+        "year": 1,
+        "semester": 1,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Kabir Joshi",
+        "email": "kabir.j@student.college.edu",
+        "program_code": "BCT",
+        "year": 1,
+        "semester": 1,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Ananya Iyer",
+        "email": "ananya.i@student.college.edu",
+        "program_code": "BCT",
+        "year": 2,
+        "semester": 3,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Diya Menon",
+        "email": "diya.m@student.college.edu",
+        "program_code": "BCT",
+        "year": 2,
+        "semester": 3,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Saanvi Shetty",
+        "email": "saanvi.s@student.college.edu",
+        "program_code": "BCT",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Aadhya Kapoor",
+        "email": "aadhya.k@student.college.edu",
+        "program_code": "BCT",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Kiara Singh",
+        "email": "kiara.s@student.college.edu",
+        "program_code": "BHM",
+        "year": 1,
+        "semester": 1,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Myra Das",
+        "email": "myra.d@student.college.edu",
+        "program_code": "BHM",
+        "year": 2,
+        "semester": 3,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Zara Ali",
+        "email": "zara.a@student.college.edu",
+        "program_code": "BHM",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Rohan Mehta",
+        "email": "rohan.m@student.college.edu",
+        "program_code": "BHM",
+        "year": 1,
+        "semester": 1,
+        "section": "C",
+        "hostel": false
+    },
+    {
+        "full_name": "Karthik Pillai",
+        "email": "karthik.p@student.college.edu",
+        "program_code": "BHM",
+        "year": 2,
+        "semester": 3,
+        "section": "C",
+        "hostel": true
+    },
+    {
+        "full_name": "Vikram Choudhary",
+        "email": "vikram.c@student.college.edu",
+        "program_code": "BHM",
+        "year": 3,
+        "semester": 5,
+        "section": "C",
+        "hostel": false
+    },
+    {
+        "full_name": "Neha Agarwal",
+        "email": "neha.a@student.college.edu",
+        "program_code": "BCT",
+        "year": 1,
+        "semester": 1,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Pooja Reddy",
+        "email": "pooja.r@student.college.edu",
+        "program_code": "BCT",
+        "year": 2,
+        "semester": 3,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Sneha Jain",
+        "email": "sneha.j@student.college.edu",
+        "program_code": "BCT",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Manish Tiwari",
+        "email": "manish.t@student.college.edu",
+        "program_code": "BHM",
+        "year": 1,
+        "semester": 1,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Suresh Babu",
+        "email": "suresh.b@student.college.edu",
+        "program_code": "BHM",
+        "year": 2,
+        "semester": 3,
+        "section": "A",
+        "hostel": true
+    },
+    {
+        "full_name": "Ganesh Hegde",
+        "email": "ganesh.h@student.college.edu",
+        "program_code": "BHM",
+        "year": 3,
+        "semester": 5,
+        "section": "A",
+        "hostel": false
+    },
+    {
+        "full_name": "Amit Shah",
+        "email": "amit.s@student.college.edu",
+        "program_code": "BHM",
+        "year": 3,
+        "semester": 5,
+        "section": "B",
+        "hostel": true
+    }
+]

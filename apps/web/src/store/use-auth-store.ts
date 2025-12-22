@@ -1,43 +1,54 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import Cookies from 'js-cookie';
-import { api } from '@/lib/api';
+import { api } from '@/utils/api';
 import { jwtDecode } from 'jwt-decode';
 
 interface User {
     id: number;
     email: string;
+    full_name: string;
     roles: string[];
 }
 
 interface AuthState {
     user: User | null;
+    token: string | null;
     isAuthenticated: boolean;
     login: (credentials: any) => Promise<void>;
     logout: () => void;
     checkAuth: () => void;
+    hasHydrated: boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
             user: null,
+            token: null,
             isAuthenticated: false,
+            hasHydrated: false,
 
             login: async (credentials) => {
-                const { data } = await api.post('/auth/login', credentials);
+                const formData = new URLSearchParams();
+                formData.append('username', credentials.email); // Map email to username
+                formData.append('password', credentials.password);
+
+                const { data } = await api.post('/auth/login', formData, {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                });
                 const { access_token, refresh_token, user } = data;
 
                 Cookies.set('access_token', access_token);
                 Cookies.set('refresh_token', refresh_token);
 
-                set({ user, isAuthenticated: true });
+                set({ user, token: access_token, isAuthenticated: true });
             },
 
             logout: () => {
                 Cookies.remove('access_token');
                 Cookies.remove('refresh_token');
-                set({ user: null, isAuthenticated: false });
+                set({ user: null, token: null, isAuthenticated: false });
                 window.location.href = '/login';
             },
 
@@ -64,8 +75,13 @@ export const useAuthStore = create<AuthState>()(
             },
         }),
         {
-            name: 'auth-storage', // name of the item in the storage (must be unique)
-            partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }), // only persist user and status
+            name: 'auth-storage',
+            partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    state.hasHydrated = true;
+                }
+            },
         }
     )
 );

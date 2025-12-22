@@ -1,0 +1,105 @@
+[
+    {
+        "full_name": "Chef Sanjeev",
+        "email": "sanjeev@college.edu",
+        "mobile": "9876500001",
+        "department_code": "FP",
+        "designation": "Head Chef",
+        "subjects": [
+            "FP101",
+            "FP102",
+            "FP201"
+        ]
+    },
+    {
+        "full_name": "Ms. Priya Sharma",
+        "email": "priya@college.edu",
+        "mobile": "9876500002",
+        "department_code": "FO",
+        "designation": "Assistant Professor",
+        "subjects": [
+            "FO101"
+        ]
+    },
+    {
+        "full_name": "Mr. Rahul Verma",
+        "email": "rahul@college.edu",
+        "mobile": "9876500003",
+        "department_code": "F&B",
+        "designation": "Lecturer",
+        "subjects": [
+            "FBS101"
+        ]
+    },
+    {
+        "full_name": "Mrs. Lakshmi Nair",
+        "email": "lakshmi@college.edu",
+        "mobile": "9876500004",
+        "department_code": "HK",
+        "designation": "Senior Lecturer",
+        "subjects": [
+            "HK101"
+        ]
+    },
+    {
+        "full_name": "Chef Gordon",
+        "email": "gordon@college.edu",
+        "mobile": "9876500005",
+        "department_code": "BKY",
+        "designation": "Pastry Chef",
+        "subjects": [
+            "BKY201"
+        ]
+    },
+    {
+        "full_name": "Dr. Ramesh Gupta",
+        "email": "ramesh@college.edu",
+        "mobile": "9876500006",
+        "department_code": "MGT",
+        "designation": "Professor",
+        "subjects": [
+            "MGT301",
+            "MGT302"
+        ]
+    },
+    {
+        "full_name": "Chef Vikas",
+        "email": "vikas@college.edu",
+        "mobile": "9876500007",
+        "department_code": "FP",
+        "designation": "Lecturer",
+        "subjects": [
+            "FP102"
+        ]
+    },
+    {
+        "full_name": "Ms. Anjali",
+        "email": "anjali@college.edu",
+        "mobile": "9876500008",
+        "department_code": "FO",
+        "designation": "Lecturer",
+        "subjects": [
+            "FO101"
+        ]
+    },
+    {
+        "full_name": "Mr. David",
+        "email": "david@college.edu",
+        "mobile": "9876500009",
+        "department_code": "F&B",
+        "designation": "Assistant Lecturer",
+        "subjects": [
+            "FBS101"
+        ]
+    },
+    {
+        "full_name": "Ms. Sarah",
+        "email": "sarah@college.edu",
+        "mobile": "9876500010",
+        "department_code": "HK",
+        "designation": "Lecturer",
+        "subjects": [
+            "HK101"
+        ]
+    }
+]

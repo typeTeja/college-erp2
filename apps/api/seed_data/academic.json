@@ -1,0 +1,153 @@
+{
+    "departments": [
+        {
+            "name": "Front Office",
+            "code": "FO"
+        },
+        {
+            "name": "Food & Beverage",
+            "code": "F&B"
+        },
+        {
+            "name": "Housekeeping",
+            "code": "HK"
+        },
+        {
+            "name": "Kitchen / Food Production",
+            "code": "FP"
+        },
+        {
+            "name": "Bakery",
+            "code": "BKY"
+        },
+        {
+            "name": "Management",
+            "code": "MGT"
+        }
+    ],
+    "programs": [
+        {
+            "name": "Bachelor of Hotel Management",
+            "code": "BHM",
+            "departments": [
+                "FO",
+                "F&B",
+                "HK",
+                "FP",
+                "BKY",
+                "MGT"
+            ],
+            "years": [
+                {
+                    "year": 1,
+                    "semesters": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "year": 2,
+                    "semesters": [
+                        3,
+                        4
+                    ]
+                },
+                {
+                    "year": 3,
+                    "semesters": [
+                        5,
+                        6
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Bachelor of Culinary Technology",
+            "code": "BCT",
+            "departments": [
+                "FP",
+                "BKY",
+                "MGT"
+            ],
+            "years": [
+                {
+                    "year": 1,
+                    "semesters": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "year": 2,
+                    "semesters": [
+                        3,
+                        4
+                    ]
+                },
+                {
+                    "year": 3,
+                    "semesters": [
+                        5,
+                        6
+                    ]
+                }
+            ]
+        }
+    ],
+    "subjects": [
+        {
+            "name": "Food Production Foundation",
+            "code": "FP101",
+            "sem": 1,
+            "type": "THEORY"
+        },
+        {
+            "name": "Food Production Practical",
+            "code": "FP102",
+            "sem": 1,
+            "type": "PRACTICAL"
+        },
+        {
+            "name": "F&B Service Foundation",
+            "code": "FBS101",
+            "sem": 1,
+            "type": "THEORY"
+        },
+        {
+            "name": "Housekeeping Operations",
+            "code": "HK101",
+            "sem": 2,
+            "type": "THEORY"
+        },
+        {
+            "name": "Front Office Operations",
+            "code": "FO101",
+            "sem": 2,
+            "type": "THEORY"
+        },
+        {
+            "name": "Indian Regional Cuisine",
+            "code": "FP201",
+            "sem": 3,
+            "type": "THEORY"
+        },
+        {
+            "name": "Bakery & Patisserie",
+            "code": "BKY201",
+            "sem": 3,
+            "type": "PRACTICAL"
+        },
+        {
+            "name": "Hotel Law",
+            "code": "MGT301",
+            "sem": 5,
+            "type": "THEORY"
+        },
+        {
+            "name": "Marketing Management",
+            "code": "MGT302",
+            "sem": 6,
+            "type": "THEORY"
+        }
+    ]
+}

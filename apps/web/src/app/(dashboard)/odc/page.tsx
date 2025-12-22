@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function ODCDashboard() {
     const { user } = useAuthStore();
@@ -12,7 +13,9 @@ export default function ODCDashboard() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Outdoor Catering (ODC) Dashboard</h1>
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-semibold text-slate-900">Outdoor Catering (ODC) Dashboard</h1>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Student Actions */}
@@ -23,7 +26,7 @@ export default function ODCDashboard() {
                                 <h3 className="text-lg font-medium">New Opportunities</h3>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-gray-500 mb-4">Browse and apply for upcoming ODC events.</p>
+                                <p className="text-slate-500 mb-4">Browse and apply for upcoming ODC events.</p>
                                 <Link href="/odc/student">
                                     <Button className="w-full">View Opportunities</Button>
                                 </Link>
@@ -35,7 +38,7 @@ export default function ODCDashboard() {
                                 <h3 className="text-lg font-medium">My Applications</h3>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-gray-500 mb-4">Check status of your applications and history.</p>
+                                <p className="text-slate-500 mb-4">Check status of your applications and history.</p>
                                 <Link href="/odc/history">
                                     <Button variant="secondary" className="w-full">View History</Button>
                                 </Link>
@@ -52,7 +55,7 @@ export default function ODCDashboard() {
                                 <h3 className="text-lg font-medium">Manage Requests</h3>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-gray-500 mb-4">Create and manage ODC event requests.</p>
+                                <p className="text-slate-500 mb-4">Create and manage ODC event requests.</p>
                                 <Link href="/odc/requests">
                                     <Button className="w-full">Manage Requests</Button>
                                 </Link>
@@ -64,9 +67,33 @@ export default function ODCDashboard() {
                                 <h3 className="text-lg font-medium">Manage Hotels</h3>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-gray-500 mb-4">Add or update hotel partners.</p>
+                                <p className="text-slate-500 mb-4">Add or update hotel partners.</p>
                                 <Link href="/odc/hotels">
                                     <Button variant="secondary" className="w-full">Manage Hotels</Button>
+                                </Link>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <h3 className="text-lg font-medium">Billing Management</h3>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-slate-500 mb-4">Generate and track invoices for ODC events.</p>
+                                <Link href="/odc/billing">
+                                    <Button variant="secondary" className="w-full">View Billings</Button>
+                                </Link>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <h3 className="text-lg font-medium">Payout Management</h3>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-slate-500 mb-4">Process student payouts for attended events.</p>
+                                <Link href="/odc/payouts">
+                                    <Button variant="secondary" className="w-full">Manage Payouts</Button>
                                 </Link>
                             </CardContent>
                         </Card>
