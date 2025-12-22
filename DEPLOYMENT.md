@@ -25,15 +25,16 @@ Coolify uses Nixpacks to automatically detect and build your application. For th
     ```
 5.  **Exposed Port**: 8000.
 6.  **Domains**: Set your API domain (e.g., `api.yourdomain.com`).
+7.  **Note**: A `nixpacks.toml` file is provided in `apps/api/` to handle the start command automatically.
 
 ### 2. Frontend Web Service (`apps/web`)
 
 1.  **Create a New Resource**: Point to the same repository.
 2.  **Base Directory**: Set to `apps/web`.
 3.  **Build Pack**: Select `nixpacks`.
-4.  **Install Command**: `npm install`.
-5.  **Build Command**: `npm run build`.
-6.  **Start Command**: `npm start`.
+4.  **Install Command**: (Can be left empty, Nixpacks will use `npm install`)
+5.  **Build Command**: (Can be left empty, Nixpacks will use `npm run build`)
+6.  **Start Command**: (Can be left empty, Nixpacks will use the `nixpacks.toml` in `apps/web/`)
 7.  **Environment Variables**:
     ```env
     NEXT_PUBLIC_API_URL=https://api.yourdomain.com
