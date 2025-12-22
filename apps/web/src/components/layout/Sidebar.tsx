@@ -69,6 +69,39 @@ const roleNavItems: Record<string, NavItem[]> = {
         { icon: <BarChart3 size={20} />, label: 'Reports', path: '/reports' },
         { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
     ],
+    PRINCIPAL: [
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
+        { icon: <Users size={20} />, label: 'Students', path: '/students' },
+        { icon: <GraduationCap size={20} />, label: 'Faculty', path: '/faculty' },
+        { icon: <DollarSign size={20} />, label: 'Fees', path: '/fees' },
+        { icon: <Building2 size={20} />, label: 'Departments', path: '/departments' },
+        { icon: <BarChart3 size={20} />, label: 'Reports', path: '/reports' },
+    ],
+    ADMISSION_OFFICER: [
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
+        { icon: <Users size={20} />, label: 'Students', path: '/students' },
+        { icon: <FileText size={20} />, label: 'Applications', path: '/admissions' },
+    ],
+    ACCOUNTS: [
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
+        { icon: <DollarSign size={20} />, label: 'Fees Management', path: '/fees' },
+        { icon: <Wallet size={20} />, label: 'Payroll', path: '/payroll' },
+    ],
+    LIBRARIAN: [
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
+        { icon: <BookOpen size={20} />, label: 'Books', path: '/library' },
+        { icon: <FileText size={20} />, label: 'Issued Books', path: '/library/issued' },
+    ],
+    WARDEN: [
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
+        { icon: <Building2 size={20} />, label: 'Hostel Rooms', path: '/hostel' },
+        { icon: <Users size={20} />, label: 'Inmates', path: '/hostel/students' },
+    ],
+    ODC_COORDINATOR: [
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
+        { icon: <ClipboardList size={20} />, label: 'ODC Requests', path: '/odc' },
+        { icon: <Building2 size={20} />, label: 'Hotels', path: '/odc/hotels' },
+    ],
 };
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
@@ -106,7 +139,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         );
     }
 
-    const userRole = user?.roles?.[0];
+    const userRole = user?.roles?.[0]?.toUpperCase();
     const navItems = userRole && roleNavItems[userRole] ? roleNavItems[userRole] : [];
 
     if (!navItems.length) return null;

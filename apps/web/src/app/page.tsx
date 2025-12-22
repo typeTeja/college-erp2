@@ -24,7 +24,7 @@ export default function DashboardPage() {
   }
 
   // Default to nothing if no role found to prevent flashing unauthorized content
-  const userRole = user?.roles?.[0];
+  const userRole = user?.roles?.[0]?.toUpperCase();
 
   if (!userRole) {
     return (
@@ -43,6 +43,12 @@ export default function DashboardPage() {
     switch (userRole) {
       case 'SUPER_ADMIN':
       case 'ADMIN':
+      case 'PRINCIPAL':
+      case 'ADMISSION_OFFICER':
+      case 'ODC_COORDINATOR':
+      case 'ACCOUNTS':
+      case 'LIBRARIAN':
+      case 'WARDEN':
         return <AdminDashboard />;
       case 'FACULTY':
         return <FacultyDashboard />;

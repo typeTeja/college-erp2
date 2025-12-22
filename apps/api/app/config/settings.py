@@ -22,7 +22,11 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS - Union[List[str], str] to handle both pre-parsed list and string
-    BACKEND_CORS_ORIGINS: Union[List[str], str] = []
+    BACKEND_CORS_ORIGINS: Union[List[str], str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:8080",
+    ]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

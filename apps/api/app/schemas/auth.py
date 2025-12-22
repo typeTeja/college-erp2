@@ -57,7 +57,26 @@ class UserResponse(UserBase):
     id: int
     is_active: bool
     is_superuser: bool
+    is_superuser: bool
     roles: List[str] = []  # Role names
+    
+    @validator("roles", pre=True)
+    def extract_role_names(cls, v):
+        """Extract role names from Role objects if necessary"""
+        if not v:
+            return []
+        # If v is a list of Role objects or similar dicts
+        # Pydantic v2 usually handles this if we use model_validator or field_validator
+        # But for ORM objects, we need manual extraction
+        roles_list = []
+        for role in v:
+            if isinstance(role, str):
+                roles_list.append(role)
+            elif hasattr(role, "name"):
+                roles_list.append(role.name)
+            elif isinstance(role, dict) and "name" in role:
+                roles_list.append(role["name"])
+        return roles_list
     
     class Config:
         from_attributes = True
