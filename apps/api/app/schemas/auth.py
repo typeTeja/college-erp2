@@ -57,7 +57,6 @@ class UserResponse(UserBase):
     id: int
     is_active: bool
     is_superuser: bool
-    is_superuser: bool
     roles: List[str] = []  # Role names
     
     @validator("roles", pre=True)

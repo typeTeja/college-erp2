@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
-    email: z.string().email('Invalid email address'),
+    username: z.string().min(1, 'Username or Email is required'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -34,10 +34,11 @@ export default function LoginPage() {
         setIsLoading(true);
         setError(null);
         try {
-            await login(data);
+            // Mapping username to both fields just in case, but AuthService handles or_
+            await login({ email: data.username, password: data.password });
             router.push('/'); // Redirect to dashboard
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Login failed. Please checks your credentials.');
+            setError(err.response?.data?.detail || err.response?.data?.message || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }
@@ -55,22 +56,22 @@ export default function LoginPage() {
             <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                 <div>
                     <label
-                        htmlFor="email"
+                        htmlFor="username"
                         className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                        Email address
+                        Username or Email
                     </label>
                     <div className="mt-2">
                         <input
-                            id="email"
-                            type="email"
-                            autoComplete="email"
-                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 pl-3 ${errors.email ? 'ring-red-500' : ''
+                            id="username"
+                            type="text"
+                            autoComplete="username"
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 pl-3 ${errors.username ? 'ring-red-500' : ''
                                 }`}
-                            {...register('email')}
+                            {...register('username')}
                         />
-                        {errors.email && (
-                            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                        {errors.username && (
+                            <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
                         )}
                     </div>
                 </div>
