@@ -59,7 +59,7 @@ class ImportService:
 
             # Map excel values to schema
             mapped_data = {
-                "admission_number": str(row.get('admission_number', '')),
+                "admission_number": str(row.get('admission_number', '')).upper().replace('ADM', '').split('.')[0].strip(),
                 "name": str(row.get('full_name')) if row.get('full_name') and str(row.get('full_name')) != 'nan' else "Unknown Student",
                 "gender": row.get('gender', 'MALE').upper() if row.get('gender') and str(row.get('gender')) != 'nan' else "MALE",
                 "dob": dob_obj,
@@ -188,9 +188,15 @@ class ImportService:
                     dob_str = str(data.dob) if data.dob else "2000-01-01"
                     password = data.dob.strftime('%d%m%Y') if data.dob else "01012000"
                     
+                    # Auto-generate email if missing, using admission number and rchmct.org domain
+                    if not data.email:
+                        email = f"{data.admission_number}@rchmct.org"
+                    else:
+                        email = data.email
+
                     user = User(
                         username=username,
-                        email=data.email, # Optional in DB? If unique index, None is usually safe in Postgres
+                        email=email, 
                         full_name=data.name or "Unknown",
                         hashed_password=get_password_hash(password),
                         is_active=True, 
@@ -205,7 +211,7 @@ class ImportService:
                         name=data.name or "Unknown",
                         dob=dob_str,
                         phone=data.mobile or "0000000000",
-                        email=data.email,
+                        email=email,
                         user_id=user.id,
                         program_id=programs_map[data.course_code],
                         current_year=data.academic_year or 1,

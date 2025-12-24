@@ -13,6 +13,8 @@ from .subject import Subject
 from .student import Student
 from .faculty import Faculty
 from .enrollment import Enrollment
+from .parent import Parent
+from .import_log import ImportLog
 
 __all__ = [
     "User",
@@ -29,4 +31,6 @@ __all__ = [
     "ODCHotel",
     "ODCRequest",
     "StudentODCApplication",
+    "Parent",
+    "ImportLog",
 ]

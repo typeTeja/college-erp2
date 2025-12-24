@@ -67,9 +67,8 @@ export const importService = {
     },
 
     async executeImport(previewData: ImportPreviewResponse, fileName: string): Promise<ImportExecuteResponse> {
-        const response = await api.post('/import/execute', null, {
-            params: { file_name: fileName },
-            data: previewData
+        const response = await api.post('/import/execute', previewData, {
+            params: { file_name: fileName }
         });
         return response.data;
     }

@@ -27,7 +27,20 @@ class StudentResponse(StudentBase):
     """Schema for student API response"""
     id: int
     program_name: str  # Flattened for frontend
+    program_code: str
     current_year: int
+    current_semester: int
+    section: str
+    batch: str
+    status: str
+    gender: str
     
     class Config:
         from_attributes = True
+
+class StudentListResponse(BaseModel):
+    """Paginated list of students"""
+    total: int
+    items: list[StudentResponse]
+    page: int
+    limit: int
