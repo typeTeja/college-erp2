@@ -64,6 +64,16 @@ def list_requests(
     service = ODCService(session)
     return service.get_requests(status)
 
+@router.get("/requests/{request_id}/applications", response_model=List[ApplicationRead])
+def get_request_applications(
+    request_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Get all applications for a specific ODC Request (Admin only)"""
+    service = ODCService(session)
+    return service.get_request_applications(request_id)
+
 # --- Applications ---
 
 @router.post("/requests/{request_id}/apply", response_model=ApplicationRead)

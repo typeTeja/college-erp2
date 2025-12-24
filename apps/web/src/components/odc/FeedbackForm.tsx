@@ -3,10 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import axios from 'axios';
-import { useAuthStore } from '@/store/use-auth-store';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { odcService } from '@/utils/odc-service';
 
 interface FeedbackFormProps {
     applicationId: number;
@@ -14,7 +11,6 @@ interface FeedbackFormProps {
 }
 
 export default function FeedbackForm({ applicationId, onSuccess }: FeedbackFormProps) {
-    const { token } = useAuthStore();
     const [rating, setRating] = useState(0);
     const [feedback, setFeedback] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -35,16 +31,10 @@ export default function FeedbackForm({ applicationId, onSuccess }: FeedbackFormP
 
         setSubmitting(true);
         try {
-            await axios.post(
-                `${API_URL}/api/v1/odc/applications/${applicationId}/student-feedback`,
-                {
-                    student_rating: rating,
-                    student_feedback: feedback
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
+            await odcService.submitStudentFeedback(applicationId, {
+                student_rating: rating,
+                student_feedback: feedback
+            });
 
             alert('Feedback submitted successfully!');
             setRating(0);

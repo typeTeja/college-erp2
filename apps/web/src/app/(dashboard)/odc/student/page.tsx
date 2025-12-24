@@ -47,7 +47,7 @@ export default function StudentOpportunitiesPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">ODC Opportunities</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Outdoor Catering (ODC) - Hotel Training Opportunities</h1>
 
             {isLoading ? (
                 <div className="text-center py-10">Loading...</div>

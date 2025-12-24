@@ -26,6 +26,7 @@ const roleNavItems: Record<string, NavItem[]> = {
     SUPER_ADMIN: [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
         { icon: <Users size={20} />, label: 'Students', path: '/students' },
+        { icon: <FileText size={20} />, label: 'Import Students', path: '/students/import', badge: 'New' },
         { icon: <GraduationCap size={20} />, label: 'Faculty', path: '/faculty' },
         { icon: <Calendar size={20} />, label: 'Attendance', path: '/attendance' },
         { icon: <DollarSign size={20} />, label: 'Fees Management', path: '/fees' },
@@ -56,13 +57,14 @@ const roleNavItems: Record<string, NavItem[]> = {
         { icon: <Clock size={20} />, label: 'Timetable', path: '/timetable' },
         { icon: <BookOpen size={20} />, label: 'Library', path: '/library' },
         { icon: <ClipboardList size={20} />, label: 'Assignments', path: '/assignments' },
-        { icon: <FileCheck size={20} />, label: 'ODC / On Duty', path: '/odc/student' },
+        { icon: <FileCheck size={20} />, label: 'Outdoor Catering (ODC)', path: '/odc/student' },
         { icon: <FileCheck size={20} />, label: 'Gate Pass', path: '/gatepass' },
         { icon: <Settings size={20} />, label: 'Profile', path: '/profile' },
     ],
     ADMIN: [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
         { icon: <Users size={20} />, label: 'Students', path: '/students' },
+        { icon: <FileText size={20} />, label: 'Import Students', path: '/students/import' },
         { icon: <GraduationCap size={20} />, label: 'Faculty', path: '/faculty' },
         { icon: <DollarSign size={20} />, label: 'Fees', path: '/fees' },
         { icon: <ClipboardList size={20} />, label: 'ODC Management', path: '/odc' },
@@ -80,6 +82,7 @@ const roleNavItems: Record<string, NavItem[]> = {
     ADMISSION_OFFICER: [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
         { icon: <Users size={20} />, label: 'Students', path: '/students' },
+        { icon: <FileText size={20} />, label: 'Import Students', path: '/students/import' },
         { icon: <FileText size={20} />, label: 'Applications', path: '/admissions' },
     ],
     ACCOUNTS: [

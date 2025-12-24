@@ -101,6 +101,13 @@ class ODCService:
             .order_by(desc(StudentODCApplication.applied_at))
         ).all()
     
+    def get_request_applications(self, request_id: int) -> List[StudentODCApplication]:
+        return self.session.exec(
+            select(StudentODCApplication)
+            .where(StudentODCApplication.request_id == request_id)
+            .order_by(desc(StudentODCApplication.applied_at))
+        ).all()
+    
     # Feedback Management
     def submit_student_feedback(
         self, 

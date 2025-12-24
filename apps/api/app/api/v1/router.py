@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, odc, dashboard, admissions
+from app.api.v1 import auth, odc, dashboard, admissions, import_api
 
 api_router = APIRouter()
 
@@ -14,3 +14,6 @@ api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboar
 
 # Include admissions routes
 api_router.include_router(admissions.router, prefix="/admissions", tags=["admissions"])
+
+# Include import routes
+api_router.include_router(import_api.router, prefix="/import", tags=["import"])

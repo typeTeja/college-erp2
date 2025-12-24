@@ -4,18 +4,86 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { Building2, ClipboardList, Wallet, Users } from 'lucide-react';
+import { odcService } from '@/utils/odc-service';
+import { useState, useEffect } from 'react';
+import { ODCStatus, BillingStatus } from '@/types/odc';
 
 export default function ODCDashboard() {
     const { user } = useAuthStore();
+    const [stats, setStats] = useState({
+        totalHotels: 0,
+        activeRequests: 0,
+        pendingPayouts: 0,
+        totalCollected: 0
+    });
+
+    useEffect(() => {
+        const loadStats = async () => {
+            try {
+                const [hotels, requests, pendingPayouts, billings] = await Promise.all([
+                    odcService.getHotels(),
+                    odcService.getRequests(),
+                    odcService.getPendingPayouts(),
+                    odcService.getBilling()
+                ]);
+
+                setStats({
+                    totalHotels: hotels.length,
+                    activeRequests: requests.filter(r => r.status === ODCStatus.OPEN).length,
+                    pendingPayouts: pendingPayouts.length,
+                    totalCollected: billings
+                        .filter(b => b.status === BillingStatus.PAID)
+                        .reduce((sum, b) => sum + (b.total_amount || 0), 0)
+                });
+            } catch (error) {
+                console.error('Failed to load ODC stats', error);
+            }
+        };
+
+        if (user) loadStats();
+    }, [user]);
+
     const isStudent = user?.roles?.includes('STUDENT');
-    const isAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.roles?.includes('ADMIN') || user?.roles?.includes('FACULTY');
+    const isAdmin = user?.roles?.some(role =>
+        ['SUPER_ADMIN', 'ADMIN', 'FACULTY', 'ODC_COORDINATOR', 'STAFF'].includes(role)
+    );
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-slate-900">Outdoor Catering (ODC) Dashboard</h1>
+                <h1 className="text-2xl font-semibold text-slate-900">Outdoor Catering (ODC) - Hotel Training</h1>
             </div>
+
+            {isAdmin && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <KPICard
+                        title="Active Requests"
+                        value={stats.activeRequests}
+                        icon={<ClipboardList size={24} />}
+                        color="blue"
+                    />
+                    <KPICard
+                        title="Hotel Partners"
+                        value={stats.totalHotels}
+                        icon={<Building2 size={24} />}
+                        color="indigo"
+                    />
+                    <KPICard
+                        title="Pending Payouts"
+                        value={stats.pendingPayouts}
+                        icon={<Users size={24} />}
+                        color="orange"
+                    />
+                    <KPICard
+                        title="Total Collected"
+                        value={`₹${stats.totalCollected.toLocaleString('en-IN')}`}
+                        icon={<Wallet size={24} />}
+                        color="green"
+                    />
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Student Actions */}

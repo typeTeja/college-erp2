@@ -10,6 +10,7 @@ import {
     ODCBilling,
     BillingCreate,
     BillingMarkPaid,
+    SelectionUpdate,
     PayoutBatchProcess,
     ODCPayout
 } from '@/types/odc';
@@ -43,6 +44,11 @@ export const odcService = {
         return response.data;
     },
 
+    async getRequestApplications(requestId: number): Promise<ODCApplication[]> {
+        const response = await api.get(`/odc/requests/${requestId}/applications`);
+        return response.data;
+    },
+
     async applyForODC(requestId: number): Promise<ODCApplication> {
         const response = await api.post(`/odc/requests/${requestId}/apply`);
         return response.data;
@@ -56,6 +62,11 @@ export const odcService = {
 
     async submitHotelFeedback(applicationId: number, data: HotelFeedbackSubmit): Promise<ODCApplication> {
         const response = await api.post(`/odc/applications/${applicationId}/hotel-feedback`, data);
+        return response.data;
+    },
+
+    async selectStudents(data: SelectionUpdate): Promise<ODCApplication[]> {
+        const response = await api.post('/odc/applications/select', data);
         return response.data;
     },
 

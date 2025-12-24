@@ -3,7 +3,9 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ODCRequest, ODCStatus } from '@/types/odc';
+import Link from 'next/link';
 
 interface ODCRequestListProps {
     requests: ODCRequest[];
@@ -41,11 +43,11 @@ export function ODCRequestList({ requests, isLoading }: ODCRequestListProps) {
                             <Badge variant={request.status === ODCStatus.OPEN ? 'success' : 'default'}>
                                 {request.status}
                             </Badge>
-                            {request.status === ODCStatus.OPEN && (
-                                <div className="text-xs text-gray-500">
-                                    Applicants: View details
-                                </div>
-                            )}
+                            <Link href={`/odc/requests/${request.id}`}>
+                                <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50 mt-2">
+                                    View Applicants & Details &rarr;
+                                </Button>
+                            </Link>
                         </div>
                     </CardContent>
                 </Card>

@@ -1,0 +1,26 @@
+admission_number,full_name,gender,dob,mobile,email,aadhaar,blood_group,course,year,semester,section,batch,father_name,father_mobile,mother_name,guardian_mobile,hostel_required,transport_required,scholarship_category,lateral_entry
+22501,ARE AKSHAY,MALE,,7995757802,,,,,,,,,,,,,False,False,GENERAL,False
+425001,MANISH SARKAR,MALE,,8208184885,,,,,,,,,,,,,False,False,GENERAL,False
+425024,MIRZA HUZAIF BAIG,MALE,,7989802034,,,,,,,,,,,,,False,False,GENERAL,False
+325027,ANDE GANESH,MALE,,9985281397,,,,,,,,,,,,,False,False,GENERAL,False
+101,SYED ATIF ALI,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1034,NAREDDY AJAY REDDY,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1067,ANDE GANESH,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1068,MANGALI SANJAY,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1035,KUNCHALA SRINATH,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1002,SEEPATHI AVINASH,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+325038,AMARA VENKATA NAGA KALYAN,MALE,,9032591928,,,,,,,,,,,,,False,False,GENERAL,False
+425027,VARANASI SHIVANI,FEMALE,,7013551657,,,,,,,,,,,,,False,False,GENERAL,False
+425012,GUJJARLAPUDI MANOJ KUMAR,MALE,,9951081055,,,,,,,,,,,,,False,False,GENERAL,False
+325011,MANGALI SANJAY,MALE,,8186093979,,,,,,,,,,,,,False,False,GENERAL,False
+325014,MOHAMMED MUNAWAR SHARIFF,MALE,,8121159689,,,,,,,,,,,,,False,False,GENERAL,False
+325009,KONDURU NANDINI,FEMALE,,7995231232,,,,,,,,,,,,,False,False,GENERAL,False
+425017,MOHD SAIF,MALE,,9651528893,,,,,,,,,,,,,False,False,GENERAL,False
+425022,METLA NAGA SHIVA DEDIPYA,FEMALE,,7396013467,,,,,,,,,,,,,False,False,GENERAL,False
+1003,PABBATHI SUNAY KUMAR,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1036,MAKKABOYI KRISHNA,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1069,KONDURU NANDINI,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1070,BANKA VARSHITH REDDY,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1037,GANDLA GANESH,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+1004,BANDI PRAVEEN,MALE,,9989099890,,,,,,,,,,,,,False,False,GENERAL,False
+325046,BAIKANI RAKESH,MALE,,9948441093,,,,,,,,,,,,,False,False,GENERAL,False
