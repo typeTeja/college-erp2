@@ -197,7 +197,7 @@ export function AdminFeePanel() {
                                                 <span className="font-bold text-red-600">₹{defaulter.total_due.toLocaleString()}</span>
                                             </td>
                                             <td className="px-4 py-4">
-                                                <Badge variant="destructive">
+                                                <Badge variant="danger">
                                                     {defaulter.overdue_installments} installments
                                                 </Badge>
                                             </td>

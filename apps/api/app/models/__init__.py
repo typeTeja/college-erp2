@@ -39,6 +39,9 @@ from .admissions import Application, ApplicationPayment, EntranceExamScore
 from .library import Book, BookIssue, LibraryFine
 from .hostel import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComplaint
 from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
+from .inventory import Asset, AssetAllocation, AssetMaintenance, AssetAudit, UniformAllocation
+from .communication import Circular, Notification, NotificationLog
+from .settings import SystemSetting, AuditLog
 
 __all__ = [
     "User",
@@ -92,4 +95,14 @@ __all__ = [
     "SyllabusTopic",
     "QuestionBank",
     "Question",
+    "Asset",
+    "AssetAllocation",
+    "AssetMaintenance",
+    "AssetAudit",
+    "UniformAllocation",
+    "Circular",
+    "Notification",
+    "NotificationLog",
+    "SystemSetting",
+    "AuditLog",
 ]

@@ -10,6 +10,20 @@ from app.core.security import get_password_hash
 
 router = APIRouter()
 
+@router.get("/me", response_model=FacultyRead)
+def get_current_faculty(
+    *,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+) -> Any:
+    """
+    Get current logged-in faculty member's profile.
+    """
+    faculty = session.exec(select(Faculty).where(Faculty.user_id == current_user.id)).first()
+    if not faculty:
+        raise HTTPException(status_code=404, detail="Faculty profile not found")
+    return faculty
+
 @router.get("/", response_model=List[FacultyRead])
 def get_faculties(
     *,

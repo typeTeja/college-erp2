@@ -3,6 +3,8 @@
 import React from 'react';
 import { Menu, Bell, Search, User } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
+import Link from 'next/link';
+import { communicationService } from '@/utils/communication-service';
 
 interface TopNavProps {
     onMenuToggle: () => void;
@@ -20,6 +22,9 @@ export function TopNav({ onMenuToggle }: TopNavProps) {
     const { user } = useAuthStore();
     const userRole = user?.roles?.[0];
     const roleLabel = userRole && roleLabels[userRole] ? roleLabels[userRole] : 'User';
+
+    const { data: notifications } = communicationService.useNotifications({ unread_only: true });
+    const unreadCount = notifications?.length || 0;
 
     return (
         <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
@@ -47,10 +52,16 @@ export function TopNav({ onMenuToggle }: TopNavProps) {
                 {/* Right section */}
                 <div className="flex items-center gap-4">
                     {/* Notifications */}
-                    <button className="relative p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                        <Bell size={20} className="text-slate-700" />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
+                    <Link href="/notifications">
+                        <button className="relative p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                            <Bell size={20} className="text-slate-700" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+                    </Link>
 
                     {/* User profile */}
                     <div className="flex items-center gap-3 pl-4 border-l border-slate-200">

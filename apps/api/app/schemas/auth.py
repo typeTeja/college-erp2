@@ -33,6 +33,7 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
     full_name: Optional[str] = None
+    preferences: Optional[dict] = {}
 
 class UserCreate(UserBase):
     """Schema for creating a user"""
@@ -49,6 +50,7 @@ class UserUpdate(BaseModel):
     """Schema for updating a user"""
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
+    preferences: Optional[dict] = None
     is_active: Optional[bool] = None
     role_ids: Optional[List[int]] = None
 
@@ -57,6 +59,7 @@ class UserResponse(UserBase):
     id: int
     is_active: bool
     is_superuser: bool
+    preferences: dict = {}
     roles: List[str] = []  # Role names
     
     @validator("roles", pre=True)

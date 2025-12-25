@@ -94,7 +94,7 @@ export function FeeDashboard({ studentId, academicYear }: FeeDashboardProps) {
                                 Fully Paid
                             </Badge>
                         ) : (
-                            <Badge variant="destructive">
+                            <Badge variant="danger">
                                 <AlertCircle className="w-4 h-4 mr-1" />
                                 {feeSummary.is_blocked ? 'Blocked' : 'Pending'}
                             </Badge>
@@ -168,7 +168,7 @@ export function FeeDashboard({ studentId, academicYear }: FeeDashboardProps) {
                                 <div className="text-right">
                                     <p className="font-bold text-gray-800">₹{installment.amount.toLocaleString()}</p>
                                     <Badge
-                                        variant={installment.status === 'paid' ? 'default' : 'outline'}
+                                        variant={installment.status === 'paid' ? 'default' : 'default'}
                                         className={
                                             installment.status === 'paid'
                                                 ? 'bg-green-100 text-green-700 border-green-300'
@@ -209,7 +209,7 @@ export function FeeDashboard({ studentId, academicYear }: FeeDashboardProps) {
                                     </div>
                                     <div className="text-right">
                                         <Badge
-                                            variant={payment.status === 'SUCCESS' ? 'default' : 'outline'}
+                                            variant={payment.status === 'SUCCESS' ? 'default' : 'default'}
                                             className={
                                                 payment.status === 'SUCCESS'
                                                     ? 'bg-green-100 text-green-700 border-green-300'

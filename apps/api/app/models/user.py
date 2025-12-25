@@ -19,9 +19,8 @@ class User(SQLModel, table=True):
     is_active: bool = Field(default=True)
     is_superuser: bool = Field(default=False)
     
-    # Password reset fields
-    password_reset_token: Optional[str] = None
-    password_reset_expires: Optional[datetime] = None
+    # Preferences (JSON store for notifications, theme, etc.)
+    preferences: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Timestamps
     last_login: Optional[datetime] = None

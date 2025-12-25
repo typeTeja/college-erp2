@@ -1,5 +1,10 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+
+class SubjectShort(BaseModel):
+    id: int
+    code: str
+    name: str
 
 class FacultyBase(BaseModel):
     name: str
@@ -16,5 +21,7 @@ class FacultyCreate(FacultyBase):
 class FacultyRead(FacultyBase):
     id: int
     user_id: Optional[int] = None
+    subjects: List[SubjectShort] = []
+    
     class Config:
         from_attributes = True
