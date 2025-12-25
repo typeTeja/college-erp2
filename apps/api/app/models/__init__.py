@@ -13,6 +13,15 @@ from .subject import Subject
 from .student import Student
 from .faculty import Faculty
 from .enrollment import Enrollment
+from .fee import (
+    FeeStructure,
+    FeeComponent,
+    FeeInstallment,
+    StudentFee,
+    FeePayment,
+    FeeConcession,
+    FeeFine,
+)
 
 __all__ = [
     "User",
@@ -29,4 +38,11 @@ __all__ = [
     "ODCHotel",
     "ODCRequest",
     "StudentODCApplication",
+    "FeeStructure",
+    "FeeComponent",
+    "FeeInstallment",
+    "StudentFee",
+    "FeePayment",
+    "FeeConcession",
+    "FeeFine",
 ]

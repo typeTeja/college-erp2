@@ -17,7 +17,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 isOpen={sidebarOpen}
                 onToggle={() => setSidebarOpen(!sidebarOpen)}
             />
-            <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+            <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
                 <TopNav onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
                 <main className="p-6">
                     {children}
