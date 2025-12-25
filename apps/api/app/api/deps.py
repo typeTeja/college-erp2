@@ -30,8 +30,9 @@ def get_current_user(
     except (JWTError, ValidationError) as e:
         print(f"DEBUG AUTH: JWT Validation Failed: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Could not validate credentials: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     
     user = session.get(User, token_data.sub)

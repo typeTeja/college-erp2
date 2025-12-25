@@ -5,6 +5,7 @@ from .user import User
 from .odc import ODCHotel, ODCRequest, StudentODCApplication
 from .role import Role
 from .user_role import UserRole
+from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
 from .program_year import ProgramYear
@@ -13,6 +14,17 @@ from .subject import Subject
 from .student import Student
 from .faculty import Faculty
 from .enrollment import Enrollment
+from .parent import Parent
+from .staff import Staff
+from .operations import Shift, MaintenanceTicket
+from .exam import Exam, ExamSchedule, ExamResult
+from .timetable import (
+    TimeSlot,
+    Classroom,
+    TimetableTemplate,
+    ClassSchedule,
+    ClassAdjustment,
+)
 from .fee import (
     FeeStructure,
     FeeComponent,
@@ -22,6 +34,11 @@ from .fee import (
     FeeConcession,
     FeeFine,
 )
+from .attendance import AttendanceSession, AttendanceRecord
+from .admissions import Application, ApplicationPayment, EntranceExamScore
+from .library import Book, BookIssue, LibraryFine
+from .hostel import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComplaint
+from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
 
 __all__ = [
     "User",
@@ -33,11 +50,23 @@ __all__ = [
     "Semester",
     "Subject",
     "Student",
+    "Parent",
     "Faculty",
+    "Staff",
+    "Shift",
+    "MaintenanceTicket",
+    "Exam",
+    "ExamSchedule",
+    "ExamResult",
     "Enrollment",
     "ODCHotel",
     "ODCRequest",
     "StudentODCApplication",
+    "TimeSlot",
+    "Classroom",
+    "TimetableTemplate",
+    "ClassSchedule",
+    "ClassAdjustment",
     "FeeStructure",
     "FeeComponent",
     "FeeInstallment",
@@ -45,4 +74,22 @@ __all__ = [
     "FeePayment",
     "FeeConcession",
     "FeeFine",
+    "Application",
+    "ApplicationPayment",
+    "EntranceExamScore",
+    "Book",
+    "BookIssue",
+    "LibraryFine",
+    "HostelBlock",
+    "HostelRoom",
+    "BedAllocation",
+    "GatePass",
+    "HostelComplaint",
+    "Permission",
+    "RolePermission",
+    "PermissionAuditLog",
+    "LessonPlan",
+    "SyllabusTopic",
+    "QuestionBank",
+    "Question",
 ]

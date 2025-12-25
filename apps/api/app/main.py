@@ -3,11 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
 from app.api.v1.router import api_router
+from app.api.v1.roles import router as roles_router
+from app.core.rbac import seed_permissions
+from app.db.session import engine
+from sqlmodel import Session
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
+
+@app.on_event("startup")
+def on_startup():
+    with Session(engine) as session:
+        seed_permissions(session)
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
@@ -20,6 +29,7 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(roles_router, prefix=f"{settings.API_V1_STR}/roles", tags=["rbac"])
 
 @app.get("/")
 def root():
