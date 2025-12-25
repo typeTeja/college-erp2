@@ -9,9 +9,9 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
+import { Switch } from "../../../components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../components/ui/tabs"
 import { useAuthStore } from "@/store/use-auth-store"
 import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
@@ -332,7 +332,7 @@ function NotificationsTab({ user, setUser }: { user: any, setUser: any }) {
                         </div>
                         <Switch
                             checked={prefs.inApp}
-                            onCheckedChange={(checked) => setPrefs({ ...prefs, inApp: checked })}
+                            onCheckedChange={(checked: boolean) => setPrefs({ ...prefs, inApp: checked })}
                         />
                     </div>
 
@@ -343,7 +343,7 @@ function NotificationsTab({ user, setUser }: { user: any, setUser: any }) {
                         </div>
                         <Switch
                             checked={prefs.email}
-                            onCheckedChange={(checked) => setPrefs({ ...prefs, email: checked })}
+                            onCheckedChange={(checked: boolean) => setPrefs({ ...prefs, email: checked })}
                         />
                     </div>
 
@@ -354,7 +354,7 @@ function NotificationsTab({ user, setUser }: { user: any, setUser: any }) {
                         </div>
                         <Switch
                             checked={prefs.sms}
-                            onCheckedChange={(checked) => setPrefs({ ...prefs, sms: checked })}
+                            onCheckedChange={(checked: boolean) => setPrefs({ ...prefs, sms: checked })}
                         />
                     </div>
                 </div>
