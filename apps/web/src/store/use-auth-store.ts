@@ -9,6 +9,7 @@ interface User {
     email: string;
     full_name: string;
     roles: string[];
+    preferences?: any;
 }
 
 interface AuthState {
@@ -18,6 +19,7 @@ interface AuthState {
     login: (credentials: any) => Promise<void>;
     logout: () => void;
     checkAuth: () => void;
+    setUser: (user: User) => void;
     hasHydrated: boolean;
 }
 
@@ -73,6 +75,7 @@ export const useAuthStore = create<AuthState>()(
                     set({ isAuthenticated: false, user: null });
                 }
             },
+            setUser: (user) => set({ user }),
         }),
         {
             name: 'auth-storage',

@@ -1,19 +1,25 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, odc, dashboard, admissions, import_api
+from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings
 
 api_router = APIRouter()
-
-# Include auth routes
-api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
-
-# Include ODC routes
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(odc.router, prefix="/odc", tags=["odc"])
-
-# Include dashboard routes
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
-
-# Include admissions routes
 api_router.include_router(admissions.router, prefix="/admissions", tags=["admissions"])
-
-# Include import routes
 api_router.include_router(import_api.router, prefix="/import", tags=["import"])
+api_router.include_router(fees.router, prefix="/fees", tags=["fees"])
+api_router.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
+api_router.include_router(exams.router, prefix="/exams", tags=["exams"])
+api_router.include_router(students.router, prefix="/students", tags=["students"])
+api_router.include_router(timetable.router, prefix="/timetable", tags=["timetable"])
+api_router.include_router(staff.router, prefix="/staff", tags=["staff"])
+api_router.include_router(operations.router, prefix="/operations", tags=["operations"])
+api_router.include_router(programs.router, prefix="/programs", tags=["programs"])
+api_router.include_router(library.router, prefix="/library", tags=["library"])
+api_router.include_router(hostel.router, prefix="/hostel", tags=["hostel"])
+api_router.include_router(faculty.router, prefix="/faculty", tags=["faculty"])
+api_router.include_router(lesson.router, prefix="/lesson", tags=["lesson"])
+api_router.include_router(inventory.router, prefix="/inventory", tags=["inventory"])
+api_router.include_router(communication.router, prefix="/communication", tags=["communication"])
+api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
+api_router.include_router(settings.router, prefix="/settings", tags=["settings"])

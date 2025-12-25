@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, List, Optional
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Column, JSON
 
 if TYPE_CHECKING:
     from .role import Role
@@ -22,6 +22,9 @@ class User(SQLModel, table=True):
     # Password reset fields
     password_reset_token: Optional[str] = None
     password_reset_expires: Optional[datetime] = None
+    
+    # Preferences (JSON store for notifications, theme, etc.)
+    preferences: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
     
     # Timestamps
     last_login: Optional[datetime] = None

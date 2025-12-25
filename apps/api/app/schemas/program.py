@@ -14,7 +14,7 @@ class ProgramCreate(ProgramBase):
     """Schema for creating a program"""
     department_id: int
 
-class ProgramResponse(ProgramBase):
+class ProgramRead(ProgramBase):
     """Schema for program API response"""
     id: int
     department_name: str

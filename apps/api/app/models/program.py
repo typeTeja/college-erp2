@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from .program_year import ProgramYear
     from .student import Student
     from .department import Department
+    from .fee import FeeStructure
 
 class Program(SQLModel, table=True):
     """Degree program model (e.g., B.Tech CS, MBA, M.Sc)"""
@@ -19,3 +20,4 @@ class Program(SQLModel, table=True):
     department: "Department" = Relationship(back_populates="programs")
     years: List["ProgramYear"] = Relationship(back_populates="program")
     students: List["Student"] = Relationship(back_populates="program")
+    fee_structures: List["FeeStructure"] = Relationship(back_populates="program")

@@ -19,3 +19,15 @@ export const CardContent = ({ children, className = '' }: { children: React.Reac
         {children}
     </div>
 );
+
+export const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+    <h3 className={`text-lg leading-6 font-medium text-gray-900 ${className}`}>
+        {children}
+    </h3>
+);
+
+export const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+    <p className={`mt-1 max-w-2xl text-sm text-gray-500 ${className}`}>
+        {children}
+    </p>
+);

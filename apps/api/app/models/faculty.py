@@ -10,9 +10,11 @@ class Faculty(SQLModel, table=True):
     user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
     name: str
     department: Optional[str] = None
+    designation: Optional[str] = None
     qualification: Optional[str] = None
     phone: Optional[str] = Field(default=None, index=True)
     email: Optional[str] = Field(default=None, index=True)
+    max_weekly_hours: int = Field(default=20)  # Workload limit
     
     # Relationships
     subjects: List["Subject"] = Relationship(back_populates="faculty")

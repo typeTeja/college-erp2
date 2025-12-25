@@ -53,7 +53,7 @@ export default function LoginPage() {
                 </p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} method="POST">
                 <div>
                     <label
                         htmlFor="username"
