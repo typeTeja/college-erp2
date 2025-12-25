@@ -87,7 +87,7 @@ export function PaymentRecordForm({
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4" method="POST">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Amount *

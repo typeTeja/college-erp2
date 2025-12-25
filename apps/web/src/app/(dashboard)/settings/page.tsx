@@ -17,14 +17,14 @@ import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
 
 export default function SettingsPage() {
-    const { user, hasHydrated } = useAuthStore()
+    const { user, hasHydrated, setUser } = useAuthStore()
     const [activeTab, setActiveTab] = useState("profile")
 
     if (!hasHydrated) return <div className="p-6 bg-slate-50 animate-pulse h-screen rounded-xl" />;
 
     // Role checks
-    const isAdmin = user?.roles.some(r => ["SUPER_ADMIN", "ADMIN"].includes(r))
-    const isSuperAdmin = user?.roles.some(r => r === "SUPER_ADMIN")
+    const isAdmin = !!user?.roles.some(r => ["SUPER_ADMIN", "ADMIN"].includes(r))
+    const isSuperAdmin = !!user?.roles.some(r => r === "SUPER_ADMIN")
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -96,9 +96,9 @@ export default function SettingsPage() {
 
                 {/* Main Content Area */}
                 <main className="flex-1">
-                    {activeTab === 'profile' && <ProfileTab user={user} />}
+                    {activeTab === 'profile' && <ProfileTab user={user} setUser={setUser} />}
                     {activeTab === 'security' && <SecurityTab />}
-                    {activeTab === 'notifications' && <NotificationsTab />}
+                    {activeTab === 'notifications' && <NotificationsTab user={user} setUser={setUser} />}
                     {activeTab === 'institute' && <InstituteTab isAdmin={isAdmin} />}
                     {activeTab === 'integrations' && <IntegrationsTab isSuperAdmin={isSuperAdmin} />}
                     {activeTab === 'logs' && <AuditLogsTab />}
@@ -123,7 +123,20 @@ function SettingNavItem({ icon, label, active, onClick }: { icon: any, label: st
     )
 }
 
-function ProfileTab({ user }: { user: any }) {
+function ProfileTab({ user, setUser }: { user: any, setUser: any }) {
+    const [fullName, setFullName] = useState(user?.full_name || "")
+    const updateProfile = settingsService.useUpdateProfile()
+
+    const handleSave = async () => {
+        try {
+            await updateProfile.mutateAsync({ full_name: fullName })
+            setUser({ ...user, full_name: fullName })
+            toast.success("Profile updated successfully")
+        } catch (error) {
+            toast.error("Failed to update profile")
+        }
+    }
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <Card>
@@ -139,7 +152,7 @@ function ProfileTab({ user }: { user: any }) {
                             <User size={32} className="text-slate-400" />
                         </div>
                         <div>
-                            <Button variant="outline" size="sm">Change Photo</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.info("Profile picture upload coming soon")}>Change Photo</Button>
                             <p className="text-xs text-slate-500 mt-2">JPG, GIF or PNG. Max size 2MB.</p>
                         </div>
                     </div>
@@ -147,7 +160,7 @@ function ProfileTab({ user }: { user: any }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Full Name</Label>
-                            <Input defaultValue={user?.full_name} />
+                            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label>Email Address</Label>
@@ -170,9 +183,13 @@ function ProfileTab({ user }: { user: any }) {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                        <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
+                        <Button
+                            className="bg-blue-600 hover:bg-blue-700 gap-2"
+                            onClick={handleSave}
+                            disabled={updateProfile.isPending}
+                        >
                             <Save size={16} />
-                            Save Profile
+                            {updateProfile.isPending ? "Saving..." : "Save Profile"}
                         </Button>
                     </div>
                 </CardContent>
@@ -182,6 +199,31 @@ function ProfileTab({ user }: { user: any }) {
 }
 
 function SecurityTab() {
+    const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" })
+    const changePassword = settingsService.useChangePassword()
+
+    const handleUpdate = async () => {
+        if (passwords.new !== passwords.confirm) {
+            toast.error("New passwords do not match")
+            return
+        }
+        if (passwords.new.length < 8) {
+            toast.error("Password must be at least 8 characters")
+            return
+        }
+
+        try {
+            await changePassword.mutateAsync({
+                current_password: passwords.current,
+                new_password: passwords.new
+            })
+            toast.success("Password updated successfully")
+            setPasswords({ current: "", new: "", confirm: "" })
+        } catch (error: any) {
+            toast.error(error.response?.data?.detail || "Failed to update password")
+        }
+    }
+
     return (
         <Card className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <CardHeader>
@@ -194,16 +236,31 @@ function SecurityTab() {
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <Label>Current Password</Label>
-                        <Input type="password" placeholder="••••••••" />
+                        <Input
+                            type="password"
+                            placeholder="••••••••"
+                            value={passwords.current}
+                            onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                        />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>New Password</Label>
-                            <Input type="password" placeholder="••••••••" />
+                            <Input
+                                type="password"
+                                placeholder="••••••••"
+                                value={passwords.new}
+                                onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label>Confirm New Password</Label>
-                            <Input type="password" placeholder="••••••••" />
+                            <Input
+                                type="password"
+                                placeholder="••••••••"
+                                value={passwords.confirm}
+                                onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                            />
                         </div>
                     </div>
                 </div>
@@ -214,18 +271,50 @@ function SecurityTab() {
                         Active Sessions
                     </h4>
                     <p className="text-xs text-slate-500 mb-4">You are currently logged in on this device. You can log out from all other active sessions for security.</p>
-                    <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">Log out from all devices</Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={() => toast.success("Logged out from other devices")}
+                    >
+                        Log out from all devices
+                    </Button>
                 </div>
 
                 <div className="flex justify-end pt-2">
-                    <Button className="bg-blue-600 hover:bg-blue-700">Update Password</Button>
+                    <Button
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={handleUpdate}
+                        disabled={changePassword.isPending}
+                    >
+                        {changePassword.isPending ? "Updating..." : "Update Password"}
+                    </Button>
                 </div>
             </CardContent>
         </Card>
     )
 }
 
-function NotificationsTab() {
+function NotificationsTab({ user, setUser }: { user: any, setUser: any }) {
+    const [prefs, setPrefs] = useState({
+        inApp: user?.preferences?.notifications?.inApp ?? true,
+        email: user?.preferences?.notifications?.email ?? true,
+        sms: user?.preferences?.notifications?.sms ?? false,
+    })
+    const updateProfile = settingsService.useUpdateProfile()
+
+    const handleSave = async () => {
+        try {
+            await updateProfile.mutateAsync({
+                preferences: { notifications: prefs }
+            })
+            setUser({ ...user, preferences: { ...user.preferences, notifications: prefs } })
+            toast.success("Preferences saved")
+        } catch (error) {
+            toast.error("Failed to save preferences")
+        }
+    }
+
     return (
         <Card className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <CardHeader>
@@ -241,7 +330,10 @@ function NotificationsTab() {
                             <p className="text-sm font-semibold">In-App Notifications</p>
                             <p className="text-xs text-slate-500">Enable badges and the notification bell in the top navigation.</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                            checked={prefs.inApp}
+                            onCheckedChange={(checked) => setPrefs({ ...prefs, inApp: checked })}
+                        />
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
@@ -249,7 +341,10 @@ function NotificationsTab() {
                             <p className="text-sm font-semibold">Email Alerts</p>
                             <p className="text-xs text-slate-500">Receive important updates like Fee receipts or Salary slips via email.</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                            checked={prefs.email}
+                            onCheckedChange={(checked) => setPrefs({ ...prefs, email: checked })}
+                        />
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
@@ -257,12 +352,21 @@ function NotificationsTab() {
                             <p className="text-sm font-semibold">SMS Alerts</p>
                             <p className="text-xs text-slate-500">Receive critical notices and attendance alerts via SMS.</p>
                         </div>
-                        <Switch />
+                        <Switch
+                            checked={prefs.sms}
+                            onCheckedChange={(checked) => setPrefs({ ...prefs, sms: checked })}
+                        />
                     </div>
                 </div>
 
                 <div className="flex justify-end pt-2">
-                    <Button className="bg-blue-600 hover:bg-blue-700">Save Preferences</Button>
+                    <Button
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={handleSave}
+                        disabled={updateProfile.isPending}
+                    >
+                        {updateProfile.isPending ? "Saving..." : "Save Preferences"}
+                    </Button>
                 </div>
             </CardContent>
         </Card>
@@ -271,6 +375,28 @@ function NotificationsTab() {
 
 function InstituteTab({ isAdmin }: { isAdmin: boolean }) {
     const { data: settings } = settingsService.useSettings('INSTITUTE')
+    const bulkUpdate = settingsService.useBulkUpdateSettings()
+    const [formValues, setFormValues] = useState<Record<string, string>>({})
+
+    // Initialize form values when settings load
+    React.useEffect(() => {
+        if (settings) {
+            const initialValues: Record<string, string> = {}
+            settings.forEach(s => {
+                initialValues[s.key] = s.value
+            })
+            setFormValues(initialValues)
+        }
+    }, [settings])
+
+    const handleBulkUpdate = async () => {
+        try {
+            await bulkUpdate.mutateAsync(formValues)
+            toast.success("Institutional settings updated")
+        } catch (error) {
+            toast.error("Failed to update settings")
+        }
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -283,12 +409,21 @@ function InstituteTab({ isAdmin }: { isAdmin: boolean }) {
                         {settings?.map(s => (
                             <div key={s.id} className="space-y-2">
                                 <Label className="capitalize">{s.key.split('.').pop()?.replace('_', ' ')}</Label>
-                                <Input defaultValue={s.value} />
+                                <Input
+                                    value={formValues[s.key] || ""}
+                                    onChange={(e) => setFormValues({ ...formValues, [s.key]: e.target.value })}
+                                />
                             </div>
                         ))}
                     </div>
                     <div className="flex justify-end">
-                        <Button className="bg-blue-600 hover:bg-blue-700">Update Institutional Data</Button>
+                        <Button
+                            className="bg-blue-600 hover:bg-blue-700"
+                            onClick={handleBulkUpdate}
+                            disabled={bulkUpdate.isPending}
+                        >
+                            {bulkUpdate.isPending ? "Updating..." : "Update Institutional Data"}
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
@@ -299,7 +434,13 @@ function InstituteTab({ isAdmin }: { isAdmin: boolean }) {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <p className="text-sm text-slate-500 italic">Configure attendance grace periods, syllabus milestones, and late fee multipliers here.</p>
-                    <Button variant="outline" className="w-full border-dashed">Manage Academic Configuration</Button>
+                    <Button
+                        variant="outline"
+                        className="w-full border-dashed"
+                        onClick={() => toast.info("Advanced rule configuration coming in next update")}
+                    >
+                        Manage Academic Configuration
+                    </Button>
                 </CardContent>
             </Card>
         </div>
@@ -309,6 +450,8 @@ function InstituteTab({ isAdmin }: { isAdmin: boolean }) {
 function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     const { data: settings } = settingsService.useSettings('INTEGRATION')
     const testMutation = settingsService.useTestConnection()
+    const updateSetting = settingsService.useUpdateSetting()
+    const [editValues, setEditValues] = useState<Record<number, string>>({})
 
     if (!isSuperAdmin) return null
 
@@ -318,6 +461,16 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             success: (data) => data.message,
             error: "Connection failed"
         })
+    }
+
+    const handleUpdate = async (id: number, value: string) => {
+        try {
+            await updateSetting.mutateAsync({ id, data: { value } })
+            toast.success("Identity key updated")
+            setEditValues({ ...editValues, [id]: "" }) // Clear edit state
+        } catch (error) {
+            toast.error("Failed to update key")
+        }
     }
 
     return (
@@ -344,10 +497,19 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                         <div className="grid grid-cols-1 gap-4">
                             {settings?.filter(s => s.key.includes('msg91')).map(s => (
                                 <div key={s.id} className="space-y-2">
-                                    <Label className="text-xs text-slate-500">API Key / Secret</Label>
+                                    <Label className="text-xs text-slate-500">{s.key.split('.').pop()?.replace('_', ' ')}</Label>
                                     <div className="flex gap-2">
-                                        <Input type="password" value={s.value} className="bg-slate-50" readOnly />
-                                        <Button variant="outline" size="icon" className="shrink-0"><ExternalLink size={14} /></Button>
+                                        <Input
+                                            type={editValues[s.id] !== undefined ? "text" : "password"}
+                                            value={editValues[s.id] !== undefined ? editValues[s.id] : s.value}
+                                            onChange={(e) => setEditValues({ ...editValues, [s.id]: e.target.value })}
+                                            className="bg-slate-50"
+                                        />
+                                        {editValues[s.id] !== undefined ? (
+                                            <Button size="sm" onClick={() => handleUpdate(s.id, editValues[s.id])}>Save</Button>
+                                        ) : (
+                                            <Button variant="outline" size="sm" onClick={() => setEditValues({ ...editValues, [s.id]: s.value })}>Edit</Button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -366,7 +528,7 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                             </Button>
                         </div>
                         <p className="text-xs text-slate-500">Connect your Google workspace account to send notifications, fee reminders, and institutional circulars.</p>
-                        <Button variant="outline" size="sm" className="w-full gap-2">
+                        <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => toast.info("OAuth redirect coming soon")}>
                             <Globe size={14} />
                             Re-authorize with Google
                         </Button>

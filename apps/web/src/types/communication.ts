@@ -41,7 +41,7 @@ export interface Notification {
     message: string;
     type: NotificationType;
     link: string | null;
-    is_read: bool;
+    is_read: boolean;
     created_at: string;
     read_at: string | null;
 }

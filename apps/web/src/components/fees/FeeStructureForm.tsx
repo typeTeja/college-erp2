@@ -118,7 +118,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
     const isBalanced = totalAmount === totalInstallments;
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" method="POST">
             {/* Basic Information */}
             <Card>
                 <CardContent className="p-6">

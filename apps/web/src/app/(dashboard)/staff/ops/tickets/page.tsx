@@ -89,7 +89,7 @@ export default function MaintenanceTicketsPage() {
                         <DialogHeader>
                             <DialogTitle>Report Maintenance Issue</DialogTitle>
                         </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                        <form onSubmit={handleSubmit} className="space-y-4 py-4" method="POST">
                             <div className="space-y-2">
                                 <Label>Issue Title</Label>
                                 <Input required placeholder="e.g. Broken Fan" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />

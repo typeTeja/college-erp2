@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { api } from '@/utils/api';
 import { Book, BookIssue, LibraryFine } from '@/types/library';
 
 export const libraryService = {

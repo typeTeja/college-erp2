@@ -113,3 +113,11 @@ export interface AuditCreateDTO {
     audited_by: string;
     remarks?: string;
 }
+
+export interface UniformAllocationCreateDTO {
+    student_id: number;
+    item_name: string;
+    size: UniformSize;
+    quantity: number;
+    is_paid?: boolean;
+}

@@ -2,7 +2,7 @@ import { api } from "@/utils/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     Circular, CircularCreateDTO,
-    Notification, NotificationRead
+    Notification
 } from "@/types/communication";
 
 export const communicationService = {

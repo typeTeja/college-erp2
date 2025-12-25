@@ -1,7 +1,7 @@
 import { api } from "@/utils/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-    Asset, AssetRead, AssetCreateDTO,
+    Asset, AssetCreateDTO,
     AssetAllocation, AllocationCreateDTO,
     AssetAudit, AuditCreateDTO,
     UniformAllocation, UniformAllocationCreateDTO
@@ -101,7 +101,7 @@ export const inventoryService = {
     useIssueUniform: () => {
         const queryClient = useQueryClient();
         return useMutation({
-            mutationFn: async (data: any) => {
+            mutationFn: async (data: UniformAllocationCreateDTO) => {
                 const response = await api.post<UniformAllocation>("/inventory/uniforms", data);
                 return response.data;
             },

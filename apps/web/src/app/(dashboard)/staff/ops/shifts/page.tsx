@@ -72,7 +72,7 @@ export default function ShiftManagementPage() {
                         <DialogHeader>
                             <DialogTitle>Add New Shift</DialogTitle>
                         </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                        <form onSubmit={handleSubmit} className="space-y-4 py-4" method="POST">
                             <div className="space-y-2">
                                 <Label>Shift Name</Label>
                                 <Input required placeholder="e.g. Morning Shift" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />

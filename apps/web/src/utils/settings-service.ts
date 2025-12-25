@@ -87,5 +87,18 @@ export const settingsService = {
                 return response.data;
             }
         });
+    },
+
+    useBulkUpdateSettings: () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (data: Record<string, any>) => {
+                const response = await api.post("/settings/bulk", { settings: data });
+                return response.data;
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["settings"] });
+            }
+        });
     }
 };

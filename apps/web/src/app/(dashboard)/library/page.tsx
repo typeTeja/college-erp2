@@ -11,6 +11,16 @@ import { libraryService } from '@/utils/library-service'
 import { BookStatus, Book } from '@/types/library'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 
 export default function LibraryPage() {
     const [searchTerm, setSearchTerm] = useState('')
@@ -186,7 +196,7 @@ export default function LibraryPage() {
                             Lending "{selectedBook?.title}" to a student.
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleIssueSubmit} className="space-y-4">
+                    <form onSubmit={handleIssueSubmit} className="space-y-4" method="POST">
                         <div className="space-y-2">
                             <Label htmlFor="studentId">Student ID</Label>
                             <Input
