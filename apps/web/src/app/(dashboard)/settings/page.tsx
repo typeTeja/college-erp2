@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { InstituteTab } from "./InstituteTab";
 import { useAuthStore } from "@/store/use-auth-store"
 import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
@@ -373,79 +374,12 @@ function NotificationsTab({ user, setUser }: { user: any, setUser: any }) {
     )
 }
 
-function InstituteTab({ isAdmin }: { isAdmin: boolean }) {
-    const { data: settings } = settingsService.useSettings('INSTITUTE')
-    const bulkUpdate = settingsService.useBulkUpdateSettings()
-    const [formValues, setFormValues] = useState<Record<string, string>>({})
 
-    // Initialize form values when settings load
-    React.useEffect(() => {
-        if (settings) {
-            const initialValues: Record<string, string> = {}
-            settings.forEach(s => {
-                initialValues[s.key] = s.value
-            })
-            setFormValues(initialValues)
-        }
-    }, [settings])
 
-    const handleBulkUpdate = async () => {
-        try {
-            await bulkUpdate.mutateAsync(formValues)
-            toast.success("Institutional settings updated")
-        } catch (error) {
-            toast.error("Failed to update settings")
-        }
-    }
 
-    return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">Institute Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {settings?.map(s => (
-                            <div key={s.id} className="space-y-2">
-                                <Label className="capitalize">{s.key.split('.').pop()?.replace('_', ' ')}</Label>
-                                <Input
-                                    value={formValues[s.key] || ""}
-                                    onChange={(e) => setFormValues({ ...formValues, [s.key]: e.target.value })}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex justify-end">
-                        <Button
-                            className="bg-blue-600 hover:bg-blue-700"
-                            onClick={handleBulkUpdate}
-                            disabled={bulkUpdate.isPending}
-                        >
-                            {bulkUpdate.isPending ? "Updating..." : "Update Institutional Data"}
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">Academic Rules</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <p className="text-sm text-slate-500 italic">Configure attendance grace periods, syllabus milestones, and late fee multipliers here.</p>
-                    <Button
-                        variant="outline"
-                        className="w-full border-dashed"
-                        onClick={() => toast.info("Advanced rule configuration coming in next update")}
-                    >
-                        Manage Academic Configuration
-                    </Button>
-                </CardContent>
-            </Card>
-        </div>
-    )
-}
+
+
 
 function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     const { data: settings } = settingsService.useSettings('INTEGRATION')

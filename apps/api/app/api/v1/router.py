@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings
+from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -23,3 +23,4 @@ api_router.include_router(inventory.router, prefix="/inventory", tags=["inventor
 api_router.include_router(communication.router, prefix="/communication", tags=["communication"])
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
+api_router.include_router(institute.router, prefix="/institute", tags=["institute"])
