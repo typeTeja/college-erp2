@@ -1,7 +1,14 @@
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
-from app.models.admissions import ApplicationStatus, ApplicationPaymentStatus
+from app.models.admissions import (
+    ApplicationStatus, 
+    ApplicationPaymentStatus,
+    FeeMode,
+    DocumentType,
+    DocumentStatus,
+    ActivityType
+)
 
 class ApplicationBase(BaseModel):
     name: str
@@ -15,7 +22,7 @@ class ApplicationBase(BaseModel):
 
 class ApplicationCreate(ApplicationBase):
     """Schema for Quick Apply (Stage 1)"""
-    pass
+    fee_mode: FeeMode = FeeMode.ONLINE  # Allow choosing online or offline payment
 
 class ApplicationUpdate(BaseModel):
     """Schema for completing the Full Application (Stage 2)"""
@@ -49,10 +56,55 @@ class EntranceExamScoreRead(BaseModel):
     class Config:
         from_attributes = True
 
+class DocumentRead(BaseModel):
+    """Schema for reading document information"""
+    id: int
+    application_id: int
+    document_type: DocumentType
+    file_url: str
+    file_name: str
+    file_size: int
+    status: DocumentStatus
+    rejection_reason: Optional[str] = None
+    verified_by: Optional[int] = None
+    verified_at: Optional[datetime] = None
+    uploaded_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class DocumentUpload(BaseModel):
+    """Schema for uploading a document"""
+    document_type: DocumentType
+
+class DocumentVerify(BaseModel):
+    """Schema for verifying a document"""
+    status: DocumentStatus
+    rejection_reason: Optional[str] = None
+
+class ActivityLogRead(BaseModel):
+    """Schema for reading activity log"""
+    id: int
+    application_id: int
+    activity_type: ActivityType
+    description: str
+    extra_data: Optional[str] = None
+    performed_by: Optional[int] = None
+    ip_address: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 class ApplicationRead(ApplicationBase):
     id: int
     application_number: str
     status: ApplicationStatus
+    fee_mode: FeeMode
+    payment_proof_url: Optional[str] = None
+    offline_payment_verified: bool
+    offline_payment_verified_by: Optional[int] = None
+    offline_payment_verified_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     
@@ -67,6 +119,7 @@ class ApplicationRead(ApplicationBase):
     
     payments: List[ApplicationPaymentRead] = []
     entrance_exam_score: Optional[EntranceExamScoreRead] = None
+    documents: List[DocumentRead] = []
 
     class Config:
         from_attributes = True
@@ -91,3 +144,13 @@ class ApplicationRecentRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class OfflinePaymentVerify(BaseModel):
+    """Schema for admin to verify offline payment"""
+    payment_proof_url: str
+    verified: bool = True
+
+class PaymentInitiate(BaseModel):
+    """Schema for initiating online payment"""
+    amount: float
+    return_url: str

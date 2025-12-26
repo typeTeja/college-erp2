@@ -1,16 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request
 from sqlmodel import Session, select, func
 from app.db.session import get_session
 from app.api.deps import get_current_user, get_current_active_superuser
 from app.models.user import User
 from app.models.role import Role
 from app.models.student import Student, StudentStatus
-from app.models.admissions import Application, ApplicationStatus, ApplicationPayment, ApplicationPaymentStatus
-from app.schemas.admissions import ApplicationCreate, ApplicationUpdate, ApplicationRead
+from app.models.admissions import (
+    Application, ApplicationStatus, ApplicationPayment, ApplicationPaymentStatus,
+    ApplicationDocument, DocumentType, DocumentStatus, ApplicationActivityLog,
+    ActivityType, FeeMode
+)
+from app.schemas.admissions import (
+    ApplicationCreate, ApplicationUpdate, ApplicationRead,
+    DocumentRead, DocumentUpload, DocumentVerify,
+    ActivityLogRead, OfflinePaymentVerify
+)
+from app.services.activity_logger import log_activity
+from app.services.admission_status import can_transition
+from app.services.email_service import email_service
+from app.middleware.rate_limit import limiter
 from typing import List, Optional
 from datetime import datetime
 import random
 import string
+import os
 
 router = APIRouter()
 
@@ -23,9 +36,18 @@ def generate_application_number(session: Session) -> str:
     random_str = ''.join(random.choices(string.digits, k=4))
     return f"{prefix}{random_str}"
 
+def get_client_ip(request: Request) -> str:
+    """Extract client IP address from request"""
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0]
+    return request.client.host if request.client else "unknown"
+
 @router.post("/quick-apply", response_model=ApplicationRead)
+@limiter.limit("5/minute")  # Rate limit: 5 requests per minute per IP
 async def quick_apply(
     data: ApplicationCreate,
+    request: Request,
     session: Session = Depends(get_session)
 ):
     """Public endpoint for high-conversion lead capture (Stage 1)"""
@@ -38,8 +60,33 @@ async def quick_apply(
     )
     
     session.add(application)
+    session.flush()
+    
+    # Log activity
+    log_activity(
+        session=session,
+        application_id=application.id,
+        activity_type=ActivityType.APPLICATION_CREATED,
+        description=f"Application created via quick apply form",
+        ip_address=get_client_ip(request),
+        extra_data={"fee_mode": data.fee_mode.value}
+    )
+    
     session.commit()
     session.refresh(application)
+    
+    # Send application confirmation email
+    try:
+        email_service.send_application_confirmation(
+            to_email=application.email,
+            name=application.name,
+            application_number=application.application_number,
+            fee_mode=data.fee_mode.value,
+            amount=500.0  # TODO: Make configurable
+        )
+    except Exception as e:
+        print(f"Failed to send confirmation email: {str(e)}")
+    
     return application
 
 @router.get("/recent", response_model=List[ApplicationRead | dict])
@@ -53,8 +100,6 @@ async def get_recent_admissions(
     results = session.exec(statement).all()
     
     # Map to dashboard expected format if needed
-    # (The response_model will handle filtering if we return objects)
-    # However, to avoid 422 in future, let's explicitly map camelCase for the dashboard
     formatted_results = []
     for app in results:
         formatted_results.append({
@@ -96,19 +141,31 @@ async def get_application(
         raise HTTPException(status_code=404, detail="Application not found")
     
     # Check permission: Only admin or the email/phone owner can view
-    # For now, simple check if user is admin
+    # For now, simple check if user is admin or email matches
+    if current_user.email != application.email and not any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles):
+        raise HTTPException(status_code=403, detail="Not authorized to view this application")
+    
     return application
 
 @router.put("/{id}", response_model=ApplicationRead)
 async def update_application(
     id: int,
     data: ApplicationUpdate,
-    session: Session = Depends(get_session)
+    request: Request,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ):
-    """Stage 2: Complete full application form (Usually via public unique link or user login)"""
+    """Stage 2: Complete full application form (Secured endpoint)"""
     application = session.get(Application, id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Security: Only the applicant (by email) or admin can update
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles)
+    is_owner = current_user.email == application.email
+    
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=403, detail="Not authorized to update this application")
     
     # Update fields
     update_data = data.dict(exclude_unset=True)
@@ -116,28 +173,244 @@ async def update_application(
         setattr(application, key, value)
     
     application.updated_at = datetime.utcnow()
-    # Auto-transition to FORM_COMPLETED if paid
-    if application.status == ApplicationStatus.PAID and update_data.get("address"):
-        application.status = ApplicationStatus.FORM_COMPLETED
-        
+    
+    # Auto-transition to FORM_COMPLETED if all required fields are present
+    if application.status == ApplicationStatus.PAID or (application.fee_mode == FeeMode.OFFLINE and application.offline_payment_verified):
+        if application.aadhaar_number and application.father_name and application.address:
+            old_status = application.status
+            application.status = ApplicationStatus.FORM_COMPLETED
+            
+            # Log status change
+            if old_status != ApplicationStatus.FORM_COMPLETED:
+                log_activity(
+                    session=session,
+                    application_id=application.id,
+                    activity_type=ActivityType.FORM_COMPLETED,
+                    description=f"Full application form completed",
+                    performed_by=current_user.id,
+                    ip_address=get_client_ip(request)
+                )
+    
     session.add(application)
     session.commit()
     session.refresh(application)
     return application
 
-@router.post("/{id}/confirm", response_model=ApplicationRead)
-async def confirm_admission(
+@router.post("/{id}/payment/offline-verify", response_model=ApplicationRead)
+async def verify_offline_payment(
     id: int,
+    data: OfflinePaymentVerify,
+    request: Request,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_active_superuser)
 ):
-    """Admin confirms admission: Triggers Student and User account creation"""
+    """Admin endpoint to verify offline payment"""
+    application = session.get(Application, id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    if application.fee_mode != FeeMode.OFFLINE:
+        raise HTTPException(status_code=400, detail="Application is not in offline payment mode")
+    
+    application.payment_proof_url = data.payment_proof_url
+    application.offline_payment_verified = data.verified
+    application.offline_payment_verified_by = current_user.id
+    application.offline_payment_verified_at = datetime.utcnow()
+    
+    if data.verified:
+        application.status = ApplicationStatus.PAID
+        
+        # Log activity
+        log_activity(
+            session=session,
+            application_id=application.id,
+            activity_type=ActivityType.OFFLINE_PAYMENT_VERIFIED,
+            description=f"Offline payment verified by {current_user.full_name}",
+            performed_by=current_user.id,
+            ip_address=get_client_ip(request),
+            extra_data={"payment_proof_url": data.payment_proof_url}
+        )
+    
+    session.add(application)
+    session.commit()
+    session.refresh(application)
+    return application
+
+@router.get("/{id}/documents", response_model=List[DocumentRead])
+async def list_documents(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all documents for an application"""
+    application = session.get(Application, id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Check permission
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles)
+    is_owner = current_user.email == application.email
+    
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    statement = select(ApplicationDocument).where(ApplicationDocument.application_id == id)
+    documents = session.exec(statement).all()
+    return documents
+
+@router.post("/{id}/documents/upload", response_model=DocumentRead)
+async def upload_document(
+    id: int,
+    document_type: DocumentType,
+    file: UploadFile = File(...),
+    request: Request = None,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Upload a document for an application"""
+    application = session.get(Application, id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Check permission
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles)
+    is_owner = current_user.email == application.email
+    
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # TODO: Implement actual file storage (S3/MinIO/local)
+    # For now, we'll just store a placeholder URL
+    file_url = f"/uploads/applications/{id}/{document_type.value}_{file.filename}"
+    
+    # Create document record
+    document = ApplicationDocument(
+        application_id=id,
+        document_type=document_type,
+        file_url=file_url,
+        file_name=file.filename,
+        file_size=0,  # TODO: Get actual file size
+        status=DocumentStatus.UPLOADED
+    )
+    
+    session.add(document)
+    session.flush()
+    
+    # Log activity
+    log_activity(
+        session=session,
+        application_id=id,
+        activity_type=ActivityType.DOCUMENT_UPLOADED,
+        description=f"Document uploaded: {document_type.value}",
+        performed_by=current_user.id,
+        ip_address=get_client_ip(request) if request else None,
+        extra_data={"document_type": document_type.value, "file_name": file.filename}
+    )
+    
+    session.commit()
+    session.refresh(document)
+    return document
+
+@router.put("/documents/{doc_id}/verify", response_model=DocumentRead)
+async def verify_document(
+    doc_id: int,
+    data: DocumentVerify,
+    request: Request,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Admin endpoint to verify or reject a document"""
+    document = session.get(ApplicationDocument, doc_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    document.status = data.status
+    document.rejection_reason = data.rejection_reason
+    document.verified_by = current_user.id
+    document.verified_at = datetime.utcnow()
+    
+    # Log activity
+    activity_type = ActivityType.DOCUMENT_VERIFIED if data.status == DocumentStatus.VERIFIED else ActivityType.DOCUMENT_REJECTED
+    log_activity(
+        session=session,
+        application_id=document.application_id,
+        activity_type=activity_type,
+        description=f"Document {data.status.value}: {document.document_type.value}",
+        performed_by=current_user.id,
+        ip_address=get_client_ip(request),
+        extra_data={"document_id": doc_id, "rejection_reason": data.rejection_reason}
+    )
+    
+    session.add(document)
+    session.commit()
+    session.refresh(document)
+    return document
+
+@router.get("/{id}/timeline", response_model=List[ActivityLogRead])
+async def get_timeline(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get activity timeline for an application"""
+    application = session.get(Application, id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Check permission
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles)
+    is_owner = current_user.email == application.email
+    
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    statement = select(ApplicationActivityLog).where(
+        ApplicationActivityLog.application_id == id
+    ).order_by(ApplicationActivityLog.created_at.desc())
+    
+    logs = session.exec(statement).all()
+    return logs
+
+@router.post("/{id}/confirm", response_model=ApplicationRead)
+async def confirm_admission(
+    id: int,
+    request: Request,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Admin confirms admission: Triggers Student and User account creation with validation"""
     application = session.get(Application, id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
     
     if application.status == ApplicationStatus.ADMITTED:
         raise HTTPException(status_code=400, detail="Applicant already admitted")
+    
+    # Pre-confirmation validation
+    errors = []
+    
+    # 1. Check if Stage 2 is completed
+    if not (application.aadhaar_number and application.father_name and application.address):
+        errors.append("Stage 2 form is not completed")
+    
+    # 2. Check if fee is paid
+    if application.fee_mode == FeeMode.ONLINE:
+        # Check if there's a successful payment
+        has_payment = any(p.status == ApplicationPaymentStatus.SUCCESS for p in application.payments)
+        if not has_payment:
+            errors.append("No successful online payment found")
+    elif application.fee_mode == FeeMode.OFFLINE:
+        if not application.offline_payment_verified:
+            errors.append("Offline payment not verified")
+    
+    # 3. Check if mandatory documents are verified (optional for now)
+    # TODO: Implement document requirement logic based on program/state
+    
+    if errors:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot confirm admission: {'; '.join(errors)}"
+        )
 
     # 1. Create User account (if not exists)
     statement = select(User).where(User.email == application.email)
@@ -156,8 +429,8 @@ async def confirm_admission(
             username=application.email,
             email=application.email,
             full_name=application.name,
-            hashed_password="hashed_placeholder", # In real app, send reset link
-            is_active=True,
+            hashed_password="TEMP_PASSWORD_RESET_REQUIRED",  # User must set password
+            is_active=False,  # Inactive until password is set
             roles=[student_role]
         )
         session.add(user)
@@ -185,8 +458,44 @@ async def confirm_admission(
     application.student_id = student.id
     application.updated_at = datetime.utcnow()
     
+    # Log activity
+    log_activity(
+        session=session,
+        application_id=application.id,
+        activity_type=ActivityType.ADMISSION_CONFIRMED,
+        description=f"Admission confirmed by {current_user.full_name}. Student ID: {admission_number}",
+        performed_by=current_user.id,
+        ip_address=get_client_ip(request),
+        extra_data={"student_id": student.id, "admission_number": admission_number}
+    )
+    
     session.add(application)
     session.commit()
     session.refresh(application)
+    
+    # Generate password setup token and send email
+    try:
+        from app.services.password_service import PasswordToken
+        
+        # Generate token
+        token = PasswordToken.create_token(user.id, user.email, expires_hours=24)
+        
+        # Generate password setup link
+        base_url = str(request.base_url).rstrip('/')
+        password_setup_link = f"{base_url.replace('/api/v1', '')}/auth/setup-password?token={token}"
+        
+        # Get program name
+        program_name = application.program.name if application.program else "N/A"
+        
+        # Send admission confirmation email with password setup link
+        email_service.send_admission_confirmation(
+            to_email=application.email,
+            name=application.name,
+            admission_number=admission_number,
+            program_name=program_name,
+            password_setup_link=password_setup_link
+        )
+    except Exception as e:
+        print(f"Failed to send admission confirmation email: {str(e)}")
     
     return application
