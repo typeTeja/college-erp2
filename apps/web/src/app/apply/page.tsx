@@ -33,16 +33,16 @@ export default function QuickApplyPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
-            await quickApplyMutation.mutateAsync({
+            const application = await quickApplyMutation.mutateAsync({
                 ...formData,
                 program_id: parseInt(formData.program_id)
             })
             toast({
                 title: "Application Submitted!",
-                description: "Your quick application has been received. Please proceed to payment.",
+                description: "Your application has been received. Please complete the full form.",
             })
-            // Redirect to a success/payment page in a real app
-            // router.push('/apply/status')
+            // Redirect to application detail page (Step 2)
+            router.push(`/admissions/${application.id}`)
         } catch (error) {
             toast({
                 title: "Error",

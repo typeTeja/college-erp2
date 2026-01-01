@@ -242,7 +242,7 @@ async def list_documents(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Get all documents for an application"""
+    """Get all documents for an application with download URLs"""
     application = session.get(Application, id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -256,6 +256,30 @@ async def list_documents(
     
     statement = select(ApplicationDocument).where(ApplicationDocument.application_id == id)
     documents = session.exec(statement).all()
+    
+    # Generate download URLs for documents stored in MinIO
+    from app.services.storage_service import storage_service
+    
+    for doc in documents:
+        # Check if file_url is an S3 key (doesn't start with /uploads/)
+        if doc.file_url and not doc.file_url.startswith('/uploads/'):
+            try:
+                # Determine bucket
+                bucket = storage_service.bucket_images if doc.document_type == DocumentType.PHOTO else storage_service.bucket_documents
+                
+                # Generate presigned download URL (5 minutes expiry)
+                download_url = storage_service.generate_presigned_download_url(
+                    key=doc.file_url,
+                    bucket=bucket,
+                    filename=doc.file_name,
+                    expiration=300
+                )
+                # Temporarily store download URL in file_url for response
+                # (In production, you might want to add a download_url field to the schema)
+                doc.file_url = download_url
+            except Exception as e:
+                print(f"Error generating download URL for document {doc.id}: {str(e)}")
+    
     return documents
 
 @router.post("/{id}/documents/upload", response_model=DocumentRead)
@@ -279,17 +303,63 @@ async def upload_document(
     if not (is_admin or is_owner):
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    # TODO: Implement actual file storage (S3/MinIO/local)
-    # For now, we'll just store a placeholder URL
-    file_url = f"/uploads/applications/{id}/{document_type.value}_{file.filename}"
+    # Import storage service
+    from app.services.storage_service import storage_service
+    from app.models.file_metadata import FileMetadata, FileModule
     
-    # Create document record
+    # Determine bucket based on document type
+    if document_type == DocumentType.PHOTO:
+        bucket = storage_service.bucket_images
+    else:
+        bucket = storage_service.bucket_documents
+    
+    # Generate prefix for S3 key
+    prefix = f"admissions/application/{id}"
+    
+    # Define allowed extensions based on document type
+    allowed_extensions = {'.pdf', '.jpg', '.jpeg', '.png'}
+    if document_type == DocumentType.PHOTO:
+        allowed_extensions = {'.jpg', '.jpeg', '.png'}
+    
+    # Upload file to MinIO
+    try:
+        file_key, file_size, mime_type = await storage_service.upload_file(
+            file=file,
+            prefix=prefix,
+            bucket=bucket,
+            allowed_extensions=allowed_extensions,
+            max_size=10485760  # 10MB
+        )
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+    
+    # Create file metadata record
+    file_metadata = FileMetadata(
+        file_key=file_key,
+        bucket_name=bucket,
+        original_filename=file.filename,
+        file_size=file_size,
+        mime_type=mime_type,
+        is_public=False,
+        module=FileModule.ADMISSIONS,
+        entity_type="Application",
+        entity_id=id,
+        uploaded_by=current_user.id,
+        description=f"Application document: {document_type.value}"
+    )
+    
+    session.add(file_metadata)
+    session.flush()
+    
+    # Create document record (keep existing structure for compatibility)
     document = ApplicationDocument(
         application_id=id,
         document_type=document_type,
-        file_url=file_url,
+        file_url=file_key,  # Store S3 key instead of local path
         file_name=file.filename,
-        file_size=0,  # TODO: Get actual file size
+        file_size=file_size,
         status=DocumentStatus.UPLOADED
     )
     
@@ -304,7 +374,12 @@ async def upload_document(
         description=f"Document uploaded: {document_type.value}",
         performed_by=current_user.id,
         ip_address=get_client_ip(request) if request else None,
-        extra_data={"document_type": document_type.value, "file_name": file.filename}
+        extra_data={
+            "document_type": document_type.value, 
+            "file_name": file.filename,
+            "file_key": file_key,
+            "file_metadata_id": file_metadata.id
+        }
     )
     
     session.commit()

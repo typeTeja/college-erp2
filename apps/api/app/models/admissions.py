@@ -103,6 +103,8 @@ class Application(SQLModel, table=True):
     # Relationships
     program: "Program" = Relationship()
     payments: List["ApplicationPayment"] = Relationship(back_populates="application")
+    documents: List["ApplicationDocument"] = Relationship(back_populates="application")
+    activity_logs: List["ApplicationActivityLog"] = Relationship(back_populates="application")
     entrance_exam_score: Optional["EntranceExamScore"] = Relationship(back_populates="application")
 
 class ApplicationPayment(SQLModel, table=True):

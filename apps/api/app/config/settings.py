@@ -6,7 +6,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         case_sensitive=True,
         env_file=".env",
-        env_file_encoding="utf-8"
+        env_file_encoding="utf-8",
+        extra="allow"  # Allow extra fields from .env
     )
     
     API_V1_STR: str = "/api/v1"
@@ -44,5 +45,18 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return []
+    
+    # Storage Configuration (S3/MinIO)
+    STORAGE_BACKEND: str = "s3"  # 's3' or 'local'
+    S3_ENDPOINT: str = ""
+    S3_ACCESS_KEY: str = ""
+    S3_SECRET_KEY: str = ""
+    S3_REGION: str = "us-east-1"
+    S3_BUCKET: str = "college-erp-documents"  # Main documents bucket
+    S3_BUCKET_IMAGES: str = "college-erp-images"  # Images bucket
+    S3_BUCKET_TEMP: str = "college-erp-temp"  # Temporary files bucket
+    S3_FORCE_PATH_STYLE: bool = True  # Required for MinIO
+    CDN_BASE_URL: str = ""  # Optional CDN URL
+    MAX_UPLOAD_SIZE: int = 10485760  # 10MB in bytes
 
 settings = Settings()

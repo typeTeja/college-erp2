@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute
+from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute, files
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(odc.router, prefix="/odc", tags=["odc"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 api_router.include_router(admissions.router, prefix="/admissions", tags=["admissions"])

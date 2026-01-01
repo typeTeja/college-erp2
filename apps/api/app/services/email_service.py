@@ -1,22 +1,25 @@
 """Email notification service for sending application-related emails"""
 from typing import Optional, Dict
 from datetime import datetime
-from pydantic import BaseSettings, EmailStr
+from pydantic import EmailStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 class EmailSettings(BaseSettings):
     """Email configuration"""
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="allow"  # Allow extra fields from .env
+    )
+    
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     FROM_EMAIL: str = ""
     FROM_NAME: str = "College ERP - Admissions"
-    
-    class Config:
-        env_file = ".env"
 
 email_settings = EmailSettings()
 
