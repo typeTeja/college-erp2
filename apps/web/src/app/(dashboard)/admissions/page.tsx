@@ -23,10 +23,12 @@ import {
     Check
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import AddOfflineApplicationDialog from '@/components/admissions/AddOfflineApplicationDialog'
 
 export default function AdmissionsDashboard() {
     const { toast } = useToast()
     const [filterStatus, setFilterStatus] = useState<ApplicationStatus | undefined>()
+    const [dialogOpen, setDialogOpen] = useState(false)
     const { data: applications, isLoading } = admissionsService.useApplications(filterStatus)
     const confirmMutation = admissionsService.useConfirmAdmission()
 
@@ -70,9 +72,11 @@ export default function AdmissionsDashboard() {
                 <h1 className="text-3xl font-bold">Admissions Dashboard</h1>
                 <div className="space-x-2">
                     <Button variant="outline" size="sm">Export Data</Button>
-                    <Button size="sm">Add Offline Application</Button>
+                    <Button size="sm" onClick={() => setDialogOpen(true)}>Add Offline Application</Button>
                 </div>
             </div>
+
+            <AddOfflineApplicationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
