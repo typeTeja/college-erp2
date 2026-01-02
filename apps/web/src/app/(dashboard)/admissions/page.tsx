@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { admissionsService } from '@/utils/admissions-service'
 import { ApplicationStatus } from '@/types/admissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -158,9 +159,11 @@ export default function AdmissionsDashboard() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right space-x-2">
-                                            <Button variant="outline" size="sm" title="View Details" className="h-8 w-8 p-0">
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
+                                            <Link href={`/admissions/${app.id}`}>
+                                                <Button variant="outline" size="sm" title="View Details" className="h-8 w-8 p-0">
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
                                             {app.status === ApplicationStatus.FORM_COMPLETED && (
                                                 <Button
                                                     variant="outline"

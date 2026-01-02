@@ -3,7 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { InstituteInfo, getInstituteInfo, updateInstituteInfo } from '@/utils/institute-service';
+import { getInstituteInfo, updateInstituteInfo } from '@/utils/institute-service';
+import { InstituteInfo } from '@/types/institute';
 
 export function InstituteTab({ isAdmin }: { isAdmin: boolean }) {
     const [info, setInfo] = useState<InstituteInfo | null>(null);

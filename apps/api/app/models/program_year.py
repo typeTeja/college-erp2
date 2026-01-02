@@ -13,7 +13,8 @@ class ProgramYear(SQLModel, table=True):
     program_id: int = Field(foreign_key="program.id", index=True)
     year_number: int  # 1, 2, 3, 4
     name: str  # e.g., "First Year", "Second Year"
+    is_active: bool = Field(default=True)
     
     # Relationships
     program: "Program" = Relationship(back_populates="years")
-    semesters: List["Semester"] = Relationship(back_populates="program_year")
+    semesters: List["Semester"] = Relationship(back_populates="program_year", sa_relationship_kwargs={"cascade": "all, delete-orphan"})

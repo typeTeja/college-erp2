@@ -11,6 +11,13 @@ class Semester(SQLModel, table=True):
     program_year_id: int = Field(foreign_key="program_year.id", index=True)
     semester_number: int  # 1 or 2 (for each year)
     name: str  # e.g., "Semester 1", "Semester 2"
+    
+    # Configuration
+    is_internship: bool = Field(default=False)
+    is_project_semester: bool = Field(default=False)
+    start_month: Optional[int] = Field(default=None)  # 1-12
+    end_month: Optional[int] = Field(default=None)  # 1-12
+    
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     

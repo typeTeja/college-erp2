@@ -27,7 +27,7 @@ class StorageService:
         """Initialize S3 client with configuration from settings"""
         self.s3_client = boto3.client(
             's3',
-            endpoint_url=settings.S3_ENDPOINT,
+            endpoint_url=settings.S3_ENDPOINT or None,
             aws_access_key_id=settings.S3_ACCESS_KEY,
             aws_secret_access_key=settings.S3_SECRET_KEY,
             region_name=settings.S3_REGION,

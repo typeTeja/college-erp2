@@ -2,13 +2,18 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 # Program Schemas
+from app.models.program import ProgramType, ProgramStatus
 
 class ProgramBase(BaseModel):
     """Base program schema"""
     code: str
     name: str
+    program_type: ProgramType = ProgramType.UG
     duration_years: int = 4
     description: Optional[str] = None
+    eligibility_criteria: Optional[str] = None
+    program_outcomes: Optional[str] = None
+    total_credits: int = 0
 
 class ProgramCreate(ProgramBase):
     """Schema for creating a program"""
@@ -17,7 +22,9 @@ class ProgramCreate(ProgramBase):
 class ProgramRead(ProgramBase):
     """Schema for program API response"""
     id: int
+    status: ProgramStatus
     department_name: str
+    is_active: bool
     
     class Config:
         from_attributes = True

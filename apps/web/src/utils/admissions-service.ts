@@ -55,10 +55,14 @@ export const admissionsService = {
 
     // Mutations
     useQuickApply: () => {
+        const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (data: QuickApplyData) => {
                 const response = await api.post<Application>("/admissions/quick-apply", data);
                 return response.data;
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["applications"] });
             }
         });
     },
