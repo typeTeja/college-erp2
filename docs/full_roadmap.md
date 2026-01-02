@@ -648,8 +648,8 @@
 - [ ] QR code scanning
 - [ ] Biometric attendance integration
 - [ ] WhatsApp Business API
-- [ ] SMS gateway
-- [ ] Email service (SendGrid/SES)
+- [ ] SMS gateway (msg91)
+- [ ] Email service (Google Gmail API)
 
 ---
 

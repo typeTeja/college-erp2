@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { admissionsService } from '@/utils/admissions-service'
 import { programService } from '@/utils/program-service'
+import { FeeMode } from '@/types/admissions'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,22 +26,23 @@ export default function QuickApplyPage() {
         program_id: '',
         state: '',
         board: '',
-        group_of_study: ''
+        group_of_study: '',
+        fee_mode: FeeMode.ONLINE
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
-            await quickApplyMutation.mutateAsync({
+            const application = await quickApplyMutation.mutateAsync({
                 ...formData,
                 program_id: parseInt(formData.program_id)
             })
             toast({
                 title: "Application Submitted!",
-                description: "Your quick application has been received. Please proceed to payment.",
+                description: "Your application has been received. Please complete the full form.",
             })
-            // Redirect to a success/payment page in a real app
-            // router.push('/apply/status')
+            // Redirect to application detail page (Step 2)
+            router.push(`/admissions/${application.id}`)
         } catch (error) {
             toast({
                 title: "Error",
@@ -159,12 +161,30 @@ export default function QuickApplyPage() {
                             />
                         </div>
 
+                        <div className="space-y-2">
+                            <Label>Payment Mode</Label>
+                            <Select value={formData.fee_mode} onValueChange={(v) => setFormData({ ...formData, fee_mode: v as FeeMode })}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={FeeMode.ONLINE}>Online Payment</SelectItem>
+                                    <SelectItem value={FeeMode.OFFLINE}>Offline Payment (Pay at College)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                {formData.fee_mode === FeeMode.ONLINE
+                                    ? "You will be redirected to payment gateway"
+                                    : "You can pay at the college office and upload proof later"}
+                            </p>
+                        </div>
+
                         <Button
                             type="submit"
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
                             disabled={quickApplyMutation.isPending}
                         >
-                            {quickApplyMutation.isPending ? "Submitting..." : "Apply Now & Proceed to Payment"}
+                            {quickApplyMutation.isPending ? "Submitting..." : "Apply Now"}
                         </Button>
                     </form>
                 </CardContent>

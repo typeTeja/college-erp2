@@ -35,7 +35,7 @@ from .fee import (
     FeeFine,
 )
 from .attendance import AttendanceSession, AttendanceRecord
-from .admissions import Application, ApplicationPayment, EntranceExamScore
+from .admissions import Application, ApplicationPayment, EntranceExamScore, ApplicationDocument, ApplicationActivityLog
 from .library import Book, BookIssue, LibraryFine
 from .hostel import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComplaint
 from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
@@ -80,6 +80,8 @@ __all__ = [
     "Application",
     "ApplicationPayment",
     "EntranceExamScore",
+    "ApplicationDocument",
+    "ApplicationActivityLog",
     "Book",
     "BookIssue",
     "LibraryFine",
