@@ -19,6 +19,8 @@ import {
     AcademicYear, getAcademicYears, createAcademicYear, updateAcademicYear, deleteAcademicYear,
     AcademicBatch, getAcademicBatches, createAcademicBatch, updateAcademicBatch, deleteAcademicBatch,
     ProgramInfo, getProgramsList,
+    ProgramFull, getPrograms, createProgram, updateProgram, deleteProgram,
+    DepartmentInfo, getDepartmentsList,
     FeeHead, getFeeHeads, createFeeHead, updateFeeHead, deleteFeeHead,
     InstallmentPlan, getInstallmentPlans, createInstallmentPlan, updateInstallmentPlan, deleteInstallmentPlan,
     ScholarshipSlab, getScholarshipSlabs, createScholarshipSlab, updateScholarshipSlab, deleteScholarshipSlab,
