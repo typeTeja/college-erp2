@@ -180,6 +180,7 @@ export default function SettingsPage() {
                     {activeTab === 'notifications' && <NotificationsTab user={user} setUser={setUser} />}
                     {activeTab === 'institute' && <InstituteTab isAdmin={isAdmin} />}
                     {activeTab === 'academic-years' && <AcademicYearTab />}
+                    {activeTab === 'academic-batches' && <AcademicBatchTab />}
                     {activeTab === 'fee-heads' && <FeeHeadTab />}
                     {activeTab === 'boards' && <BoardTab />}
                     {activeTab === 'reservations' && <ReservationCategoryTab />}
