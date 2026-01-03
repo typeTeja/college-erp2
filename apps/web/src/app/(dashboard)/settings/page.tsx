@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { InstituteTab } from "./InstituteTab";
 import {
     AcademicYearTab,
+    AcademicBatchTab,
     FeeHeadTab,
     BoardTab,
     ReservationCategoryTab,
