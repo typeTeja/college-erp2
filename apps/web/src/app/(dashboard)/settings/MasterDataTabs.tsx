@@ -954,7 +954,21 @@ export function PlacementCompanyTab() {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editItem, setEditItem] = useState<PlacementCompany | null>(null);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        name: string;
+        code: string;
+        company_type: 'HOTEL' | 'RESTAURANT' | 'CRUISE' | 'OTHER';
+        contact_person: string;
+        contact_email: string;
+        contact_phone: string;
+        address: string;
+        city: string;
+        state: string;
+        country: string;
+        website: string;
+        is_partner: boolean;
+        is_active: boolean;
+    }>({
         name: '', code: '', company_type: 'HOTEL', contact_person: '', contact_email: '', contact_phone: '',
         address: '', city: '', state: '', country: 'India', website: '', is_partner: false, is_active: true
     });
