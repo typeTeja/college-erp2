@@ -14,6 +14,15 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { InstituteTab } from "./InstituteTab";
+import {
+    AcademicYearTab,
+    FeeHeadTab,
+    BoardTab,
+    ReservationCategoryTab,
+    LeadSourceTab,
+    DesignationTab,
+    PlacementCompanyTab
+} from "./MasterDataTabs";
 import { useAuthStore } from "@/store/use-auth-store"
 import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
