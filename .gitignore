@@ -108,3 +108,7 @@ dmypy.json
 # Deployment
 deployment-errors.txt
 !apps/web/src/lib/api/attendance-service.ts
+-e 
+# Environment files
+*.env
+*.env.*
