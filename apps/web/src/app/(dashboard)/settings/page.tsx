@@ -172,6 +172,13 @@ export default function SettingsPage() {
                     {activeTab === 'security' && <SecurityTab />}
                     {activeTab === 'notifications' && <NotificationsTab user={user} setUser={setUser} />}
                     {activeTab === 'institute' && <InstituteTab isAdmin={isAdmin} />}
+                    {activeTab === 'academic-years' && <AcademicYearTab />}
+                    {activeTab === 'fee-heads' && <FeeHeadTab />}
+                    {activeTab === 'boards' && <BoardTab />}
+                    {activeTab === 'reservations' && <ReservationCategoryTab />}
+                    {activeTab === 'lead-sources' && <LeadSourceTab />}
+                    {activeTab === 'designations' && <DesignationTab />}
+                    {activeTab === 'companies' && <PlacementCompanyTab />}
                     {activeTab === 'integrations' && <IntegrationsTab isSuperAdmin={isSuperAdmin} />}
                     {activeTab === 'logs' && <AuditLogsTab />}
                 </main>
