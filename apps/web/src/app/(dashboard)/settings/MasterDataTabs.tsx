@@ -262,7 +262,7 @@ export function AcademicYearTab() {
                         </div>
                         <div>
                             <Label>Status</Label>
-                            <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                            <Select value={formData.status} onValueChange={(v: 'UPCOMING' | 'ACTIVE' | 'COMPLETED') => setFormData({ ...formData, status: v })}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="UPCOMING">Upcoming</SelectItem>
