@@ -186,6 +186,7 @@ export default function SettingsPage() {
                     {activeTab === 'security' && <SecurityTab />}
                     {activeTab === 'notifications' && <NotificationsTab user={user} setUser={setUser} />}
                     {activeTab === 'institute' && <InstituteTab isAdmin={isAdmin} />}
+                    {activeTab === 'programs' && <ProgramsTab />}
                     {activeTab === 'academic-years' && <AcademicYearTab />}
                     {activeTab === 'academic-batches' && <AcademicBatchTab />}
                     {activeTab === 'fee-heads' && <FeeHeadTab />}
