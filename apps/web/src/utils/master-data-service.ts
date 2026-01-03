@@ -662,3 +662,130 @@ export const updateSMSTemplate = async (id: number, data: Partial<SMSTemplate>):
 export const deleteSMSTemplate = async (id: number): Promise<void> => {
     await api.delete(`/master/sms-templates/${id}`);
 };
+
+// ============================================================================
+// Academic Structure
+// ============================================================================
+
+export interface PracticalBatchInfo {
+    id: number;
+    name: string;
+    code: string;
+    max_strength: number;
+    current_strength: number;
+    is_active: boolean;
+}
+
+export interface SectionInfo {
+    id: number;
+    name: string;
+    code: string;
+    max_strength: number;
+    current_strength: number;
+    is_active: boolean;
+    batches: PracticalBatchInfo[];
+}
+
+export interface SemesterInfo {
+    id: number;
+    semester_number: number;
+    name: string;
+    is_internship: boolean;
+    is_project_semester: boolean;
+    sections: SectionInfo[];
+}
+
+export interface YearInfo {
+    id: number;
+    year_number: number;
+    name: string;
+    is_active: boolean;
+    semesters: SemesterInfo[];
+}
+
+export interface AcademicStructure {
+    id: number;
+    code: string;
+    name: string;
+    short_name: string;
+    duration_years: number;
+    semester_system: boolean;
+    years: YearInfo[];
+}
+
+export const getAcademicStructure = async (programId?: number): Promise<AcademicStructure[]> => {
+    const params = programId ? { program_id: programId } : {};
+    const response = await api.get('/master/academic-structure', { params });
+    return response.data;
+};
+
+export const generateAcademicStructure = async (data: {
+    program_id: number;
+    sections_per_semester?: number;
+    students_per_section?: number;
+    batches_per_section?: number;
+    students_per_batch?: number;
+}): Promise<any> => {
+    const response = await api.post('/master/academic-structure/generate', data);
+    return response.data;
+};
+
+// Program Year
+export const createProgramYear = async (data: { program_id: number; year_number: number; name: string }): Promise<any> => {
+    const response = await api.post('/master/program-years', data);
+    return response.data;
+};
+
+export const updateProgramYear = async (id: number, data: { name?: string; is_active?: boolean }): Promise<any> => {
+    const response = await api.patch(`/master/program-years/${id}`, data);
+    return response.data;
+};
+
+export const deleteProgramYear = async (id: number): Promise<void> => {
+    await api.delete(`/master/program-years/${id}`);
+};
+
+// Semester
+export const createSemester = async (data: { program_year_id: number; semester_number: number; name: string }): Promise<any> => {
+    const response = await api.post('/master/semesters', data);
+    return response.data;
+};
+
+export const updateSemester = async (id: number, data: { name?: string; is_internship?: boolean; is_project_semester?: boolean }): Promise<any> => {
+    const response = await api.patch(`/master/semesters/${id}`, data);
+    return response.data;
+};
+
+export const deleteSemester = async (id: number): Promise<void> => {
+    await api.delete(`/master/semesters/${id}`);
+};
+
+// Section
+export const createSection = async (data: { semester_id: number; name: string; code: string; max_strength?: number }): Promise<any> => {
+    const response = await api.post('/master/sections', data);
+    return response.data;
+};
+
+export const updateSection = async (id: number, data: { name?: string; max_strength?: number; is_active?: boolean }): Promise<any> => {
+    const response = await api.patch(`/master/sections/${id}`, data);
+    return response.data;
+};
+
+export const deleteSection = async (id: number): Promise<void> => {
+    await api.delete(`/master/sections/${id}`);
+};
+
+// Practical Batch
+export const createPracticalBatch = async (data: { section_id: number; name: string; code: string; max_strength?: number }): Promise<any> => {
+    const response = await api.post('/master/practical-batches', data);
+    return response.data;
+};
+
+export const updatePracticalBatch = async (id: number, data: { name?: string; max_strength?: number; is_active?: boolean }): Promise<any> => {
+    const response = await api.patch(`/master/practical-batches/${id}`, data);
+    return response.data;
+};
+
+export const deletePracticalBatch = async (id: number): Promise<void> => {
+    await api.delete(`/master/practical-batches/${id}`);
+};
