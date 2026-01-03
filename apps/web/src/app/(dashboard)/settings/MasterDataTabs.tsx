@@ -1063,7 +1063,7 @@ export function PlacementCompanyTab() {
                         </div>
                         <div>
                             <Label>Company Type</Label>
-                            <Select value={formData.company_type} onValueChange={(v) => setFormData({ ...formData, company_type: v })}>
+                            <Select value={formData.company_type} onValueChange={(v: 'HOTEL' | 'RESTAURANT' | 'CRUISE' | 'OTHER') => setFormData({ ...formData, company_type: v })}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="HOTEL">Hotel</SelectItem>
