@@ -94,6 +94,12 @@ export default function SettingsPage() {
                                     active={activeTab === 'academic-years'}
                                     onClick={() => setActiveTab('academic-years')}
                                 />
+                                <SettingNavItem
+                                    icon={<GraduationCap size={18} />}
+                                    label="Academic Batches"
+                                    active={activeTab === 'academic-batches'}
+                                    onClick={() => setActiveTab('academic-batches')}
+                                />
 
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                     Fee Configuration
