@@ -133,23 +133,70 @@ def delete_academic_year(
     return {"status": "success", "message": "Academic year deleted"}
 
 # ============================================================================
+# Programs Endpoint (for dropdown selection)
+# ============================================================================
+
+@router.get("/programs-list", tags=["Academic Setup"])
+def list_programs_for_selection(
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """List all programs for dropdown selection"""
+    programs = session.exec(select(Program).where(Program.is_active == True).order_by(Program.name)).all()
+    return [
+        {
+            "id": p.id,
+            "code": p.code,
+            "name": p.name,
+            "duration_years": p.duration_years,
+            "program_type": p.program_type
+        }
+        for p in programs
+    ]
+
+# ============================================================================
 # Academic Batch Endpoints
 # ============================================================================
 
-@router.get("/academic-batches", response_model=List[AcademicBatchRead], tags=["Academic Setup"])
+@router.get("/academic-batches", tags=["Academic Setup"])
 def list_academic_batches(
     session: Session = Depends(deps.get_session),
     current_user: User = Depends(deps.get_current_user),
     program_id: Optional[int] = None,
     is_active: Optional[bool] = None
 ):
-    """List all academic batches"""
+    """List all academic batches with program details"""
     stmt = select(AcademicBatch)
     if program_id:
         stmt = stmt.where(AcademicBatch.program_id == program_id)
     if is_active is not None:
         stmt = stmt.where(AcademicBatch.is_active == is_active)
-    return session.exec(stmt.order_by(AcademicBatch.admission_year.desc())).all()
+    
+    batches = session.exec(stmt.order_by(AcademicBatch.admission_year.desc())).all()
+    
+    # Enrich with program details
+    result = []
+    for batch in batches:
+        program = session.get(Program, batch.program_id)
+        batch_dict = {
+            "id": batch.id,
+            "name": batch.name,
+            "code": batch.code,
+            "program_id": batch.program_id,
+            "program_name": program.name if program else "Unknown",
+            "program_code": program.code if program else "Unknown",
+            "academic_year_id": batch.academic_year_id,
+            "admission_year": batch.admission_year,
+            "graduation_year": batch.graduation_year,
+            "max_strength": batch.max_strength,
+            "current_strength": batch.current_strength,
+            "is_active": batch.is_active,
+            "created_at": batch.created_at,
+            "updated_at": batch.updated_at
+        }
+        result.append(batch_dict)
+    
+    return result
 
 @router.post("/academic-batches", response_model=AcademicBatchRead, tags=["Academic Setup"])
 def create_academic_batch(
