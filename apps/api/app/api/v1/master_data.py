@@ -1168,3 +1168,151 @@ def delete_sms_template(
     session.delete(template)
     session.commit()
     return {"status": "success", "message": "SMS template deleted"}
+
+# ============================================================================
+# Programs/Courses Management
+# ============================================================================
+
+@router.get("/programs", tags=["Programs"])
+def list_programs(
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user),
+    is_active: Optional[bool] = None
+):
+    """List all programs/courses with department details"""
+    stmt = select(Program)
+    if is_active is not None:
+        stmt = stmt.where(Program.is_active == is_active)
+    
+    programs = session.exec(stmt.order_by(Program.name)).all()
+    
+    result = []
+    for p in programs:
+        dept = session.get(Department, p.department_id)
+        result.append({
+            "id": p.id,
+            "code": p.code,
+            "short_name": p.short_name or p.code,
+            "name": p.name,
+            "program_type": p.program_type,
+            "status": p.status,
+            "duration_years": p.duration_years,
+            "description": p.description,
+            "semester_system": getattr(p, 'semester_system', True),
+            "rnet_required": getattr(p, 'rnet_required', True),
+            "allow_installments": getattr(p, 'allow_installments', True),
+            "department_id": p.department_id,
+            "department_name": dept.name if dept else "Unknown",
+            "is_active": p.is_active,
+            "created_at": p.created_at,
+            "updated_at": p.updated_at
+        })
+    
+    return result
+
+@router.get("/departments-list", tags=["Programs"])
+def list_departments_for_selection(
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """List all departments for dropdown selection"""
+    departments = session.exec(select(Department).order_by(Department.name)).all()
+    return [{"id": d.id, "name": d.name, "code": d.code} for d in departments]
+
+@router.post("/programs", tags=["Programs"])
+def create_program(
+    data: dict,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """Create a new program/course"""
+    check_admin(current_user)
+    
+    # Check if code already exists
+    existing = session.exec(select(Program).where(Program.code == data.get('code'))).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Program code already exists")
+    
+    program = Program(
+        code=data.get('code'),
+        short_name=data.get('short_name', data.get('code')),
+        name=data.get('name'),
+        program_type=data.get('program_type', 'UG'),
+        duration_years=data.get('duration_years', 4),
+        description=data.get('description'),
+        semester_system=data.get('semester_system', True),
+        rnet_required=data.get('rnet_required', True),
+        allow_installments=data.get('allow_installments', True),
+        department_id=data.get('department_id'),
+        is_active=data.get('is_active', True),
+        status=data.get('status', 'ACTIVE')
+    )
+    
+    session.add(program)
+    session.commit()
+    session.refresh(program)
+    
+    return {
+        "id": program.id,
+        "code": program.code,
+        "short_name": program.short_name,
+        "name": program.name,
+        "duration_years": program.duration_years,
+        "message": "Program created successfully"
+    }
+
+@router.patch("/programs/{id}", tags=["Programs"])
+def update_program(
+    id: int,
+    data: dict,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """Update a program/course"""
+    check_admin(current_user)
+    
+    program = session.get(Program, id)
+    if not program:
+        raise HTTPException(status_code=404, detail="Program not found")
+    
+    # Update fields
+    for key in ['code', 'short_name', 'name', 'program_type', 'duration_years', 
+                'description', 'semester_system', 'rnet_required', 'allow_installments',
+                'department_id', 'is_active', 'status']:
+        if key in data:
+            setattr(program, key, data[key])
+    
+    session.add(program)
+    session.commit()
+    session.refresh(program)
+    
+    return {"message": "Program updated successfully", "id": program.id}
+
+@router.delete("/programs/{id}", tags=["Programs"])
+def delete_program(
+    id: int,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """Delete a program/course"""
+    check_admin(current_user)
+    
+    program = session.get(Program, id)
+    if not program:
+        raise HTTPException(status_code=404, detail="Program not found")
+    
+    # Check if there are students in this program
+    from app.models.student import Student
+    students_count = session.exec(
+        select(Student).where(Student.program_id == id)
+    ).first()
+    
+    if students_count:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete program with enrolled students. Deactivate instead."
+        )
+    
+    session.delete(program)
+    session.commit()
+    return {"status": "success", "message": "Program deleted"}
