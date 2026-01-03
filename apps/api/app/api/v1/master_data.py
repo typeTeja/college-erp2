@@ -12,7 +12,7 @@ from app.models.master_data import (
     AcademicYear, AcademicBatch, Section, PracticalBatch, SubjectConfig,
     FeeHead, InstallmentPlan, ScholarshipSlab,
     Board, PreviousQualification, StudyGroup, ReservationCategory, LeadSource,
-    Designation, Classroom, PlacementCompany,
+    Designation, MasterClassroom, PlacementCompany,
     EmailTemplate, SMSTemplate
 )
 from app.schemas.master_data import (
