@@ -57,6 +57,60 @@ export const getProgramsList = async (): Promise<ProgramInfo[]> => {
 };
 
 // ============================================================================
+// Programs/Courses Management
+// ============================================================================
+
+export interface ProgramFull {
+    id: number;
+    code: string;
+    short_name: string;
+    name: string;
+    program_type: 'UG' | 'PG' | 'DIPLOMA' | 'CERTIFICATE' | 'PHD';
+    status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
+    duration_years: number;
+    description?: string;
+    semester_system: boolean;
+    rnet_required: boolean;
+    allow_installments: boolean;
+    department_id: number;
+    department_name?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface DepartmentInfo {
+    id: number;
+    name: string;
+    code: string;
+}
+
+export const getPrograms = async (isActive?: boolean): Promise<ProgramFull[]> => {
+    const params = isActive !== undefined ? { is_active: isActive } : {};
+    const response = await api.get('/master/programs', { params });
+    return response.data;
+};
+
+export const getDepartmentsList = async (): Promise<DepartmentInfo[]> => {
+    const response = await api.get('/master/departments-list');
+    return response.data;
+};
+
+export const createProgram = async (data: Partial<ProgramFull>): Promise<any> => {
+    const response = await api.post('/master/programs', data);
+    return response.data;
+};
+
+export const updateProgram = async (id: number, data: Partial<ProgramFull>): Promise<any> => {
+    const response = await api.patch(`/master/programs/${id}`, data);
+    return response.data;
+};
+
+export const deleteProgram = async (id: number): Promise<void> => {
+    await api.delete(`/master/programs/${id}`);
+};
+
+// ============================================================================
 // Academic Batch
 // ============================================================================
 
