@@ -16,6 +16,7 @@ from app.models.master_data import (
     EmailTemplate, SMSTemplate
 )
 from app.models.program import Program
+from app.models.department import Department
 from app.schemas.master_data import (
     AcademicYearCreate, AcademicYearUpdate, AcademicYearRead,
     AcademicBatchCreate, AcademicBatchUpdate, AcademicBatchRead,
