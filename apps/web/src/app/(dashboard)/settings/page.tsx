@@ -17,6 +17,7 @@ import { InstituteTab } from "./InstituteTab";
 import {
     AcademicYearTab,
     AcademicBatchTab,
+    ProgramsTab,
     FeeHeadTab,
     BoardTab,
     ReservationCategoryTab,
