@@ -788,7 +788,7 @@ export function LeadSourceTab() {
                         </div>
                         <div>
                             <Label>Category</Label>
-                            <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+                            <Select value={formData.category} onValueChange={(v: 'DIGITAL' | 'OFFLINE' | 'REFERRAL' | 'OTHER') => setFormData({ ...formData, category: v })}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="DIGITAL">Digital</SelectItem>
