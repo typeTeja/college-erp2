@@ -25,6 +25,7 @@ import {
     DesignationTab,
     PlacementCompanyTab
 } from "./MasterDataTabs";
+import { AcademicStructureTab } from "./AcademicStructureTab";
 import { useAuthStore } from "@/store/use-auth-store"
 import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
