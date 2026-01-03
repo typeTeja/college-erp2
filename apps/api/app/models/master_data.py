@@ -347,9 +347,9 @@ class RoomType(str, PyEnum):
     OFFICE = "OFFICE"
     OTHER = "OTHER"
 
-class Classroom(SQLModel, table=True):
+class MasterClassroom(SQLModel, table=True):
     """Classroom Management"""
-    __tablename__ = "classroom"
+    __tablename__ = "master_classroom"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)  # e.g., "Room 101", "Computer Lab 1"
