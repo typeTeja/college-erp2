@@ -142,7 +142,13 @@ export function AcademicYearTab() {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editItem, setEditItem] = useState<AcademicYear | null>(null);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        name: string;
+        start_date: string;
+        end_date: string;
+        status: 'UPCOMING' | 'ACTIVE' | 'COMPLETED';
+        is_current: boolean;
+    }>({
         name: '', start_date: '', end_date: '', status: 'UPCOMING', is_current: false
     });
 
