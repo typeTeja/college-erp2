@@ -291,6 +291,379 @@ export function AcademicYearTab() {
 }
 
 // ============================================================================
+// Programs/Courses Tab - Add Course Management
+// ============================================================================
+
+export function ProgramsTab() {
+    const [data, setData] = useState<ProgramFull[]>([]);
+    const [departments, setDepartments] = useState<DepartmentInfo[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editItem, setEditItem] = useState<ProgramFull | null>(null);
+    
+    const currentYear = new Date().getFullYear();
+    
+    const [formData, setFormData] = useState({
+        code: '',
+        short_name: '',
+        name: '',
+        program_type: 'UG' as 'UG' | 'PG' | 'DIPLOMA' | 'CERTIFICATE' | 'PHD',
+        duration_years: 3,
+        description: '',
+        semester_system: true,
+        rnet_required: true,
+        allow_installments: true,
+        department_id: 0,
+        is_active: true
+    });
+
+    const fetchData = async () => {
+        try {
+            const [programsResult, deptsResult] = await Promise.all([
+                getPrograms(),
+                getDepartmentsList()
+            ]);
+            setData(programsResult);
+            setDepartments(deptsResult);
+        } catch (e) {
+            toast.error('Failed to load programs');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchData(); }, []);
+
+    const handleSubmit = async () => {
+        if (!formData.code || !formData.name || !formData.department_id) {
+            toast.error('Please fill all required fields');
+            return;
+        }
+
+        try {
+            if (editItem) {
+                await updateProgram(editItem.id, formData);
+                toast.success('Course updated successfully');
+            } else {
+                await createProgram(formData);
+                toast.success('Course added successfully');
+            }
+            setDialogOpen(false);
+            setEditItem(null);
+            resetForm();
+            fetchData();
+        } catch (e: any) {
+            toast.error(e?.response?.data?.detail || 'Operation failed');
+        }
+    };
+
+    const handleDelete = async (item: ProgramFull) => {
+        if (confirm(`Delete course "${item.name}"? This cannot be undone if there are no enrolled students.`)) {
+            try {
+                await deleteProgram(item.id);
+                toast.success('Course deleted');
+                fetchData();
+            } catch (e: any) {
+                toast.error(e?.response?.data?.detail || 'Failed to delete');
+            }
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            code: '',
+            short_name: '',
+            name: '',
+            program_type: 'UG',
+            duration_years: 3,
+            description: '',
+            semester_system: true,
+            rnet_required: true,
+            allow_installments: true,
+            department_id: departments[0]?.id || 0,
+            is_active: true
+        });
+    };
+
+    const openAdd = () => {
+        setEditItem(null);
+        resetForm();
+        setDialogOpen(true);
+    };
+
+    const openEdit = (item: ProgramFull) => {
+        setEditItem(item);
+        setFormData({
+            code: item.code,
+            short_name: item.short_name || item.code,
+            name: item.name,
+            program_type: item.program_type,
+            duration_years: item.duration_years,
+            description: item.description || '',
+            semester_system: item.semester_system,
+            rnet_required: item.rnet_required,
+            allow_installments: item.allow_installments,
+            department_id: item.department_id,
+            is_active: item.is_active
+        });
+        setDialogOpen(true);
+    };
+
+    // Calculate batch example based on duration
+    const batchExample = `${currentYear}-${currentYear + formData.duration_years}`;
+
+    return (
+        <>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <BookOpen className="h-5 w-5 text-purple-600" />
+                        Programs / Courses
+                    </CardTitle>
+                    <Button onClick={openAdd} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="h-4 w-4 mr-1" /> Add Course
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                        </div>
+                    ) : data.length === 0 ? (
+                        <div className="text-center py-8 text-slate-500">
+                            No courses found. Click "Add Course" to create a new one.
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b bg-slate-50">
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Code</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Course Name</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Type</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Duration</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">System</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Status</th>
+                                        <th className="px-4 py-3 text-right font-medium text-slate-600">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.map((item) => (
+                                        <tr key={item.id} className="border-b hover:bg-slate-50">
+                                            <td className="px-4 py-3">
+                                                <div className="font-medium">{item.code}</div>
+                                                <div className="text-xs text-slate-500">{item.short_name}</div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div>{item.name}</div>
+                                                <div className="text-xs text-slate-500">{item.department_name}</div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <Badge variant="outline">{item.program_type}</Badge>
+                                            </td>
+                                            <td className="px-4 py-3">{item.duration_years} Years</td>
+                                            <td className="px-4 py-3">
+                                                <Badge variant={item.semester_system ? 'default' : 'secondary'}>
+                                                    {item.semester_system ? 'Semester' : 'Year'}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <Badge variant={item.is_active ? 'default' : 'secondary'}>
+                                                    {item.is_active ? 'Active' : 'Inactive'}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex justify-end gap-1">
+                                                    <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
+                                                        <Edit2 className="h-4 w-4 text-blue-600" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(item)}>
+                                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>{editItem ? 'Edit Course' : 'Add Course'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                        {/* Program Code */}
+                        <div>
+                            <Label>Program Code *</Label>
+                            <Input 
+                                value={formData.code} 
+                                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                                placeholder="e.g., BHM"
+                                disabled={!!editItem}
+                            />
+                        </div>
+
+                        {/* Short Name */}
+                        <div>
+                            <Label>Short Name *</Label>
+                            <Input 
+                                value={formData.short_name} 
+                                onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
+                                placeholder="e.g., BHM"
+                            />
+                        </div>
+
+                        {/* Course Name */}
+                        <div>
+                            <Label>Course Name *</Label>
+                            <Input 
+                                value={formData.name} 
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="e.g., Bachelor of Hotel Management"
+                            />
+                        </div>
+
+                        {/* Department */}
+                        <div>
+                            <Label>Department *</Label>
+                            <Select 
+                                value={formData.department_id?.toString() || ""} 
+                                onValueChange={(v) => setFormData({ ...formData, department_id: parseInt(v) })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Department" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {departments.map(d => (
+                                        <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Program Type */}
+                        <div>
+                            <Label>Program Type</Label>
+                            <Select 
+                                value={formData.program_type} 
+                                onValueChange={(v: 'UG' | 'PG' | 'DIPLOMA' | 'CERTIFICATE' | 'PHD') => setFormData({ ...formData, program_type: v })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="UG">Undergraduate (UG)</SelectItem>
+                                    <SelectItem value="PG">Postgraduate (PG)</SelectItem>
+                                    <SelectItem value="DIPLOMA">Diploma</SelectItem>
+                                    <SelectItem value="CERTIFICATE">Certificate</SelectItem>
+                                    <SelectItem value="PHD">Ph.D</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+                            <Label>Duration (Years) *</Label>
+                            <Input 
+                                type="number" 
+                                value={formData.duration_years} 
+                                onChange={(e) => setFormData({ ...formData, duration_years: parseInt(e.target.value) || 3 })}
+                                min={1}
+                                max={10}
+                            />
+                            <p className="text-xs text-slate-500 mt-1">
+                                This is used to calculate academic batches. Example: {formData.duration_years}-year course starting {currentYear} = Batch {batchExample}
+                            </p>
+                        </div>
+
+                        {/* Academic System Toggle */}
+                        <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                            <Label className="font-medium">Academic System</Label>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${formData.semester_system ? 'bg-green-500' : 'bg-slate-300'}`} />
+                                    <span className={formData.semester_system ? 'text-slate-900 font-medium' : 'text-slate-500'}>
+                                        Semester System
+                                    </span>
+                                </div>
+                                <Switch 
+                                    checked={formData.semester_system} 
+                                    onCheckedChange={(v) => setFormData({ ...formData, semester_system: v })} 
+                                />
+                            </div>
+                            <p className="text-xs text-slate-500">
+                                {formData.semester_system 
+                                    ? '✓ Semester system - Academic year divided into semesters'
+                                    : '✗ Year system - Continuous classes throughout the academic year'}
+                            </p>
+                        </div>
+
+                        {/* RNET Toggle */}
+                        <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <Label className="font-medium">RNET Required</Label>
+                                    <p className="text-xs text-slate-500 mt-1">
+                                        {formData.rnet_required 
+                                            ? 'Students must pass entrance test before admission'
+                                            : 'If unchecked, students skip entrance test and go directly to admission offer'}
+                                    </p>
+                                </div>
+                                <Switch 
+                                    checked={formData.rnet_required} 
+                                    onCheckedChange={(v) => setFormData({ ...formData, rnet_required: v })} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* Installments Toggle */}
+                        <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <Label className="font-medium">Allow Installments</Label>
+                                    <p className="text-xs text-slate-500 mt-1">
+                                        Students can pay annual fee in multiple installments
+                                    </p>
+                                </div>
+                                <Switch 
+                                    checked={formData.allow_installments} 
+                                    onCheckedChange={(v) => setFormData({ ...formData, allow_installments: v })} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* Active Status */}
+                        <div className="flex items-center gap-2">
+                            <Switch 
+                                checked={formData.is_active} 
+                                onCheckedChange={(v) => setFormData({ ...formData, is_active: v })} 
+                            />
+                            <Label>Active</Label>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-2 pt-4">
+                            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                            <Button 
+                                onClick={handleSubmit} 
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                {editItem ? 'Update Course' : 'Add Course'}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
+}
+
+// ============================================================================
 // Academic Batch Tab - Program-wise batch management
 // ============================================================================
 
