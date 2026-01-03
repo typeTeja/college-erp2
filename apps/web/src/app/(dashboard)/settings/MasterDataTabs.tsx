@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import {
     AcademicYear, getAcademicYears, createAcademicYear, updateAcademicYear, deleteAcademicYear,
+    AcademicBatch, getAcademicBatches, createAcademicBatch, updateAcademicBatch, deleteAcademicBatch,
+    ProgramInfo, getProgramsList,
     FeeHead, getFeeHeads, createFeeHead, updateFeeHead, deleteFeeHead,
     InstallmentPlan, getInstallmentPlans, createInstallmentPlan, updateInstallmentPlan, deleteInstallmentPlan,
     ScholarshipSlab, getScholarshipSlabs, createScholarshipSlab, updateScholarshipSlab, deleteScholarshipSlab,
