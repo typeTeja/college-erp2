@@ -2,7 +2,7 @@
  * Master Data Service - Settings Module
  * API calls for all master data endpoints
  */
-import api from './api';
+import { api } from './api';
 
 // ============================================================================
 // Academic Year
