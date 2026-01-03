@@ -846,12 +846,12 @@ def list_classrooms(
     room_type: Optional[str] = None
 ):
     """List all classrooms"""
-    stmt = select(Classroom)
+    stmt = select(MasterClassroom)
     if is_active is not None:
-        stmt = stmt.where(Classroom.is_active == is_active)
+        stmt = stmt.where(MasterClassroom.is_active == is_active)
     if room_type:
-        stmt = stmt.where(Classroom.room_type == room_type)
-    return session.exec(stmt.order_by(Classroom.building, Classroom.floor, Classroom.name)).all()
+        stmt = stmt.where(MasterClassroom.room_type == room_type)
+    return session.exec(stmt.order_by(MasterClassroom.building, MasterClassroom.floor, MasterClassroom.name)).all()
 
 @router.post("/classrooms", response_model=ClassroomRead, tags=["Infrastructure"])
 def create_classroom(
@@ -862,7 +862,7 @@ def create_classroom(
     """Create a new classroom"""
     check_admin(current_user)
     
-    classroom = Classroom(**data.model_dump())
+    classroom = MasterClassroom(**data.model_dump())
     session.add(classroom)
     session.commit()
     session.refresh(classroom)
@@ -878,7 +878,7 @@ def update_classroom(
     """Update a classroom"""
     check_admin(current_user)
     
-    classroom = session.get(Classroom, id)
+    classroom = session.get(MasterClassroom, id)
     if not classroom:
         raise HTTPException(status_code=404, detail="Classroom not found")
     
@@ -899,7 +899,7 @@ def delete_classroom(
     """Delete a classroom"""
     check_admin(current_user)
     
-    classroom = session.get(Classroom, id)
+    classroom = session.get(MasterClassroom, id)
     if not classroom:
         raise HTTPException(status_code=404, detail="Classroom not found")
     
