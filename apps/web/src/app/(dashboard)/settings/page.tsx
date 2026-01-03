@@ -65,19 +65,80 @@ export default function SettingsPage() {
                         {(isAdmin || isSuperAdmin) && (
                             <>
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                    Management
+                                    Institution Setup
                                 </div>
                                 <SettingNavItem
                                     icon={<Building2 size={18} />}
-                                    label="Institutional"
+                                    label="College Details"
                                     active={activeTab === 'institute'}
                                     onClick={() => setActiveTab('institute')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Academic Setup
+                                </div>
+                                <SettingNavItem
+                                    icon={<Calendar size={18} />}
+                                    label="Academic Years"
+                                    active={activeTab === 'academic-years'}
+                                    onClick={() => setActiveTab('academic-years')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Fee Configuration
+                                </div>
+                                <SettingNavItem
+                                    icon={<DollarSign size={18} />}
+                                    label="Fee Heads"
+                                    active={activeTab === 'fee-heads'}
+                                    onClick={() => setActiveTab('fee-heads')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Admission Setup
+                                </div>
+                                <SettingNavItem
+                                    icon={<BookOpen size={18} />}
+                                    label="Boards/Universities"
+                                    active={activeTab === 'boards'}
+                                    onClick={() => setActiveTab('boards')}
+                                />
+                                <SettingNavItem
+                                    icon={<Award size={18} />}
+                                    label="Reservation Categories"
+                                    active={activeTab === 'reservations'}
+                                    onClick={() => setActiveTab('reservations')}
+                                />
+                                <SettingNavItem
+                                    icon={<Users size={18} />}
+                                    label="Lead Sources"
+                                    active={activeTab === 'lead-sources'}
+                                    onClick={() => setActiveTab('lead-sources')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Infrastructure
+                                </div>
+                                <SettingNavItem
+                                    icon={<Briefcase size={18} />}
+                                    label="Designations"
+                                    active={activeTab === 'designations'}
+                                    onClick={() => setActiveTab('designations')}
+                                />
+                                <SettingNavItem
+                                    icon={<Building size={18} />}
+                                    label="Companies/Hotels"
+                                    active={activeTab === 'companies'}
+                                    onClick={() => setActiveTab('companies')}
                                 />
                             </>
                         )}
 
                         {isSuperAdmin && (
                             <>
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    System
+                                </div>
                                 <SettingNavItem
                                     icon={<Globe size={18} />}
                                     label="Integrations"
