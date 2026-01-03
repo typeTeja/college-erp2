@@ -1,0 +1,4 @@
+# Wrapper requirements - includes dotenv for loading .env
+python-dotenv>=1.0.0
+
+# Main requirements are in /app/apps/api/requirements.txt
