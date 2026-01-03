@@ -289,6 +289,349 @@ export function AcademicYearTab() {
 }
 
 // ============================================================================
+// Academic Batch Tab - Program-wise batch management
+// ============================================================================
+
+export function AcademicBatchTab() {
+    const [data, setData] = useState<AcademicBatch[]>([]);
+    const [programs, setPrograms] = useState<ProgramInfo[]>([]);
+    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editItem, setEditItem] = useState<AcademicBatch | null>(null);
+    const [selectedProgram, setSelectedProgram] = useState<ProgramInfo | null>(null);
+    const [filterProgramId, setFilterProgramId] = useState<number | null>(null);
+    
+    const currentYear = new Date().getFullYear();
+    
+    const [formData, setFormData] = useState({
+        program_id: 0,
+        academic_year_id: 0,
+        admission_year: currentYear,
+        max_strength: 60,
+        is_active: true
+    });
+
+    // Auto-calculate batch name and graduation year based on program selection
+    const calculateBatchDetails = (programId: number, admissionYear: number) => {
+        const program = programs.find(p => p.id === programId);
+        if (program) {
+            const graduationYear = admissionYear + program.duration_years;
+            const batchName = `${program.code} ${admissionYear}-${graduationYear}`;
+            const batchCode = `${program.code}${admissionYear}`;
+            return { batchName, batchCode, graduationYear, program };
+        }
+        return null;
+    };
+
+    const fetchData = async () => {
+        try {
+            const [batchesResult, programsResult, yearsResult] = await Promise.all([
+                getAcademicBatches(filterProgramId || undefined),
+                getProgramsList(),
+                getAcademicYears()
+            ]);
+            setData(batchesResult);
+            setPrograms(programsResult);
+            setAcademicYears(yearsResult);
+        } catch (e) {
+            toast.error('Failed to load data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchData(); }, [filterProgramId]);
+
+    const handleProgramChange = (programId: number) => {
+        const program = programs.find(p => p.id === programId);
+        setSelectedProgram(program || null);
+        setFormData({ ...formData, program_id: programId });
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const details = calculateBatchDetails(formData.program_id, formData.admission_year);
+            if (!details) {
+                toast.error('Please select a program');
+                return;
+            }
+
+            const payload = {
+                name: details.batchName,
+                code: details.batchCode,
+                program_id: formData.program_id,
+                academic_year_id: formData.academic_year_id || academicYears.find(y => y.is_current)?.id || academicYears[0]?.id,
+                admission_year: formData.admission_year,
+                graduation_year: details.graduationYear,
+                max_strength: formData.max_strength,
+                is_active: formData.is_active
+            };
+
+            if (editItem) {
+                await updateAcademicBatch(editItem.id, payload);
+                toast.success('Academic batch updated');
+            } else {
+                await createAcademicBatch(payload);
+                toast.success('Academic batch created');
+            }
+            setDialogOpen(false);
+            setEditItem(null);
+            setSelectedProgram(null);
+            fetchData();
+        } catch (e: any) {
+            toast.error(e?.response?.data?.detail || 'Operation failed');
+        }
+    };
+
+    const handleDelete = async (item: AcademicBatch) => {
+        if (confirm(`Delete batch "${item.name}"? This may affect student records.`)) {
+            try {
+                await deleteAcademicBatch(item.id);
+                toast.success('Academic batch deleted');
+                fetchData();
+            } catch (e) {
+                toast.error('Failed to delete');
+            }
+        }
+    };
+
+    const openAdd = () => {
+        setEditItem(null);
+        setSelectedProgram(null);
+        setFormData({
+            program_id: 0,
+            academic_year_id: academicYears.find(y => y.is_current)?.id || 0,
+            admission_year: currentYear,
+            max_strength: 60,
+            is_active: true
+        });
+        setDialogOpen(true);
+    };
+
+    const openEdit = (item: AcademicBatch) => {
+        setEditItem(item);
+        const program = programs.find(p => p.id === item.program_id);
+        setSelectedProgram(program || null);
+        setFormData({
+            program_id: item.program_id,
+            academic_year_id: item.academic_year_id,
+            admission_year: item.admission_year,
+            max_strength: item.max_strength,
+            is_active: item.is_active
+        });
+        setDialogOpen(true);
+    };
+
+    // Preview calculation
+    const previewDetails = formData.program_id ? calculateBatchDetails(formData.program_id, formData.admission_year) : null;
+
+    return (
+        <>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <GraduationCap className="h-5 w-5 text-indigo-600" />
+                        Academic Batches
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                        <Select 
+                            value={filterProgramId?.toString() || "all"} 
+                            onValueChange={(v) => setFilterProgramId(v === "all" ? null : parseInt(v))}
+                        >
+                            <SelectTrigger className="w-48">
+                                <SelectValue placeholder="Filter by Program" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Programs</SelectItem>
+                                {programs.map(p => (
+                                    <SelectItem key={p.id} value={p.id.toString()}>{p.code} - {p.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Button onClick={openAdd} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                            <Plus className="h-4 w-4 mr-1" /> Create Batch
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                        </div>
+                    ) : data.length === 0 ? (
+                        <div className="text-center py-8 text-slate-500">
+                            No batches found. Click "Create Batch" to add a new one.
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b bg-slate-50">
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Batch Name</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Program</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Admission Year</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Graduation Year</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Strength</th>
+                                        <th className="px-4 py-3 text-left font-medium text-slate-600">Status</th>
+                                        <th className="px-4 py-3 text-right font-medium text-slate-600">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.map((item) => (
+                                        <tr key={item.id} className="border-b hover:bg-slate-50">
+                                            <td className="px-4 py-3">
+                                                <div className="font-medium">{item.name}</div>
+                                                <div className="text-xs text-slate-500">{item.code}</div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <Badge variant="outline">{item.program_code || item.program_name}</Badge>
+                                            </td>
+                                            <td className="px-4 py-3">{item.admission_year}</td>
+                                            <td className="px-4 py-3">{item.graduation_year}</td>
+                                            <td className="px-4 py-3">
+                                                <span className="text-blue-600 font-medium">{item.current_strength}</span>
+                                                <span className="text-slate-400"> / {item.max_strength}</span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <Badge variant={item.is_active ? 'default' : 'secondary'}>
+                                                    {item.is_active ? 'Active' : 'Inactive'}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex justify-end gap-1">
+                                                    <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
+                                                        <Edit2 className="h-4 w-4 text-blue-600" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(item)}>
+                                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>{editItem ? 'Edit Academic Batch' : 'Create Academic Batch'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        {/* Program Selection */}
+                        <div>
+                            <Label>Program *</Label>
+                            <Select 
+                                value={formData.program_id?.toString() || ""} 
+                                onValueChange={(v) => handleProgramChange(parseInt(v))}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Program" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {programs.map(p => (
+                                        <SelectItem key={p.id} value={p.id.toString()}>
+                                            {p.code} - {p.name} ({p.duration_years} years)
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {selectedProgram && (
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Duration: {selectedProgram.duration_years} years | Type: {selectedProgram.program_type}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Admission Year */}
+                        <div>
+                            <Label>Joining Year (Admission Year) *</Label>
+                            <Select 
+                                value={formData.admission_year.toString()} 
+                                onValueChange={(v) => setFormData({ ...formData, admission_year: parseInt(v) })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: 10 }, (_, i) => currentYear - 5 + i).map(year => (
+                                        <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Auto-calculated Preview */}
+                        {previewDetails && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                                <h4 className="font-medium text-blue-800 flex items-center gap-2">
+                                    <Check className="h-4 w-4" /> Batch Preview
+                                </h4>
+                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <span className="text-slate-600">Batch Name:</span>
+                                        <div className="font-medium text-blue-900">{previewDetails.batchName}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-slate-600">Batch Code:</span>
+                                        <div className="font-medium text-blue-900">{previewDetails.batchCode}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-slate-600">Start Year:</span>
+                                        <div className="font-medium">{formData.admission_year + 1}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-slate-600">Graduation Year:</span>
+                                        <div className="font-medium">{previewDetails.graduationYear}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Max Strength */}
+                        <div>
+                            <Label>Maximum Strength</Label>
+                            <Input 
+                                type="number" 
+                                value={formData.max_strength} 
+                                onChange={(e) => setFormData({ ...formData, max_strength: parseInt(e.target.value) || 60 })}
+                                min={1}
+                            />
+                        </div>
+
+                        {/* Active Status */}
+                        <div className="flex items-center gap-2">
+                            <Switch 
+                                checked={formData.is_active} 
+                                onCheckedChange={(v) => setFormData({ ...formData, is_active: v })} 
+                            />
+                            <Label>Active</Label>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-2 pt-4">
+                            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                            <Button 
+                                onClick={handleSubmit} 
+                                className="bg-blue-600 hover:bg-blue-700"
+                                disabled={!formData.program_id}
+                            >
+                                {editItem ? 'Update Batch' : 'Create Batch'}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
+}
+
+// ============================================================================
 // Fee Head Tab
 // ============================================================================
 
