@@ -90,6 +90,12 @@ export default function SettingsPage() {
                                     Academic Setup
                                 </div>
                                 <SettingNavItem
+                                    icon={<BookOpen size={18} />}
+                                    label="Programs/Courses"
+                                    active={activeTab === 'programs'}
+                                    onClick={() => setActiveTab('programs')}
+                                />
+                                <SettingNavItem
                                     icon={<Calendar size={18} />}
                                     label="Academic Years"
                                     active={activeTab === 'academic-years'}
