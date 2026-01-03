@@ -15,6 +15,7 @@ from app.models.master_data import (
     Designation, MasterClassroom, PlacementCompany,
     EmailTemplate, SMSTemplate
 )
+from app.models.program import Program
 from app.schemas.master_data import (
     AcademicYearCreate, AcademicYearUpdate, AcademicYearRead,
     AcademicBatchCreate, AcademicBatchUpdate, AcademicBatchRead,
