@@ -58,7 +58,7 @@ from .master_data import (
     ReservationCategory,
     LeadSource,
     Designation,
-    Classroom as MasterClassroom,
+    MasterClassroom,
     PlacementCompany,
     EmailTemplate,
     SMSTemplate,
