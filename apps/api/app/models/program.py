@@ -25,12 +25,20 @@ class ProgramStatus(str, PyEnum):
 class Program(SQLModel, table=True):
     """Degree program model (e.g., B.Tech CS, MBA, M.Sc)"""
     id: Optional[int] = Field(default=None, primary_key=True)
-    code: str = Field(index=True, unique=True)  # e.g., "BTECH-CS"
-    name: str  # e.g., "Bachelor of Technology - Computer Science"
+    code: str = Field(index=True, unique=True)  # e.g., "BHM"
+    short_name: Optional[str] = Field(default=None)  # e.g., "BHM" - Short display name
+    name: str  # e.g., "Bachelor of Hotel Management"
     program_type: ProgramType = Field(default=ProgramType.UG)
     status: ProgramStatus = Field(default=ProgramStatus.DRAFT)
     duration_years: int = Field(default=4)
     description: Optional[str] = None
+    
+    # Academic Structure
+    semester_system: bool = Field(default=True)  # True = Semester, False = Year system
+    
+    # Admission Settings
+    rnet_required: bool = Field(default=True)  # Entrance test required
+    allow_installments: bool = Field(default=True)  # Allow fee installments
     
     # New Fields
     eligibility_criteria: Optional[str] = Field(default=None, sa_column=Column(Text))
