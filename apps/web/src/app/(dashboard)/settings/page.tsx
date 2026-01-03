@@ -4,7 +4,8 @@ import React, { useState } from 'react'
 import {
     Settings, User, Shield, Building2, Globe,
     Bell, Lock, History, ExternalLink, Save,
-    CheckCircle2, AlertCircle, RefreshCcw
+    CheckCircle2, AlertCircle, RefreshCcw,
+    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
