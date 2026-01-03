@@ -40,6 +40,23 @@ export const deleteAcademicYear = async (id: number): Promise<void> => {
 };
 
 // ============================================================================
+// Programs (for dropdown selection)
+// ============================================================================
+
+export interface ProgramInfo {
+    id: number;
+    code: string;
+    name: string;
+    duration_years: number;
+    program_type: string;
+}
+
+export const getProgramsList = async (): Promise<ProgramInfo[]> => {
+    const response = await api.get('/master/programs-list');
+    return response.data;
+};
+
+// ============================================================================
 // Academic Batch
 // ============================================================================
 
@@ -48,6 +65,8 @@ export interface AcademicBatch {
     name: string;
     code: string;
     program_id: number;
+    program_name?: string;
+    program_code?: string;
     academic_year_id: number;
     admission_year: number;
     graduation_year: number;
