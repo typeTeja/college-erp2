@@ -5,7 +5,7 @@ import {
     Settings, User, Shield, Building2, Globe,
     Bell, Lock, History, ExternalLink, Save,
     CheckCircle2, AlertCircle, RefreshCcw,
-    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building
+    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building, GraduationCap
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
