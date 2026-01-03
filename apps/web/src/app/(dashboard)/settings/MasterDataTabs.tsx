@@ -688,7 +688,14 @@ export function LeadSourceTab() {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editItem, setEditItem] = useState<LeadSource | null>(null);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        name: string;
+        code: string;
+        description: string;
+        category: 'DIGITAL' | 'OFFLINE' | 'REFERRAL' | 'OTHER';
+        is_active: boolean;
+        display_order: number;
+    }>({
         name: '', code: '', description: '', category: 'DIGITAL', is_active: true, display_order: 0
     });
 
