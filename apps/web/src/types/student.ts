@@ -9,8 +9,9 @@ export interface Student {
     phone?: string;
     email?: string;
     program_id?: number;
-    semester_id?: number;
+    batch_semester_id?: number;
     current_year?: number;
+    current_semester?: number; // 1, 2, 3 etc.
     section?: string;
     roll_number?: string;
     status: string;

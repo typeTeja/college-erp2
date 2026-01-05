@@ -48,7 +48,7 @@ def check_admin(current_user: User):
 # Regulation Endpoints
 # ============================================================================
 
-@router.get("/regulations", response_model=List[RegulationRead], tags=["Regulations"])
+@router.get("/", response_model=List[RegulationRead], tags=["Regulations"])
 def list_regulations(
     session: Session = Depends(deps.get_session),
     current_user: User = Depends(deps.get_current_user),
@@ -73,7 +73,7 @@ def list_regulations(
     return session.exec(stmt).all()
 
 
-@router.get("/regulations/{id}", response_model=RegulationWithDetails, tags=["Regulations"])
+@router.get("/{id}", response_model=RegulationWithDetails, tags=["Regulations"])
 def get_regulation(
     id: int,
     session: Session = Depends(deps.get_session),
@@ -87,7 +87,7 @@ def get_regulation(
     return regulation
 
 
-@router.post("/regulations", response_model=RegulationRead, tags=["Regulations"])
+@router.post("/", response_model=RegulationRead, tags=["Regulations"])
 def create_regulation(
     data: RegulationCreate,
     session: Session = Depends(deps.get_session),
@@ -120,7 +120,7 @@ def create_regulation(
     return regulation
 
 
-@router.patch("/regulations/{id}", response_model=RegulationRead, tags=["Regulations"])
+@router.patch("/{id}", response_model=RegulationRead, tags=["Regulations"])
 def update_regulation(
     id: int,
     data: RegulationUpdate,
@@ -174,7 +174,7 @@ def update_regulation(
     return regulation
 
 
-@router.delete("/regulations/{id}", tags=["Regulations"])
+@router.delete("/{id}", tags=["Regulations"])
 def delete_regulation(
     id: int,
     session: Session = Depends(deps.get_session),
@@ -205,7 +205,7 @@ def delete_regulation(
     return {"status": "success", "message": "Regulation deleted"}
 
 
-@router.post("/regulations/{id}/lock", response_model=RegulationRead, tags=["Regulations"])
+@router.post("/{id}/lock", response_model=RegulationRead, tags=["Regulations"])
 def lock_regulation(
     id: int,
     session: Session = Depends(deps.get_session),

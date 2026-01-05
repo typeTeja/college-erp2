@@ -12,22 +12,14 @@ export enum ProgramStatus {
     ARCHIVED = "ARCHIVED"
 }
 
-export interface Semester {
-    id: number;
-    name: string;
-    semester_number: number;
-    is_internship: boolean;
-    is_project_semester: boolean;
-    start_month?: number;
-    end_month?: number;
-}
+// Semester interface removed (use BatchSemester from academic-batch.ts)
 
 export interface ProgramYear {
     id: number;
     name: string;
     year_number: number;
     is_active: boolean;
-    semesters: Semester[];
+    // semesters removed - viewed through Batch or Regulation
 }
 
 export interface Program {

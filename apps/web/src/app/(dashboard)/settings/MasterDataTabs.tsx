@@ -33,6 +33,8 @@ import {
     Classroom, getClassrooms, createClassroom, updateClassroom, deleteClassroom,
     PlacementCompany, getPlacementCompanies, createPlacementCompany, updatePlacementCompany, deletePlacementCompany,
 } from '@/utils/master-data-service';
+import { getRegulations } from '@/utils/regulation-service'; // Import Regulation Service
+import { Regulation } from '@/types/regulation'; // Import Regulation Type
 
 // ============================================================================
 // Generic Data Table Component
@@ -291,6 +293,122 @@ export function AcademicYearTab() {
 }
 
 // ============================================================================
+// Departments Tab
+// ============================================================================
+
+export function DepartmentsTab() {
+    const [data, setData] = useState<DepartmentInfo[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editItem, setEditItem] = useState<DepartmentInfo | null>(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        code: '',
+        description: '',
+        is_active: true
+    });
+
+    const fetchData = async () => {
+        try {
+            const result = await getDepartmentsList();
+            setData(result);
+        } catch (e) {
+            toast.error('Failed to load departments');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchData(); }, []);
+
+    const handleSubmit = async () => {
+        try {
+            if (editItem) {
+                await updateDepartment(editItem.id, formData);
+                toast.success('Department updated');
+            } else {
+                await createDepartment(formData);
+                toast.success('Department created');
+            }
+            setDialogOpen(false);
+            setEditItem(null);
+            fetchData();
+        } catch (e: any) {
+            toast.error(e?.response?.data?.detail || 'Operation failed');
+        }
+    };
+
+    const handleDelete = async (item: DepartmentInfo) => {
+        if (confirm(`Delete department "${item.name}"?`)) {
+            try {
+                await deleteDepartment(item.id);
+                toast.success('Department deleted');
+                fetchData();
+            } catch (e: any) {
+                toast.error(e?.response?.data?.detail || 'Failed to delete');
+            }
+        }
+    };
+
+    const openAdd = () => {
+        setEditItem(null);
+        setFormData({ name: '', code: '', description: '', is_active: true });
+        setDialogOpen(true);
+    };
+
+    const openEdit = (item: DepartmentInfo) => {
+        setEditItem(item);
+        setFormData({
+            name: item.name,
+            code: item.code,
+            description: '', // Desc not in info, might need separate get? ignoring for now as list is simple
+            is_active: true
+        });
+        setDialogOpen(true);
+    };
+
+    return (
+        <>
+            <DataTable
+                title="Departments"
+                icon={<BookOpen className="h-5 w-5 text-blue-600" />}
+                data={data}
+                loading={loading}
+                columns={[
+                    { key: 'name', label: 'Department Name' },
+                    { key: 'code', label: 'Code' },
+                ]}
+                onAdd={openAdd}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+            />
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{editItem ? 'Edit Department' : 'Add Department'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Department Name (e.g., Computer Science)</Label>
+                            <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                        </div>
+                        <div>
+                            <Label>Department Code (e.g., CSE)</Label>
+                            <Input value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })} />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">Save</Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
+}
+
+// ============================================================================
 // Programs/Courses Tab - Add Course Management
 // ============================================================================
 
@@ -300,9 +418,9 @@ export function ProgramsTab() {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editItem, setEditItem] = useState<ProgramFull | null>(null);
-    
+
     const currentYear = new Date().getFullYear();
-    
+
     const [formData, setFormData] = useState({
         code: '',
         short_name: '',
@@ -500,8 +618,8 @@ export function ProgramsTab() {
                         {/* Program Code */}
                         <div>
                             <Label>Program Code *</Label>
-                            <Input 
-                                value={formData.code} 
+                            <Input
+                                value={formData.code}
                                 onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                                 placeholder="e.g., BHM"
                                 disabled={!!editItem}
@@ -511,8 +629,8 @@ export function ProgramsTab() {
                         {/* Short Name */}
                         <div>
                             <Label>Short Name *</Label>
-                            <Input 
-                                value={formData.short_name} 
+                            <Input
+                                value={formData.short_name}
                                 onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
                                 placeholder="e.g., BHM"
                             />
@@ -521,8 +639,8 @@ export function ProgramsTab() {
                         {/* Course Name */}
                         <div>
                             <Label>Course Name *</Label>
-                            <Input 
-                                value={formData.name} 
+                            <Input
+                                value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="e.g., Bachelor of Hotel Management"
                             />
@@ -531,8 +649,8 @@ export function ProgramsTab() {
                         {/* Department */}
                         <div>
                             <Label>Department *</Label>
-                            <Select 
-                                value={formData.department_id?.toString() || ""} 
+                            <Select
+                                value={formData.department_id?.toString() || ""}
                                 onValueChange={(v) => setFormData({ ...formData, department_id: parseInt(v) })}
                             >
                                 <SelectTrigger>
@@ -549,8 +667,8 @@ export function ProgramsTab() {
                         {/* Program Type */}
                         <div>
                             <Label>Program Type</Label>
-                            <Select 
-                                value={formData.program_type} 
+                            <Select
+                                value={formData.program_type}
                                 onValueChange={(v: 'UG' | 'PG' | 'DIPLOMA' | 'CERTIFICATE' | 'PHD') => setFormData({ ...formData, program_type: v })}
                             >
                                 <SelectTrigger>
@@ -569,9 +687,9 @@ export function ProgramsTab() {
                         {/* Duration */}
                         <div>
                             <Label>Duration (Years) *</Label>
-                            <Input 
-                                type="number" 
-                                value={formData.duration_years} 
+                            <Input
+                                type="number"
+                                value={formData.duration_years}
                                 onChange={(e) => setFormData({ ...formData, duration_years: parseInt(e.target.value) || 3 })}
                                 min={1}
                                 max={10}
@@ -591,13 +709,13 @@ export function ProgramsTab() {
                                         Semester System
                                     </span>
                                 </div>
-                                <Switch 
-                                    checked={formData.semester_system} 
-                                    onCheckedChange={(v) => setFormData({ ...formData, semester_system: v })} 
+                                <Switch
+                                    checked={formData.semester_system}
+                                    onCheckedChange={(v) => setFormData({ ...formData, semester_system: v })}
                                 />
                             </div>
                             <p className="text-xs text-slate-500">
-                                {formData.semester_system 
+                                {formData.semester_system
                                     ? '✓ Semester system - Academic year divided into semesters'
                                     : '✗ Year system - Continuous classes throughout the academic year'}
                             </p>
@@ -609,14 +727,14 @@ export function ProgramsTab() {
                                 <div>
                                     <Label className="font-medium">RNET Required</Label>
                                     <p className="text-xs text-slate-500 mt-1">
-                                        {formData.rnet_required 
+                                        {formData.rnet_required
                                             ? 'Students must pass entrance test before admission'
                                             : 'If unchecked, students skip entrance test and go directly to admission offer'}
                                     </p>
                                 </div>
-                                <Switch 
-                                    checked={formData.rnet_required} 
-                                    onCheckedChange={(v) => setFormData({ ...formData, rnet_required: v })} 
+                                <Switch
+                                    checked={formData.rnet_required}
+                                    onCheckedChange={(v) => setFormData({ ...formData, rnet_required: v })}
                                 />
                             </div>
                         </div>
@@ -630,18 +748,18 @@ export function ProgramsTab() {
                                         Students can pay annual fee in multiple installments
                                     </p>
                                 </div>
-                                <Switch 
-                                    checked={formData.allow_installments} 
-                                    onCheckedChange={(v) => setFormData({ ...formData, allow_installments: v })} 
+                                <Switch
+                                    checked={formData.allow_installments}
+                                    onCheckedChange={(v) => setFormData({ ...formData, allow_installments: v })}
                                 />
                             </div>
                         </div>
 
                         {/* Active Status */}
                         <div className="flex items-center gap-2">
-                            <Switch 
-                                checked={formData.is_active} 
-                                onCheckedChange={(v) => setFormData({ ...formData, is_active: v })} 
+                            <Switch
+                                checked={formData.is_active}
+                                onCheckedChange={(v) => setFormData({ ...formData, is_active: v })}
                             />
                             <Label>Active</Label>
                         </div>
@@ -649,8 +767,8 @@ export function ProgramsTab() {
                         {/* Actions */}
                         <div className="flex justify-end gap-2 pt-4">
                             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                            <Button 
-                                onClick={handleSubmit} 
+                            <Button
+                                onClick={handleSubmit}
                                 className="bg-blue-600 hover:bg-blue-700"
                             >
                                 {editItem ? 'Update Course' : 'Add Course'}
@@ -671,16 +789,20 @@ export function AcademicBatchTab() {
     const [data, setData] = useState<AcademicBatch[]>([]);
     const [programs, setPrograms] = useState<ProgramInfo[]>([]);
     const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+    // New state for regulations
+    const [regulations, setRegulations] = useState<Regulation[]>([]);
+
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editItem, setEditItem] = useState<AcademicBatch | null>(null);
     const [selectedProgram, setSelectedProgram] = useState<ProgramInfo | null>(null);
     const [filterProgramId, setFilterProgramId] = useState<number | null>(null);
-    
+
     const currentYear = new Date().getFullYear();
-    
+
     const [formData, setFormData] = useState({
         program_id: 0,
+        regulation_id: 0, // Add regulation_id
         academic_year_id: 0,
         admission_year: currentYear,
         max_strength: 60,
@@ -718,10 +840,27 @@ export function AcademicBatchTab() {
 
     useEffect(() => { fetchData(); }, [filterProgramId]);
 
-    const handleProgramChange = (programId: number) => {
+    // Handle program change to fetch regulations
+    const handleProgramChange = async (programId: number) => {
         const program = programs.find(p => p.id === programId);
         setSelectedProgram(program || null);
-        setFormData({ ...formData, program_id: programId });
+        setFormData(prev => ({ ...prev, program_id: programId, regulation_id: 0 })); // Reset regulation
+
+        // Fetch regulations for this program
+        if (programId) {
+            try {
+                const regs = await getRegulations(programId); // Fetch all regulations (locked or unlocked)
+                setRegulations(regs);
+                if (regs.length === 0) {
+                    toast.warning("No regulations found for this program. You must create a regulation first.");
+                }
+            } catch (e) {
+                toast.error("Failed to load regulations");
+                setRegulations([]);
+            }
+        } else {
+            setRegulations([]);
+        }
     };
 
     const handleSubmit = async () => {
@@ -731,15 +870,23 @@ export function AcademicBatchTab() {
                 toast.error('Please select a program');
                 return;
             }
+            if (!formData.regulation_id) {
+                toast.error('Please select a regulation');
+                return;
+            }
+            if (!formData.admission_year) {
+                toast.error('Please Select Admission Year');
+                return;
+            }
 
             const payload = {
                 name: details.batchName,
                 code: details.batchCode,
                 program_id: formData.program_id,
+                regulation_id: formData.regulation_id, // Include regulation_id
                 academic_year_id: formData.academic_year_id || academicYears.find(y => y.is_current)?.id || academicYears[0]?.id,
-                admission_year: formData.admission_year,
-                graduation_year: details.graduationYear,
-                max_strength: formData.max_strength,
+                joining_year: formData.admission_year, // Backend expects joining_year
+                total_students: formData.max_strength, // Backend expects total_students
                 is_active: formData.is_active
             };
 
@@ -774,8 +921,10 @@ export function AcademicBatchTab() {
     const openAdd = () => {
         setEditItem(null);
         setSelectedProgram(null);
+        setRegulations([]); // Reset regulations for new entry
         setFormData({
             program_id: 0,
+            regulation_id: 0,
             academic_year_id: academicYears.find(y => y.is_current)?.id || 0,
             admission_year: currentYear,
             max_strength: 60,
@@ -788,11 +937,17 @@ export function AcademicBatchTab() {
         setEditItem(item);
         const program = programs.find(p => p.id === item.program_id);
         setSelectedProgram(program || null);
+        // We need to fetch regulations for the program to populate the dropdown
+        if (item.program_id) {
+            getRegulations(item.program_id).then(regs => setRegulations(regs));
+        }
+
         setFormData({
             program_id: item.program_id,
-            academic_year_id: item.academic_year_id,
-            admission_year: item.admission_year,
-            max_strength: item.max_strength,
+            regulation_id: item.regulation_id || 0,
+            academic_year_id: item.academic_year_id || 0, // Fallback
+            admission_year: item.joining_year,
+            max_strength: item.total_students,
             is_active: item.is_active
         });
         setDialogOpen(true);
@@ -810,8 +965,8 @@ export function AcademicBatchTab() {
                         Academic Batches
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                        <Select 
-                            value={filterProgramId?.toString() || "all"} 
+                        <Select
+                            value={filterProgramId?.toString() || "all"}
                             onValueChange={(v) => setFilterProgramId(v === "all" ? null : parseInt(v))}
                         >
                             <SelectTrigger className="w-48">
@@ -901,8 +1056,8 @@ export function AcademicBatchTab() {
                         {/* Program Selection */}
                         <div>
                             <Label>Program *</Label>
-                            <Select 
-                                value={formData.program_id?.toString() || ""} 
+                            <Select
+                                value={formData.program_id?.toString() || ""}
                                 onValueChange={(v) => handleProgramChange(parseInt(v))}
                             >
                                 <SelectTrigger>
@@ -925,9 +1080,31 @@ export function AcademicBatchTab() {
 
                         {/* Admission Year */}
                         <div>
+                            <Label>Regulation *</Label>
+                            <Select
+                                value={formData.regulation_id?.toString() || "0"}
+                                onValueChange={(v) => setFormData(prev => ({ ...prev, regulation_id: parseInt(v) }))}
+                                disabled={!formData.program_id}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={formData.program_id ? "Select Regulation" : "Select Program First"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {regulations.map(r => (
+                                        <SelectItem key={r.id} value={r.id.toString()}>{r.name} ({r.academic_year_name})</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {formData.program_id && regulations.length === 0 && (
+                                <p className="text-xs text-red-600 mt-1">No regulations found. Go to Regulations tab to create one.</p>
+                            )}
+                        </div>
+
+                        {/* Admission Year */}
+                        <div>
                             <Label>Joining Year (Admission Year) *</Label>
-                            <Select 
-                                value={formData.admission_year.toString()} 
+                            <Select
+                                value={formData.admission_year.toString()}
                                 onValueChange={(v) => setFormData({ ...formData, admission_year: parseInt(v) })}
                             >
                                 <SelectTrigger>
@@ -971,9 +1148,9 @@ export function AcademicBatchTab() {
                         {/* Max Strength */}
                         <div>
                             <Label>Maximum Strength</Label>
-                            <Input 
-                                type="number" 
-                                value={formData.max_strength} 
+                            <Input
+                                type="number"
+                                value={formData.max_strength}
                                 onChange={(e) => setFormData({ ...formData, max_strength: parseInt(e.target.value) || 60 })}
                                 min={1}
                             />
@@ -981,9 +1158,9 @@ export function AcademicBatchTab() {
 
                         {/* Active Status */}
                         <div className="flex items-center gap-2">
-                            <Switch 
-                                checked={formData.is_active} 
-                                onCheckedChange={(v) => setFormData({ ...formData, is_active: v })} 
+                            <Switch
+                                checked={formData.is_active}
+                                onCheckedChange={(v) => setFormData({ ...formData, is_active: v })}
                             />
                             <Label>Active</Label>
                         </div>
@@ -991,8 +1168,8 @@ export function AcademicBatchTab() {
                         {/* Actions */}
                         <div className="flex justify-end gap-2 pt-4">
                             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                            <Button 
-                                onClick={handleSubmit} 
+                            <Button
+                                onClick={handleSubmit}
                                 className="bg-blue-600 hover:bg-blue-700"
                                 disabled={!formData.program_id}
                             >

@@ -35,7 +35,9 @@ from app.schemas.master_data import (
     ClassroomCreate, ClassroomUpdate, ClassroomRead,
     PlacementCompanyCreate, PlacementCompanyUpdate, PlacementCompanyRead,
     EmailTemplateCreate, EmailTemplateUpdate, EmailTemplateRead,
+    EmailTemplateCreate, EmailTemplateUpdate, EmailTemplateRead,
     SMSTemplateCreate, SMSTemplateUpdate, SMSTemplateRead,
+    DepartmentCreate, DepartmentUpdate, DepartmentRead,
 )
 
 router = APIRouter()
@@ -1122,6 +1124,70 @@ def list_departments_for_selection(
     """List all departments for dropdown selection"""
     departments = session.exec(select(Department).order_by(Department.name)).all()
     return [{"id": d.id, "name": d.name, "code": d.code} for d in departments]
+
+@router.post("/departments", response_model=DepartmentRead, tags=["Academic Setup"])
+def create_department(
+    data: DepartmentCreate,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """Create a new department"""
+    check_admin(current_user)
+    
+    # Check duplicate
+    existing = session.exec(select(Department).where(Department.code == data.code)).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Department code already exists")
+    
+    department = Department(**data.model_dump())
+    session.add(department)
+    session.commit()
+    session.refresh(department)
+    return department
+
+@router.patch("/departments/{id}", response_model=DepartmentRead, tags=["Academic Setup"])
+def update_department(
+    id: int,
+    data: DepartmentUpdate,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """Update a department"""
+    check_admin(current_user)
+    
+    department = session.get(Department, id)
+    if not department:
+        raise HTTPException(status_code=404, detail="Department not found")
+    
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(department, key, value)
+    
+    session.add(department)
+    session.commit()
+    session.refresh(department)
+    return department
+
+@router.delete("/departments/{id}", tags=["Academic Setup"])
+def delete_department(
+    id: int,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """Delete a department"""
+    check_admin(current_user)
+    
+    department = session.get(Department, id)
+    if not department:
+        raise HTTPException(status_code=404, detail="Department not found")
+        
+    # Check dependencies (Programs)
+    programs_count = session.exec(select(Program).where(Program.department_id == id)).first()
+    if programs_count:
+        raise HTTPException(status_code=400, detail="Cannot delete department linked to programs")
+    
+    session.delete(department)
+    session.commit()
+    return {"status": "success", "message": "Department deleted"}
 
 @router.post("/programs", tags=["Programs"])
 def create_program(

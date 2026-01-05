@@ -8,6 +8,7 @@ from .user_role import UserRole
 from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
+from .academic.batch import AcademicBatch
 # Legacy models removed: LegacyProgramYear, Semester
 from .subject import Subject
 from .student import Student
@@ -129,6 +130,7 @@ __all__ = [
     "AuditLog",
     "InstituteInfo",
     "AcademicYear",
+    "AcademicBatch",
     # LegacyAcademicBatch removed
     "Section",
     "PracticalBatch",

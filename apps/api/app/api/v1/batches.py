@@ -61,7 +61,7 @@ def get_ordinal_name(num: int) -> str:
 # Academic Batch Endpoints
 # ============================================================================
 
-@router.get("/batches", response_model=List[AcademicBatchRead], tags=["Academic Batches"])
+@router.get("/", response_model=List[AcademicBatchRead], tags=["Academic Batches"])
 def list_batches(
     session: Session = Depends(deps.get_session),
     current_user: User = Depends(deps.get_current_user),
@@ -86,7 +86,7 @@ def list_batches(
     return session.exec(stmt).all()
 
 
-@router.get("/batches/{id}", response_model=AcademicBatchWithDetails, tags=["Academic Batches"])
+@router.get("/{id}", response_model=AcademicBatchWithDetails, tags=["Academic Batches"])
 def get_batch(
     id: int,
     session: Session = Depends(deps.get_session),
@@ -100,7 +100,7 @@ def get_batch(
     return batch
 
 
-@router.post("/batches", response_model=AcademicBatchRead, tags=["Academic Batches"])
+@router.post("/", response_model=AcademicBatchRead, tags=["Academic Batches"])
 def create_batch(
     data: AcademicBatchCreate,
     session: Session = Depends(deps.get_session),
@@ -256,7 +256,7 @@ def create_batch(
         )
 
 
-@router.patch("/batches/{id}", response_model=AcademicBatchRead, tags=["Academic Batches"])
+@router.patch("/{id}", response_model=AcademicBatchRead, tags=["Academic Batches"])
 def update_batch(
     id: int,
     data: AcademicBatchUpdate,
@@ -301,7 +301,7 @@ def update_batch(
     return batch
 
 
-@router.delete("/batches/{id}", tags=["Academic Batches"])
+@router.delete("/{id}", tags=["Academic Batches"])
 def delete_batch(
     id: int,
     session: Session = Depends(deps.get_session),
@@ -331,7 +331,7 @@ def delete_batch(
 # Program Year Endpoints (READ-ONLY)
 # ============================================================================
 
-@router.get("/batches/{batch_id}/program-years", response_model=List[ProgramYearRead], tags=["Program Years"])
+@router.get("/{batch_id}/program-years", response_model=List[ProgramYearRead], tags=["Program Years"])
 def list_program_years(
     batch_id: int,
     session: Session = Depends(deps.get_session),
@@ -357,7 +357,7 @@ def list_program_years(
 # Batch Semester Endpoints (READ-ONLY)
 # ============================================================================
 
-@router.get("/batches/{batch_id}/semesters", response_model=List[BatchSemesterRead], tags=["Batch Semesters"])
+@router.get("/{batch_id}/semesters", response_model=List[BatchSemesterRead], tags=["Batch Semesters"])
 def list_batch_semesters(
     batch_id: int,
     session: Session = Depends(deps.get_session),
@@ -379,7 +379,7 @@ def list_batch_semesters(
 # Batch Subject Endpoints (READ-ONLY)
 # ============================================================================
 
-@router.get("/batches/{batch_id}/subjects", response_model=List[BatchSubjectRead], tags=["Batch Subjects"])
+@router.get("/{batch_id}/subjects", response_model=List[BatchSubjectRead], tags=["Batch Subjects"])
 def list_batch_subjects(
     batch_id: int,
     session: Session = Depends(deps.get_session),

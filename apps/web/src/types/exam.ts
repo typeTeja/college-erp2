@@ -16,7 +16,7 @@ export interface Exam {
     name: string;
     exam_type: ExamType;
     academic_year: string;
-    semester_id: number;
+    batch_semester_id: number;
     start_date: string;
     end_date: string;
     status: ExamStatus;
@@ -51,7 +51,7 @@ export interface CreateExamDTO {
     name: string;
     exam_type: ExamType;
     academic_year: string;
-    semester_id: number;
+    batch_semester_id: number;
     start_date: string;
     end_date: string;
     description?: string;

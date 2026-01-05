@@ -566,3 +566,32 @@ class SMSTemplateRead(SMSTemplateBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+# ============================================================================
+# Department Schemas
+# ============================================================================
+
+class DepartmentBase(BaseModel):
+    name: str = Field(..., max_length=100)
+    code: str = Field(..., max_length=20)
+    description: Optional[str] = None
+    head_of_department_id: Optional[int] = None
+    is_active: bool = True
+
+class DepartmentCreate(DepartmentBase):
+    pass
+
+class DepartmentUpdate(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    description: Optional[str] = None
+    head_of_department_id: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class DepartmentRead(DepartmentBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
