@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from app.api import deps
 from app.models.user import User
 from app.models.master_data import (
-    AcademicYear, LegacyAcademicBatch, Section, PracticalBatch, SubjectConfig,
+    AcademicYear, Section, PracticalBatch, SubjectConfig,
     FeeHead, InstallmentPlan, ScholarshipSlab,
     Board, PreviousQualification, StudyGroup, ReservationCategory, LeadSource,
     Designation, MasterClassroom, PlacementCompany,
@@ -155,103 +155,7 @@ def list_programs_for_selection(
         for p in programs
     ]
 
-# ============================================================================
-# Academic Batch Endpoints
-# ============================================================================
 
-@router.get("/academic-batches", tags=["Academic Setup"])
-def list_academic_batches(
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user),
-    program_id: Optional[int] = None,
-    is_active: Optional[bool] = None
-):
-    """List all academic batches with program details"""
-    stmt = select(AcademicBatch)
-    if program_id:
-        stmt = stmt.where(AcademicBatch.program_id == program_id)
-    if is_active is not None:
-        stmt = stmt.where(AcademicBatch.is_active == is_active)
-    
-    batches = session.exec(stmt.order_by(AcademicBatch.admission_year.desc())).all()
-    
-    # Enrich with program details
-    result = []
-    for batch in batches:
-        program = session.get(Program, batch.program_id)
-        batch_dict = {
-            "id": batch.id,
-            "name": batch.name,
-            "code": batch.code,
-            "program_id": batch.program_id,
-            "program_name": program.name if program else "Unknown",
-            "program_code": program.code if program else "Unknown",
-            "academic_year_id": batch.academic_year_id,
-            "admission_year": batch.admission_year,
-            "graduation_year": batch.graduation_year,
-            "max_strength": batch.max_strength,
-            "current_strength": batch.current_strength,
-            "is_active": batch.is_active,
-            "created_at": batch.created_at,
-            "updated_at": batch.updated_at
-        }
-        result.append(batch_dict)
-    
-    return result
-
-@router.post("/academic-batches", response_model=AcademicBatchRead, tags=["Academic Setup"])
-def create_academic_batch(
-    data: AcademicBatchCreate,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Create a new academic batch"""
-    check_admin(current_user)
-    
-    batch = AcademicBatch(**data.model_dump())
-    session.add(batch)
-    session.commit()
-    session.refresh(batch)
-    return batch
-
-@router.patch("/academic-batches/{id}", response_model=AcademicBatchRead, tags=["Academic Setup"])
-def update_academic_batch(
-    id: int,
-    data: AcademicBatchUpdate,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Update an academic batch"""
-    check_admin(current_user)
-    
-    batch = session.get(AcademicBatch, id)
-    if not batch:
-        raise HTTPException(status_code=404, detail="Academic batch not found")
-    
-    for key, value in data.model_dump(exclude_unset=True).items():
-        setattr(batch, key, value)
-    
-    session.add(batch)
-    session.commit()
-    session.refresh(batch)
-    return batch
-
-@router.delete("/academic-batches/{id}", tags=["Academic Setup"])
-def delete_academic_batch(
-    id: int,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Delete an academic batch"""
-    check_admin(current_user)
-    
-    batch = session.get(AcademicBatch, id)
-    if not batch:
-        raise HTTPException(status_code=404, detail="Academic batch not found")
-    
-    session.delete(batch)
-    session.commit()
-    return {"status": "success", "message": "Academic batch deleted"}
 
 # ============================================================================
 # Fee Head Endpoints
@@ -1322,457 +1226,32 @@ def delete_program(
 # Course → Year → Semester → Section → Batch
 # ============================================================================
 
-from app.models.program_year import LegacyProgramYear
-from app.models.semester import Semester
-from app.models.master_data import Section, PracticalBatch
+# Legacy endpoints removed
 
-@router.get("/academic-structure", tags=["Academic Structure"])
-def get_academic_structure(
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user),
-    program_id: Optional[int] = None
-):
-    """Get complete academic structure: Program → Year → Semester → Section → Batch"""
-    
-    # Get programs
-    stmt = select(Program).where(Program.is_active == True)
-    if program_id:
-        stmt = stmt.where(Program.id == program_id)
-    programs = session.exec(stmt.order_by(Program.name)).all()
-    
-    result = []
-    for program in programs:
-        program_data = {
-            "id": program.id,
-            "code": program.code,
-            "name": program.name,
-            "short_name": getattr(program, 'short_name', program.code),
-            "duration_years": program.duration_years,
-            "semester_system": getattr(program, 'semester_system', True),
-            "years": []
-        }
-        
-        # Get program years
-        years = session.exec(
-            select(ProgramYear)
-            .where(ProgramYear.program_id == program.id)
-            .order_by(ProgramYear.year_number)
-        ).all()
-        
-        for year in years:
-            year_data = {
-                "id": year.id,
-                "year_number": year.year_number,
-                "name": year.name,
-                "is_active": year.is_active,
-                "semesters": []
-            }
-            
-            # Get semesters
-            semesters = session.exec(
-                select(Semester)
-                .where(Semester.program_year_id == year.id)
-                .order_by(Semester.semester_number)
-            ).all()
-            
-            for sem in semesters:
-                sem_data = {
-                    "id": sem.id,
-                    "semester_number": sem.semester_number,
-                    "name": sem.name,
-                    "is_internship": sem.is_internship,
-                    "is_project_semester": sem.is_project_semester,
-                    "sections": []
-                }
-                
-                # Get sections
-                sections = session.exec(
-                    select(Section)
-                    .where(Section.semester_id == sem.id)
-                    .order_by(Section.code)
-                ).all()
-                
-                for section in sections:
-                    section_data = {
-                        "id": section.id,
-                        "name": section.name,
-                        "code": section.code,
-                        "max_strength": section.max_strength,
-                        "current_strength": section.current_strength,
-                        "is_active": section.is_active,
-                        "batches": []
-                    }
-                    
-                    # Get practical batches
-                    batches = session.exec(
-                        select(PracticalBatch)
-                        .where(PracticalBatch.section_id == section.id)
-                        .order_by(PracticalBatch.code)
-                    ).all()
-                    
-                    for batch in batches:
-                        section_data["batches"].append({
-                            "id": batch.id,
-                            "name": batch.name,
-                            "code": batch.code,
-                            "max_strength": batch.max_strength,
-                            "current_strength": batch.current_strength,
-                            "is_active": batch.is_active
-                        })
-                    
-                    sem_data["sections"].append(section_data)
-                
-                year_data["semesters"].append(sem_data)
-            
-            program_data["years"].append(year_data)
-        
-        result.append(program_data)
-    
-    return result
 
-@router.post("/academic-structure/generate", tags=["Academic Structure"])
-def generate_academic_structure(
-    data: dict,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Auto-generate academic structure for a program"""
-    check_admin(current_user)
-    
-    program_id = data.get('program_id')
-    sections_per_semester = data.get('sections_per_semester', 2)
-    students_per_section = data.get('students_per_section', 60)
-    batches_per_section = data.get('batches_per_section', 2)
-    students_per_batch = data.get('students_per_batch', 30)
-    
-    program = session.get(Program, program_id)
-    if not program:
-        raise HTTPException(status_code=404, detail="Program not found")
-    
-    created = {"years": 0, "semesters": 0, "sections": 0, "batches": 0}
-    
-    # Create years
-    for year_num in range(1, program.duration_years + 1):
-        year_names = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"]
-        year_name = f"{year_names[year_num-1]} Year" if year_num <= 6 else f"Year {year_num}"
-        
-        # Check if year exists
-        existing_year = session.exec(
-            select(ProgramYear)
-            .where(ProgramYear.program_id == program_id)
-            .where(ProgramYear.year_number == year_num)
-        ).first()
-        
-        if not existing_year:
-            year = ProgramYear(
-                program_id=program_id,
-                year_number=year_num,
-                name=year_name,
-                is_active=True
-            )
-            session.add(year)
-            session.flush()
-            created["years"] += 1
-        else:
-            year = existing_year
-        
-        # Create semesters (2 per year if semester system)
-        semesters_count = 2 if getattr(program, 'semester_system', True) else 1
-        for sem_num in range(1, semesters_count + 1):
-            global_sem_num = (year_num - 1) * semesters_count + sem_num
-            sem_name = f"Semester {global_sem_num}" if semesters_count == 2 else f"Year {year_num}"
-            
-            existing_sem = session.exec(
-                select(Semester)
-                .where(Semester.program_year_id == year.id)
-                .where(Semester.semester_number == sem_num)
-            ).first()
-            
-            if not existing_sem:
-                sem = Semester(
-                    program_year_id=year.id,
-                    semester_number=sem_num,
-                    name=sem_name,
-                    is_internship=False,
-                    is_project_semester=False
-                )
-                session.add(sem)
-                session.flush()
-                created["semesters"] += 1
-            else:
-                sem = existing_sem
-            
-            # Create sections
-            section_codes = ["A", "B", "C", "D", "E", "F", "G", "H"]
-            for sec_idx in range(sections_per_semester):
-                sec_code = section_codes[sec_idx] if sec_idx < len(section_codes) else str(sec_idx + 1)
-                sec_name = f"Section {sec_code}"
-                
-                existing_section = session.exec(
-                    select(Section)
-                    .where(Section.semester_id == sem.id)
-                    .where(Section.code == sec_code)
-                ).first()
-                
-                if not existing_section:
-                    section = Section(
-                        name=sec_name,
-                        code=sec_code,
-                        semester_id=sem.id,
-                        max_strength=students_per_section,
-                        current_strength=0,
-                        is_active=True
-                    )
-                    session.add(section)
-                    session.flush()
-                    created["sections"] += 1
-                else:
-                    section = existing_section
-                
-                # Create practical batches
-                batch_codes = ["A", "B", "C", "D"]
-                for batch_idx in range(batches_per_section):
-                    batch_code = batch_codes[batch_idx] if batch_idx < len(batch_codes) else str(batch_idx + 1)
-                    batch_name = f"Batch {batch_code}"
-                    
-                    existing_batch = session.exec(
-                        select(PracticalBatch)
-                        .where(PracticalBatch.section_id == section.id)
-                        .where(PracticalBatch.code == batch_code)
-                    ).first()
-                    
-                    if not existing_batch:
-                        batch = PracticalBatch(
-                            name=batch_name,
-                            code=batch_code,
-                            section_id=section.id,
-                            max_strength=students_per_batch,
-                            current_strength=0,
-                            is_active=True
-                        )
-                        session.add(batch)
-                        created["batches"] += 1
-    
-    session.commit()
-    
-    return {
-        "message": f"Structure generated for {program.code}",
-        "created": created
-    }
+# ============================================================================
+# Practical Batch Endpoints
+# ============================================================================
 
-# Program Year CRUD
-@router.post("/program-years", tags=["Academic Structure"])
-def create_program_year(
-    data: dict,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Create a program year"""
-    check_admin(current_user)
-    
-    year = ProgramYear(
-        program_id=data.get('program_id'),
-        year_number=data.get('year_number'),
-        name=data.get('name'),
-        is_active=data.get('is_active', True)
-    )
-    session.add(year)
-    session.commit()
-    session.refresh(year)
-    return {"id": year.id, "message": "Program year created"}
-
-@router.patch("/program-years/{id}", tags=["Academic Structure"])
-def update_program_year(
-    id: int,
-    data: dict,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Update a program year"""
-    check_admin(current_user)
-    
-    year = session.get(ProgramYear, id)
-    if not year:
-        raise HTTPException(status_code=404, detail="Program year not found")
-    
-    for key in ['name', 'is_active']:
-        if key in data:
-            setattr(year, key, data[key])
-    
-    session.add(year)
-    session.commit()
-    return {"message": "Program year updated"}
-
-@router.delete("/program-years/{id}", tags=["Academic Structure"])
-def delete_program_year(
-    id: int,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Delete a program year and all child elements"""
-    check_admin(current_user)
-    
-    year = session.get(ProgramYear, id)
-    if not year:
-        raise HTTPException(status_code=404, detail="Program year not found")
-    
-    session.delete(year)
-    session.commit()
-    return {"message": "Program year deleted"}
-
-# Semester CRUD
-@router.post("/semesters", tags=["Academic Structure"])
-def create_semester(
-    data: dict,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Create a semester"""
-    check_admin(current_user)
-    
-    sem = Semester(
-        program_year_id=data.get('program_year_id'),
-        semester_number=data.get('semester_number'),
-        name=data.get('name'),
-        is_internship=data.get('is_internship', False),
-        is_project_semester=data.get('is_project_semester', False)
-    )
-    session.add(sem)
-    session.commit()
-    session.refresh(sem)
-    return {"id": sem.id, "message": "Semester created"}
-
-@router.patch("/semesters/{id}", tags=["Academic Structure"])
-def update_semester(
-    id: int,
-    data: dict,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Update a semester"""
-    check_admin(current_user)
-    
-    sem = session.get(Semester, id)
-    if not sem:
-        raise HTTPException(status_code=404, detail="Semester not found")
-    
-    for key in ['name', 'is_internship', 'is_project_semester']:
-        if key in data:
-            setattr(sem, key, data[key])
-    
-    session.add(sem)
-    session.commit()
-    return {"message": "Semester updated"}
-
-@router.delete("/semesters/{id}", tags=["Academic Structure"])
-def delete_semester(
-    id: int,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Delete a semester"""
-    check_admin(current_user)
-    
-    sem = session.get(Semester, id)
-    if not sem:
-        raise HTTPException(status_code=404, detail="Semester not found")
-    
-    session.delete(sem)
-    session.commit()
-    return {"message": "Semester deleted"}
-
-# Section CRUD
-@router.post("/sections", tags=["Academic Structure"])
-def create_section(
-    data: dict,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Create a section"""
-    check_admin(current_user)
-    
-    section = Section(
-        name=data.get('name'),
-        code=data.get('code'),
-        semester_id=data.get('semester_id'),
-        max_strength=data.get('max_strength', 60),
-        is_active=data.get('is_active', True)
-    )
-    session.add(section)
-    session.commit()
-    session.refresh(section)
-    return {"id": section.id, "message": "Section created"}
-
-@router.patch("/sections/{id}", tags=["Academic Structure"])
-def update_section(
-    id: int,
-    data: dict,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Update a section"""
-    check_admin(current_user)
-    
-    section = session.get(Section, id)
-    if not section:
-        raise HTTPException(status_code=404, detail="Section not found")
-    
-    for key in ['name', 'max_strength', 'is_active']:
-        if key in data:
-            setattr(section, key, data[key])
-    
-    session.add(section)
-    session.commit()
-    return {"message": "Section updated"}
-
-@router.delete("/sections/{id}", tags=["Academic Structure"])
-def delete_section(
-    id: int,
-    session: Session = Depends(deps.get_session),
-    current_user: User = Depends(deps.get_current_user)
-):
-    """Delete a section"""
-    check_admin(current_user)
-    
-    section = session.get(Section, id)
-    if not section:
-        raise HTTPException(status_code=404, detail="Section not found")
-    
-    # Delete child batches first
-    batches = session.exec(select(PracticalBatch).where(PracticalBatch.section_id == id)).all()
-    for batch in batches:
-        session.delete(batch)
-    
-    session.delete(section)
-    session.commit()
-    return {"message": "Section deleted"}
-
-# Practical Batch CRUD
-@router.post("/practical-batches", tags=["Academic Structure"])
+@router.post("/practical-batches", response_model=PracticalBatchRead, tags=["Academic Setup"])
 def create_practical_batch(
-    data: dict,
+    data: PracticalBatchCreate,
     session: Session = Depends(deps.get_session),
     current_user: User = Depends(deps.get_current_user)
 ):
-    """Create a practical batch"""
+    """Create a new practical batch"""
     check_admin(current_user)
     
-    batch = PracticalBatch(
-        name=data.get('name'),
-        code=data.get('code'),
-        section_id=data.get('section_id'),
-        max_strength=data.get('max_strength', 30),
-        is_active=data.get('is_active', True)
-    )
+    batch = PracticalBatch(**data.model_dump())
     session.add(batch)
     session.commit()
     session.refresh(batch)
-    return {"id": batch.id, "message": "Practical batch created"}
+    return batch
 
-@router.patch("/practical-batches/{id}", tags=["Academic Structure"])
+@router.patch("/practical-batches/{id}", response_model=PracticalBatchRead, tags=["Academic Setup"])
 def update_practical_batch(
     id: int,
-    data: dict,
+    data: PracticalBatchUpdate,
     session: Session = Depends(deps.get_session),
     current_user: User = Depends(deps.get_current_user)
 ):
@@ -1783,15 +1262,15 @@ def update_practical_batch(
     if not batch:
         raise HTTPException(status_code=404, detail="Practical batch not found")
     
-    for key in ['name', 'max_strength', 'is_active']:
-        if key in data:
-            setattr(batch, key, data[key])
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(batch, key, value)
     
     session.add(batch)
     session.commit()
-    return {"message": "Practical batch updated"}
+    session.refresh(batch)
+    return batch
 
-@router.delete("/practical-batches/{id}", tags=["Academic Structure"])
+@router.delete("/practical-batches/{id}", tags=["Academic Setup"])
 def delete_practical_batch(
     id: int,
     session: Session = Depends(deps.get_session),
@@ -1806,4 +1285,4 @@ def delete_practical_batch(
     
     session.delete(batch)
     session.commit()
-    return {"message": "Practical batch deleted"}
+    return {"status": "success", "message": "Practical batch deleted"}

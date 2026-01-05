@@ -4,7 +4,7 @@ from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
-    from .semester import Semester
+    from .academic.batch import BatchSemester
     from .subject import Subject
     from .student import Student
 
@@ -25,14 +25,17 @@ class Exam(SQLModel, table=True):
     name: str  # e.g., "Fall 2024 Mid-Term"
     exam_type: ExamType
     academic_year: str  # e.g., "2024-2025"
-    semester_id: int = Field(foreign_key="semester.id")
+    
+    # Updated to link to BatchSemester
+    batch_semester_id: int = Field(foreign_key="batch_semesters.id")
+    
     start_date: date
     end_date: date
     status: ExamStatus = Field(default=ExamStatus.DRAFT)
     description: Optional[str] = None
     
     # Relationships
-    semester: "Semester" = Relationship()
+    batch_semester: "BatchSemester" = Relationship()
     schedules: List["ExamSchedule"] = Relationship(back_populates="exam")
 
 class ExamSchedule(SQLModel, table=True):

@@ -64,7 +64,7 @@ class Regulation(SQLModel, table=True):
     updated_by: Optional[int] = Field(default=None, foreign_key="user.id")
     
     # Relationships
-    program: "Program" = Relationship(back_populates="regulations")
+    program: "Program" = Relationship() # back_populates="regulations" removed to avoid circular mapper issue
     subjects: List["RegulationSubject"] = Relationship(
         back_populates="regulation",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}

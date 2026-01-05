@@ -126,7 +126,7 @@ class BatchSemester(SQLModel, table=True):
     # Relationships
     batch: "AcademicBatch" = Relationship(back_populates="semesters")
     program_year: "ProgramYear" = Relationship(back_populates="semesters")
-    # sections: List["Section"] = Relationship(back_populates="batch_semester")  # TODO: Add when Section model is updated
+    sections: List["Section"] = Relationship(back_populates="batch_semester")
 
 
 class BatchSubject(SQLModel, table=True):

@@ -8,8 +8,7 @@ from .user_role import UserRole
 from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
-from .program_year import LegacyProgramYear
-from .semester import Semester
+# Legacy models removed: LegacyProgramYear, Semester
 from .subject import Subject
 from .student import Student
 from .faculty import Faculty
@@ -45,7 +44,7 @@ from .settings import SystemSetting, AuditLog
 from .institute import InstituteInfo
 from .master_data import (
     AcademicYear,
-    LegacyAcademicBatch,  # Changed from AcademicBatch
+    # LegacyAcademicBatch removed
     Section,
     PracticalBatch,
     SubjectConfig,
@@ -70,8 +69,8 @@ __all__ = [
     "UserRole",
     "Department",
     "Program",
-    "LegacyProgramYear",  # Changed from ProgramYear
-    "Semester",
+    # LegacyProgramYear removed
+    # Semester removed
     "Subject",
     "Student",
     "Parent",
@@ -130,7 +129,7 @@ __all__ = [
     "AuditLog",
     "InstituteInfo",
     "AcademicYear",
-    "LegacyAcademicBatch",  # Changed from AcademicBatch
+    # LegacyAcademicBatch removed
     "Section",
     "PracticalBatch",
     "SubjectConfig",

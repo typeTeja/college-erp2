@@ -6,7 +6,7 @@ from datetime import date, time
 if TYPE_CHECKING:
     from .faculty import Faculty
     from .subject import Subject
-    from .student import Semester
+    from .academic.batch import BatchSemester
     # from .academic_year import AcademicYear # Assuming exists or using ID directly
 
 class DayOfWeek(str, Enum):
@@ -63,7 +63,7 @@ class ClassSchedule(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     academic_year_id: int
-    semester_id: int = Field(foreign_key="semester.id")
+    batch_semester_id: int = Field(foreign_key="batch_semesters.id")
     section_id: Optional[int] = None # Or link to a Section model if it exists
     
     day_of_week: DayOfWeek

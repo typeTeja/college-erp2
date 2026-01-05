@@ -33,44 +33,23 @@ class AcademicYear(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class LegacyAcademicBatch(SQLModel, table=True):
-    """
-    LEGACY: Academic Batch Management - Student cohorts with auto-generation logic
-    
-    NOTE: This is the OLD academic_batch model.
-    The NEW academic foundation uses AcademicBatch in app.models.academic.batch
-    """
-    __tablename__ = "academic_batch"
-    
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(index=True)  # e.g., "BHM 2024-2028"
-    code: str = Field(unique=True, index=True)  # e.g., "BHM2024"
-    
-    program_id: int = Field(foreign_key="program.id", index=True)
-    academic_year_id: int = Field(foreign_key="academic_year.id", index=True)
-    
-    admission_year: int  # Year of admission (e.g., 2024)
-    graduation_year: int  # Expected graduation year
-    
-    max_strength: int = Field(default=60)
-    current_strength: int = Field(default=0)
-    
-    is_active: bool = Field(default=True)
-    
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class Section(SQLModel, table=True):
-    """Section within a semester - e.g., Section A, Section B"""
+    """Section within a batch semester - (e.g., Section A, Section B)"""
     __tablename__ = "section"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str  # e.g., "Section A", "Section B"
     code: str = Field(index=True)  # e.g., "A", "B"
     
-    semester_id: int = Field(foreign_key="semester.id", index=True)
-    batch_id: Optional[int] = Field(default=None, foreign_key="academic_batch.id", index=True)
+    # Linked to BatchSemester
+    batch_semester_id: int = Field(foreign_key="batch_semesters.id", index=True)
+    # Legacy semester_id removed
+    
+    batch_id: Optional[int] = Field(default=None, foreign_key="academic_batches.id", index=True)
     
     max_strength: int = Field(default=40)
     current_strength: int = Field(default=0)
@@ -78,6 +57,10 @@ class Section(SQLModel, table=True):
     is_active: bool = Field(default=True)
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    batch_semester: Optional["BatchSemester"] = Relationship(back_populates="sections")
+    practical_batches: List["PracticalBatch"] = Relationship(back_populates="section")
 
 
 class PracticalBatch(SQLModel, table=True):
@@ -96,6 +79,9 @@ class PracticalBatch(SQLModel, table=True):
     is_active: bool = Field(default=True)
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    section: Optional["Section"] = Relationship(back_populates="practical_batches")
 
 
 class SubjectType(str, PyEnum):
