@@ -14,7 +14,7 @@ from app.models.role import Role
 from app.models.user_role import UserRole
 from app.models.department import Department
 from app.models.program import Program
-from app.models.program_year import ProgramYear
+from app.models.program_year import LegacyProgramYear
 from app.models.semester import Semester
 from app.models.subject import Subject
 from app.models.faculty import Faculty

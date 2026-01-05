@@ -5,10 +5,12 @@ from sqlalchemy import Column, Text
 from datetime import datetime
 
 if TYPE_CHECKING:
-    from .program_year import ProgramYear
+    from .program_year import LegacyProgramYear
     from .student import Student
     from .department import Department
     from .fee import FeeStructure
+    from .academic.regulation import Regulation
+    from .academic.batch import AcademicBatch
 
 class ProgramType(str, PyEnum):
     UG = "UG"
@@ -53,9 +55,11 @@ class Program(SQLModel, table=True):
     
     # Relationships
     department: "Department" = Relationship(back_populates="programs")
-    years: List["ProgramYear"] = Relationship(back_populates="program", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    years: List["LegacyProgramYear"] = Relationship(back_populates="program", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     students: List["Student"] = Relationship(back_populates="program")
     fee_structures: List["FeeStructure"] = Relationship(back_populates="program")
+    regulations: List["Regulation"] = Relationship(back_populates="program")
+    batches: List["AcademicBatch"] = Relationship(back_populates="program")  # NEW
 
     @property
     def department_name(self) -> str:

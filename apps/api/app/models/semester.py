@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, List, Optional
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
-    from .program_year import ProgramYear
+    from .program_year import LegacyProgramYear
     from .subject import Subject
 
 class Semester(SQLModel, table=True):
@@ -22,5 +22,5 @@ class Semester(SQLModel, table=True):
     end_date: Optional[str] = None
     
     # Relationships
-    program_year: "ProgramYear" = Relationship(back_populates="semesters")
+    program_year: "LegacyProgramYear" = Relationship(back_populates="semesters")
     subjects: List["Subject"] = Relationship(back_populates="semester")

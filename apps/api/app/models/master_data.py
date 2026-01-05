@@ -33,8 +33,13 @@ class AcademicYear(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class AcademicBatch(SQLModel, table=True):
-    """Academic Batch Management - Student cohorts with auto-generation logic"""
+class LegacyAcademicBatch(SQLModel, table=True):
+    """
+    LEGACY: Academic Batch Management - Student cohorts with auto-generation logic
+    
+    NOTE: This is the OLD academic_batch model.
+    The NEW academic foundation uses AcademicBatch in app.models.academic.batch
+    """
     __tablename__ = "academic_batch"
     
     id: Optional[int] = Field(default=None, primary_key=True)

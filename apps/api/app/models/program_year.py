@@ -5,8 +5,13 @@ if TYPE_CHECKING:
     from .program import Program
     from .semester import Semester
 
-class ProgramYear(SQLModel, table=True):
-    """Year within a program (Year 1, Year 2, etc.)"""
+class LegacyProgramYear(SQLModel, table=True):
+    """
+    LEGACY: Year within a program (Year 1, Year 2, etc.)
+    
+    NOTE: This is the OLD program_year model.
+    The NEW academic foundation uses ProgramYear in app.models.academic.batch
+    """
     __tablename__ = "program_year"
     
     id: Optional[int] = Field(default=None, primary_key=True)

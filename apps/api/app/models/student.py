@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from .enrollment import Enrollment
     from .program import Program
     from .parent import Parent
+    from .academic.student_history import StudentSemesterHistory, StudentPromotionLog
 
 class Gender(str, Enum):
     MALE = "MALE"
@@ -67,3 +68,8 @@ class Student(SQLModel, table=True):
     program: "Program" = Relationship(back_populates="students")
     enrollments: List["Enrollment"] = Relationship(back_populates="student")
     parent: Optional["Parent"] = Relationship(sa_relationship_kwargs={"uselist": False, "foreign_keys": "Parent.linked_student_id"})
+    
+    # Academic foundation relationships
+    semester_history: List["StudentSemesterHistory"] = Relationship(back_populates="student")
+    promotion_logs: List["StudentPromotionLog"] = Relationship(back_populates="student")
+

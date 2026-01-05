@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from fastapi import HTTPException
 from sqlalchemy.orm import selectinload
 from app.models.program import Program, ProgramType, ProgramStatus
-from app.models.program_year import ProgramYear
+from app.models.program_year import LegacyProgramYear
 from app.models.semester import Semester
 from app.models.department import Department
 from app.schemas.program import ProgramCreate
@@ -47,7 +47,7 @@ class ProgramService:
         for year_num in range(1, total_years + 1):
             # Create Year
             year_name = f"Year {year_num}"
-            program_year = ProgramYear(
+            program_year = LegacyProgramYear(
                 program_id=program.id,
                 year_number=year_num,
                 name=year_name,

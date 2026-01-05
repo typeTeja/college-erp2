@@ -8,7 +8,7 @@ from .user_role import UserRole
 from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
-from .program_year import ProgramYear
+from .program_year import LegacyProgramYear
 from .semester import Semester
 from .subject import Subject
 from .student import Student
@@ -45,7 +45,7 @@ from .settings import SystemSetting, AuditLog
 from .institute import InstituteInfo
 from .master_data import (
     AcademicYear,
-    AcademicBatch,
+    LegacyAcademicBatch,  # Changed from AcademicBatch
     Section,
     PracticalBatch,
     SubjectConfig,
@@ -70,7 +70,7 @@ __all__ = [
     "UserRole",
     "Department",
     "Program",
-    "ProgramYear",
+    "LegacyProgramYear",  # Changed from ProgramYear
     "Semester",
     "Subject",
     "Student",
@@ -130,7 +130,7 @@ __all__ = [
     "AuditLog",
     "InstituteInfo",
     "AcademicYear",
-    "AcademicBatch",
+    "LegacyAcademicBatch",  # Changed from AcademicBatch
     "Section",
     "PracticalBatch",
     "SubjectConfig",

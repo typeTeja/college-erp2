@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from app.api import deps
 from app.models.user import User
 from app.models.master_data import (
-    AcademicYear, AcademicBatch, Section, PracticalBatch, SubjectConfig,
+    AcademicYear, LegacyAcademicBatch, Section, PracticalBatch, SubjectConfig,
     FeeHead, InstallmentPlan, ScholarshipSlab,
     Board, PreviousQualification, StudyGroup, ReservationCategory, LeadSource,
     Designation, MasterClassroom, PlacementCompany,
@@ -1322,7 +1322,7 @@ def delete_program(
 # Course → Year → Semester → Section → Batch
 # ============================================================================
 
-from app.models.program_year import ProgramYear
+from app.models.program_year import LegacyProgramYear
 from app.models.semester import Semester
 from app.models.master_data import Section, PracticalBatch
 
