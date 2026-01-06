@@ -1145,7 +1145,7 @@ export function AcademicBatchTab() {
                                     </div>
                                     <div>
                                         <span className="text-slate-600">Start Year:</span>
-                                        <div className="font-medium">{formData.admission_year + 1}</div>
+                                        <div className="font-medium">{formData.admission_year}</div>
                                     </div>
                                     <div>
                                         <span className="text-slate-600">Graduation Year:</span>

@@ -93,7 +93,7 @@ class BatchSemesterRead(BaseModel):
     id: int
     batch_id: int
     program_year_id: int
-    program_year: int
+    year_no: int
     semester_no: int
     semester_name: str
     total_credits: int

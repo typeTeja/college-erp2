@@ -46,10 +46,13 @@ class Student(SQLModel, table=True):
     email: Optional[str] = Field(default=None, index=True)
     user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
     program_id: int = Field(foreign_key="program.id", index=True)
-    current_year: int = Field(default=1)  # Current academic year (1, 2, 3, 4)
-    current_semester: int = Field(default=1) # Mutable semester
-    section: str = Field(default="A")
-    batch: str = Field(default="2024-2028") # e.g. 2024-2028
+    
+    # Strict Academic Structure (Foreign Keys)
+    batch_id: int = Field(foreign_key="academic_batches.id", index=True)
+    program_year_id: int = Field(foreign_key="program_years.id", index=True)
+    batch_semester_id: int = Field(foreign_key="batch_semesters.id", index=True)
+    section_id: Optional[int] = Field(default=None, foreign_key="section.id", index=True)
+    practical_batch_id: Optional[int] = Field(default=None, foreign_key="practical_batch.id", index=True)
     
     # Demographics
     gender: Gender = Field(default=Gender.MALE)
