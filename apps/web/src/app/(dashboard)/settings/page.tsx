@@ -5,7 +5,7 @@ import {
     Settings, User, Shield, Building2, Globe,
     Bell, Lock, History, ExternalLink, Save,
     CheckCircle2, AlertCircle, RefreshCcw,
-    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building, GraduationCap
+    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building, GraduationCap, FileText
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,7 @@ import {
     PlacementCompanyTab
 } from "./MasterDataTabs";
 import { AcademicStructureTab } from "./AcademicStructureTab";
+import { RegulationsTab } from "./RegulationsTab";
 import { useAuthStore } from "@/store/use-auth-store"
 import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
@@ -101,6 +102,12 @@ export default function SettingsPage() {
                                     label="Academic Years"
                                     active={activeTab === 'academic-years'}
                                     onClick={() => setActiveTab('academic-years')}
+                                />
+                                <SettingNavItem
+                                    icon={<FileText size={18} />}
+                                    label="Regulations"
+                                    active={activeTab === 'regulations'}
+                                    onClick={() => setActiveTab('regulations')}
                                 />
                                 <SettingNavItem
                                     icon={<GraduationCap size={18} />}
@@ -189,6 +196,7 @@ export default function SettingsPage() {
                     {activeTab === 'institute' && <InstituteTab isAdmin={isAdmin} />}
                     {activeTab === 'programs' && <ProgramsTab />}
                     {activeTab === 'academic-years' && <AcademicYearTab />}
+                    {activeTab === 'regulations' && <RegulationsTab />}
                     {activeTab === 'academic-batches' && <AcademicBatchTab />}
                     {activeTab === 'fee-heads' && <FeeHeadTab />}
                     {activeTab === 'boards' && <BoardTab />}

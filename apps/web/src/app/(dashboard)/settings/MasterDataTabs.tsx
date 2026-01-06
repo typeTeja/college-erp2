@@ -20,7 +20,7 @@ import {
     AcademicBatch, getAcademicBatches, createAcademicBatch, updateAcademicBatch, deleteAcademicBatch,
     ProgramInfo, getProgramsList,
     ProgramFull, getPrograms, createProgram, updateProgram, deleteProgram,
-    DepartmentInfo, getDepartmentsList,
+    DepartmentInfo, getDepartmentsList, createDepartment, updateDepartment, deleteDepartment,
     FeeHead, getFeeHeads, createFeeHead, updateFeeHead, deleteFeeHead,
     InstallmentPlan, getInstallmentPlans, createInstallmentPlan, updateInstallmentPlan, deleteInstallmentPlan,
     ScholarshipSlab, getScholarshipSlabs, createScholarshipSlab, updateScholarshipSlab, deleteScholarshipSlab,
@@ -849,12 +849,16 @@ export function AcademicBatchTab() {
         // Fetch regulations for this program
         if (programId) {
             try {
-                const regs = await getRegulations(programId); // Fetch all regulations (locked or unlocked)
+                // Fetch ALL regulations for the program, regardless of lock status
+                const regs = await getRegulations(programId);
+                console.log(`Fetched regulations for program ${programId}:`, regs);
                 setRegulations(regs);
+
                 if (regs.length === 0) {
-                    toast.warning("No regulations found for this program. You must create a regulation first.");
+                    toast.warning("No regulations found. Please create a Regulation first.");
                 }
             } catch (e) {
+                console.error("Failed to load regulations", e);
                 toast.error("Failed to load regulations");
                 setRegulations([]);
             }
@@ -1008,38 +1012,42 @@ export function AcademicBatchTab() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {data.map((item) => (
-                                        <tr key={item.id} className="border-b hover:bg-slate-50">
-                                            <td className="px-4 py-3">
-                                                <div className="font-medium">{item.name}</div>
-                                                <div className="text-xs text-slate-500">{item.code}</div>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <Badge variant="outline">{item.program_code || item.program_name}</Badge>
-                                            </td>
-                                            <td className="px-4 py-3">{item.admission_year}</td>
-                                            <td className="px-4 py-3">{item.graduation_year}</td>
-                                            <td className="px-4 py-3">
-                                                <span className="text-blue-600 font-medium">{item.current_strength}</span>
-                                                <span className="text-slate-400"> / {item.max_strength}</span>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <Badge variant={item.is_active ? 'default' : 'secondary'}>
-                                                    {item.is_active ? 'Active' : 'Inactive'}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex justify-end gap-1">
-                                                    <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
-                                                        <Edit2 className="h-4 w-4 text-blue-600" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(item)}>
-                                                        <Trash2 className="h-4 w-4 text-red-600" />
-                                                    </Button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {data.map((item) => {
+                                        // Lookup program details
+                                        const program = programs.find(p => p.id === item.program_id);
+                                        return (
+                                            <tr key={item.id} className="border-b hover:bg-slate-50">
+                                                <td className="px-4 py-3">
+                                                    <div className="font-medium">{item.name || (item as any).batch_name}</div>
+                                                    <div className="text-xs text-slate-500">{item.code || (item as any).batch_code}</div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <Badge variant="outline">{program ? program.code : (item.program_code || item.program_name || '-')}</Badge>
+                                                </td>
+                                                <td className="px-4 py-3">{item.admission_year || (item as any).joining_year}</td>
+                                                <td className="px-4 py-3">{item.graduation_year || (item as any).end_year}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className="text-blue-600 font-medium">{item.current_strength || 0}</span>
+                                                    <span className="text-slate-400"> / {item.max_strength || (item as any).total_students}</span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <Badge variant={item.is_active ? 'default' : 'secondary'}>
+                                                        {item.is_active ? 'Active' : 'Inactive'}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex justify-end gap-1">
+                                                        <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
+                                                            <Edit2 className="h-4 w-4 text-blue-600" />
+                                                        </Button>
+                                                        <Button variant="ghost" size="sm" onClick={() => handleDelete(item)}>
+                                                            <Trash2 className="h-4 w-4 text-red-600" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -1091,7 +1099,9 @@ export function AcademicBatchTab() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     {regulations.map(r => (
-                                        <SelectItem key={r.id} value={r.id.toString()}>{r.name} ({r.academic_year_name})</SelectItem>
+                                        <SelectItem key={r.id} value={r.id.toString()}>
+                                            {r.regulation_name} ({r.regulation_code}) {r.is_active ? '' : '(Inactive)'}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>

@@ -63,6 +63,8 @@ from .master_data import (
     EmailTemplate,
     SMSTemplate,
 )
+from .file_metadata import FileMetadata
+from .import_log import ImportLog
 
 __all__ = [
     "User",
@@ -148,4 +150,6 @@ __all__ = [
     "PlacementCompany",
     "EmailTemplate",
     "SMSTemplate",
+    "FileMetadata",
+    "ImportLog",
 ]

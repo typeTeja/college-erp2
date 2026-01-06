@@ -112,7 +112,7 @@ class BatchSemester(SQLModel, table=True):
     batch_id: int = Field(foreign_key="academic_batches.id", index=True)
     program_year_id: int = Field(foreign_key="program_years.id", index=True)
     
-    program_year: int = Field(ge=1, le=5)
+    year_no: int = Field(ge=1, le=5) # Renamed from program_year to avoid conflict with relationship
     semester_no: int = Field(ge=1, le=10)
     semester_name: str = Field(max_length=50)
     

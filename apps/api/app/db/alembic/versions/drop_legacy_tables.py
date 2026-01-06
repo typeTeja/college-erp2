@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'drop_legacy_tables'
-down_revision = 'f352b322382d_merge_heads' # Use the last merge head
+down_revision = 'f352b322382d' # Use the last merge head
 branch_labels = None
 depends_on = None
 
@@ -28,12 +28,8 @@ def upgrade():
     # Let's assume new model uses different name or we drop and recreate.
     # User said: "program_year table (singular)" to be removed.
     
+    op.drop_table('practical_batch') # Depends on section, drop first
     op.drop_table('section') # Dropping section to recreate with new FK?
-    # Section is master data. It has FK to semester. 
-    # Since we changed FK to batch_semester_id, we need to alter or drop/create.
-    # Given greenfield, dropping is easier.
-    
-    op.drop_table('practical_batch') # Depends on section
     
     # Drop legacy tables
     op.execute('DROP TABLE IF EXISTS semester CASCADE')

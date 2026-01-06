@@ -20,6 +20,12 @@ export interface RegulationCreate {
     regulation_code: string;
     regulation_name: string;
     program_id: number;
+    promotion_model?: string; // Default CREDIT_BASED
+    year1_to_year2_min_percentage?: number;
+    year2_to_year3_min_year2_percentage?: number;
+    year3_to_graduation_min_percentage?: number;
+    min_internal_pass?: number;
+    min_external_pass?: number;
+    min_total_pass?: number;
     is_active?: boolean;
-    // Add other optional fields if needed for creation
 }

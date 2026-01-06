@@ -196,7 +196,7 @@ def create_batch(
                     batch_semester = BatchSemester(
                         batch_id=batch.id,
                         program_year_id=program_year.id,
-                        program_year=year_no,
+                        year_no=year_no,
                         semester_no=semester_no,
                         semester_name=f"Semester {semester_no}",
                         total_credits=reg_semester.total_credits if reg_semester else 0,

@@ -155,10 +155,13 @@ export interface AcademicBatch {
     program_id: number;
     program_name?: string;
     program_code?: string;
+    regulation_id?: number; // Added
     academic_year_id: number;
-    admission_year: number;
+    admission_year: number; // For UI
+    joining_year: number; // Matches backend
     graduation_year: number;
-    max_strength: number;
+    max_strength: number; // For UI
+    total_students: number; // Matches backend
     current_strength: number;
     is_active: boolean;
     created_at: string;
