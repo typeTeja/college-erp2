@@ -24,6 +24,18 @@ class RegulationBase(BaseModel):
     min_internal_pass: int = Field(default=12, ge=0)
     min_external_pass: int = Field(default=28, ge=0)
     min_total_pass: int = Field(default=40, ge=0)
+
+    # Theory Config
+    theory_max_marks: int = Field(default=100, ge=0)
+    theory_internal_max: int = Field(default=60, ge=0)
+    theory_external_max: int = Field(default=40, ge=0)
+    theory_pass_percentage: int = Field(default=40, ge=0, le=100)
+
+    # Practical Config
+    practical_max_marks: int = Field(default=100, ge=0)
+    practical_internal_max: int = Field(default=40, ge=0)
+    practical_external_max: int = Field(default=60, ge=0)
+    practical_pass_percentage: int = Field(default=50, ge=0, le=100)
     
     is_active: bool = Field(default=True)
 
@@ -47,6 +59,16 @@ class RegulationUpdate(BaseModel):
     min_internal_pass: Optional[int] = Field(None, ge=0)
     min_external_pass: Optional[int] = Field(None, ge=0)
     min_total_pass: Optional[int] = Field(None, ge=0)
+
+    theory_max_marks: Optional[int] = Field(None, ge=0)
+    theory_internal_max: Optional[int] = Field(None, ge=0)
+    theory_external_max: Optional[int] = Field(None, ge=0)
+    theory_pass_percentage: Optional[int] = Field(None, ge=0, le=100)
+
+    practical_max_marks: Optional[int] = Field(None, ge=0)
+    practical_internal_max: Optional[int] = Field(None, ge=0)
+    practical_external_max: Optional[int] = Field(None, ge=0)
+    practical_pass_percentage: Optional[int] = Field(None, ge=0, le=100)
     
     is_active: Optional[bool] = None
 

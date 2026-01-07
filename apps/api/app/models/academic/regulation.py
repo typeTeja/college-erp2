@@ -41,10 +41,22 @@ class Regulation(SQLModel, table=True):
     year2_to_year3_min_year2_percentage: int = Field(default=50, ge=0, le=100)
     year3_to_graduation_min_percentage: int = Field(default=100, ge=0, le=100)
     
-    # Passing marks criteria
+    # Passing marks criteria (Global/Fallback)
     min_internal_pass: int = Field(default=12, ge=0)
     min_external_pass: int = Field(default=28, ge=0)
     min_total_pass: int = Field(default=40, ge=0)
+
+    # Theory Evaluation Config
+    theory_max_marks: int = Field(default=100, ge=0)
+    theory_internal_max: int = Field(default=60, ge=0)
+    theory_external_max: int = Field(default=40, ge=0)
+    theory_pass_percentage: int = Field(default=40, ge=0, le=100)
+
+    # Practical Evaluation Config
+    practical_max_marks: int = Field(default=100, ge=0)
+    practical_internal_max: int = Field(default=40, ge=0)
+    practical_external_max: int = Field(default=60, ge=0)
+    practical_pass_percentage: int = Field(default=50, ge=0, le=100)
     
     # Locking mechanism
     is_locked: bool = Field(default=False, index=True)

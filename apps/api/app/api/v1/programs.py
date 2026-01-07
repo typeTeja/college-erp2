@@ -28,7 +28,8 @@ def get_programs(
     skip: int = 0, 
     limit: int = 100,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    # Allow public access for listing programs (needed for Apply page)
+    # current_user: User = Depends(get_current_user) 
 ):
     """List programs with filtering (Authenticated users)"""
     return ProgramService.get_programs(session, skip, limit, type, status)
