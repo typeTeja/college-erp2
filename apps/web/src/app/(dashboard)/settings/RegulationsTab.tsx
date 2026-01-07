@@ -133,6 +133,14 @@ export function RegulationsTab() {
         min_internal_pass: 12,
         min_external_pass: 28,
         min_total_pass: 40,
+        theory_max_marks: 100,
+        theory_internal_max: 60,
+        theory_external_max: 40,
+        theory_pass_percentage: 40,
+        practical_max_marks: 100,
+        practical_internal_max: 40,
+        practical_external_max: 60,
+        practical_pass_percentage: 50,
         is_active: true
     });
 
@@ -206,6 +214,14 @@ export function RegulationsTab() {
             min_internal_pass: 12,
             min_external_pass: 28,
             min_total_pass: 40,
+            theory_max_marks: 100,
+            theory_internal_max: 60,
+            theory_external_max: 40,
+            theory_pass_percentage: 40,
+            practical_max_marks: 100,
+            practical_internal_max: 40,
+            practical_external_max: 60,
+            practical_pass_percentage: 50,
             is_active: true
         });
         setDialogOpen(true);
@@ -308,25 +324,96 @@ export function RegulationsTab() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <Label>Int. Pass Marks</Label>
-                                <Input
-                                    type="number"
-                                    value={formData.min_internal_pass}
-                                    onChange={(e) => setFormData({ ...formData, min_internal_pass: parseInt(e.target.value) })}
-                                />
+                        {/* Theory Configuration */}
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
+                            <h4 className="font-medium text-sm text-slate-700">Theory Evaluation Schema</h4>
+                            <div className="grid grid-cols-4 gap-3">
+                                <div>
+                                    <Label className="text-xs">Max Marks</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.theory_max_marks}
+                                        onChange={(e) => setFormData({ ...formData, theory_max_marks: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">Internal Max</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.theory_internal_max}
+                                        onChange={(e) => setFormData({ ...formData, theory_internal_max: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">External Max</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.theory_external_max}
+                                        onChange={(e) => setFormData({ ...formData, theory_external_max: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">Pass %</Label>
+                                    <div className="relative">
+                                        <Input
+                                            type="number"
+                                            value={formData.theory_pass_percentage}
+                                            onChange={(e) => setFormData({ ...formData, theory_pass_percentage: parseInt(e.target.value) || 0 })}
+                                            className="pr-6"
+                                        />
+                                        <span className="absolute right-2 top-2.5 text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <Label>Ext. Pass Marks</Label>
-                                <Input
-                                    type="number"
-                                    value={formData.min_external_pass}
-                                    onChange={(e) => setFormData({ ...formData, min_external_pass: parseInt(e.target.value) })}
-                                />
+                        </div>
+
+                        {/* Practical Configuration */}
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-3">
+                            <h4 className="font-medium text-sm text-slate-700">Practical Evaluation Schema</h4>
+                            <div className="grid grid-cols-4 gap-3">
+                                <div>
+                                    <Label className="text-xs">Max Marks</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.practical_max_marks}
+                                        onChange={(e) => setFormData({ ...formData, practical_max_marks: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">Internal Max</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.practical_internal_max}
+                                        onChange={(e) => setFormData({ ...formData, practical_internal_max: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">External Max</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.practical_external_max}
+                                        onChange={(e) => setFormData({ ...formData, practical_external_max: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">Pass %</Label>
+                                    <div className="relative">
+                                        <Input
+                                            type="number"
+                                            value={formData.practical_pass_percentage}
+                                            onChange={(e) => setFormData({ ...formData, practical_pass_percentage: parseInt(e.target.value) || 0 })}
+                                            className="pr-6"
+                                        />
+                                        <span className="absolute right-2 top-2.5 text-xs text-slate-400">%</span>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        {/* Global Passing Defaults (Hidden or minimized if not needed, but keeping for now as secondary) */}
+                        <div className="grid grid-cols-3 gap-4 border-t pt-2">
                             <div>
-                                <Label>Total Pass Marks</Label>
+                                <Label>Overall Pass Marks</Label>
                                 <Input
                                     type="number"
                                     value={formData.min_total_pass}

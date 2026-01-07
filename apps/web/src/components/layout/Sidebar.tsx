@@ -26,7 +26,7 @@ interface NavItem {
 const roleNavItems: Record<string, NavItem[]> = {
     SUPER_ADMIN: [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
-        { icon: <Layers size={20} />, label: 'Programs', path: '/programs' },
+        // Programs is now in Settings
         { icon: <ClipboardList size={20} />, label: 'Admissions', path: '/admissions' },
         { icon: <Users size={20} />, label: 'Students', path: '/students' },
         { icon: <FileText size={20} />, label: 'Import Students', path: '/students/import', badge: 'New' },
@@ -75,7 +75,7 @@ const roleNavItems: Record<string, NavItem[]> = {
     ],
     ADMIN: [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
-        { icon: <Layers size={20} />, label: 'Programs', path: '/programs' },
+        // Programs is now in Settings
         { icon: <ClipboardList size={20} />, label: 'Admissions', path: '/admissions' },
         { icon: <Users size={20} />, label: 'Students', path: '/students' },
         { icon: <FileText size={20} />, label: 'Import Students', path: '/students/import' },
