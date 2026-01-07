@@ -18,8 +18,8 @@ export const timetableService = {
     },
 
     // --- Schedule Management ---
-    getSchedule: async (academicYearId: number, semesterId: number, sectionId?: number) => {
-        const params = { academic_year_id: academicYearId, semester_id: semesterId, section_id: sectionId };
+    getSchedule: async (academicYearId: number, batchSemesterId: number, sectionId?: number) => {
+        const params = { academic_year_id: academicYearId, batch_semester_id: batchSemesterId, section_id: sectionId };
         const response = await api.get<ClassSchedule[]>("/timetable/entries", { params });
         return response.data;
     },

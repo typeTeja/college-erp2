@@ -64,7 +64,7 @@ export function FacultySchedule({ facultyId }: { facultyId: number }) {
                                                         <div>Room: {entry.room_number || entry.room_id}</div>
                                                         <div className="mt-1">
                                                             <Badge variant="default" className="text-[10px] h-5">
-                                                                Sem {entry.semester_id}
+                                                                Sem {entry.batch_semester_id}
                                                             </Badge>
                                                         </div>
                                                     </div>

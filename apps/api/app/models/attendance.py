@@ -24,7 +24,7 @@ class AttendanceSession(SQLModel, table=True):
     subject_id: int = Field(foreign_key="subject.id")
     faculty_id: int = Field(foreign_key="faculty.id")
     program_id: int = Field(foreign_key="program.id")
-    program_year_id: int = Field(foreign_key="program_year.id")
+    program_year_id: int = Field(foreign_key="program_years.id")
     
     semester: int
     section: str = Field(max_length=10)

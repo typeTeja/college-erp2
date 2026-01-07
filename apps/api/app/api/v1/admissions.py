@@ -10,6 +10,7 @@ from app.models.admissions import (
     ApplicationDocument, DocumentType, DocumentStatus, ApplicationActivityLog,
     ActivityType, FeeMode
 )
+from app.models.academic.batch import AcademicBatch, ProgramYear, BatchSemester
 from app.schemas.admissions import (
     ApplicationCreate, ApplicationUpdate, ApplicationRead,
     DocumentRead, DocumentUpload, DocumentVerify,
@@ -511,6 +512,44 @@ async def confirm_admission(
         session.add(user)
         session.flush()
 
+    # 1.1 Find Academic Batch and Structure
+    current_year_val = datetime.now().year
+    
+    # Simple logic: Admission is for current year batch
+    # TODO: Make this smarter based on academic calendar
+    batch = session.exec(
+        select(AcademicBatch)
+        .where(AcademicBatch.program_id == application.program_id)
+        .where(AcademicBatch.joining_year == current_year_val)
+    ).first()
+    
+    if not batch:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No academic batch found for Program {application.program_id} and Year {current_year_val}. Please create a batch first."
+        )
+        
+    # Get 1st Year (System derived)
+    program_year = session.exec(
+        select(ProgramYear)
+        .where(ProgramYear.batch_id == batch.id)
+        .where(ProgramYear.year_no == 1)
+    ).first()
+    
+    if not program_year:
+         raise HTTPException(status_code=500, detail="Batch structure incomplete: Missing 1st Year")
+
+    # Get 1st Semester
+    batch_semester = session.exec(
+        select(BatchSemester)
+        .where(BatchSemester.batch_id == batch.id)
+        .where(BatchSemester.year_no == 1)
+        .where(BatchSemester.semester_no == 1)
+    ).first()
+    
+    if not batch_semester:
+        raise HTTPException(status_code=500, detail="Batch structure incomplete: Missing Semester 1")
+
     # 2. Create Student profile
     admission_number = f"ADM-{datetime.now().year}-{str(application.id).zfill(4)}"
     student = Student(
@@ -520,7 +559,14 @@ async def confirm_admission(
         phone=application.phone,
         user_id=user.id,
         program_id=application.program_id,
-        gender=application.gender,
+        
+        # Strict Academic Hierarchy
+        batch_id=batch.id,
+        program_year_id=program_year.id,
+        batch_semester_id=batch_semester.id,
+        # Section and Practical Batch assigned later
+        
+        gender=application.gender if hasattr(Gender, application.gender) else Gender.MALE, # Safe fallback or parsing needed
         aadhaar_number=application.aadhaar_number,
         hostel_required=application.hostel_required,
         status=StudentStatus.ACTIVE

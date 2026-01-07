@@ -42,7 +42,7 @@ export interface Classroom {
 export interface ClassSchedule {
     id: number;
     academic_year_id: number;
-    semester_id: number;
+    batch_semester_id: number;
     section_id?: number;
     day_of_week: DayOfWeek;
     period_id: number;
@@ -82,7 +82,7 @@ export interface CreateTimeSlotDTO {
 
 export interface CreateScheduleDTO {
     academic_year_id: number;
-    semester_id: number;
+    batch_semester_id: number;
     section_id?: number;
     day_of_week: DayOfWeek;
     period_id: number;

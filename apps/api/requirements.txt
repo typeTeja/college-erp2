@@ -10,7 +10,7 @@ email-validator==2.2.0
 # Database & ORM
 sqlmodel==0.0.22
 alembic==1.14.0
-pymysql==1.1.1
+psycopg2-binary==2.9.9
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0

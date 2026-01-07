@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     
     # Database
     DATABASE_URL: str
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def fix_database_url(cls, v: str) -> str:
+        if v and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
     
     # Security
     SECRET_KEY: str = "default_secret_key_CHANGE_IN_PROD"

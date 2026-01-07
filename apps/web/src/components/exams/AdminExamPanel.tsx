@@ -8,17 +8,35 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { examService } from '@/utils/exam-service';
+import { getAcademicBatches, getBatchSemesters } from '@/utils/master-data-service';
 import { CreateExamDTO, ExamType } from '@/types/exam';
+import { toast } from "sonner";
 
 export function AdminExamPanel() {
     const queryClient = useQueryClient();
+
+    // Selection State
+    const [batchId, setBatchId] = useState<number | null>(null);
+
     const [newExam, setNewExam] = useState<Partial<CreateExamDTO>>({
         name: '',
-        academic_year: '2024-2025',
-        semester_id: 1,
+        academic_year: '2024-2025', // Should ideally come from active academic year
+        batch_semester_id: undefined,
         exam_type: ExamType.MID_TERM,
         start_date: '',
         end_date: '',
+    });
+
+    // Queries
+    const { data: batches } = useQuery({
+        queryKey: ["academic-batches", "active"],
+        queryFn: () => getAcademicBatches(undefined, true),
+    });
+
+    const { data: semesters } = useQuery({
+        queryKey: ["batch-semesters", batchId],
+        queryFn: () => getBatchSemesters(batchId!),
+        enabled: !!batchId,
     });
 
     const { data: exams, isLoading } = useQuery({
@@ -30,12 +48,24 @@ export function AdminExamPanel() {
         mutationFn: (data: CreateExamDTO) => examService.createExam(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['exams'] });
-            // Reset form or show success message
+            toast.success("Exam cycle created successfully");
+            setNewExam({
+                ...newExam,
+                name: '',
+                start_date: '',
+                end_date: ''
+            });
         },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.detail || "Failed to create exam");
+        }
     });
 
     const handleCreate = () => {
-        if (!newExam.name || !newExam.start_date || !newExam.end_date) return;
+        if (!newExam.name || !newExam.start_date || !newExam.end_date || !newExam.batch_semester_id) {
+            toast.error("Please fill all required fields including Batch Semester");
+            return;
+        }
         createExamMutation.mutate(newExam as CreateExamDTO);
     };
 
@@ -48,15 +78,50 @@ export function AdminExamPanel() {
             <Card>
                 <CardHeader>
                     <CardTitle>Create New Exam Cycle</CardTitle>
-                    <CardDescription>Define a new examination period</CardDescription>
+                    <CardDescription>Define a new examination period linked to a specific Batch Semester</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                        {/* Selection Controls */}
+                        <div className="space-y-2">
+                            <Label>Academic Batch</Label>
+                            <Select value={batchId?.toString()} onValueChange={(v) => { setBatchId(Number(v)); setNewExam({ ...newExam, batch_semester_id: undefined }); }}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Batch" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {batches?.map(b => (
+                                        <SelectItem key={b.id} value={b.id.toString()}>{b.name} ({b.code})</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Semester</Label>
+                            <Select
+                                value={newExam.batch_semester_id?.toString() || ""}
+                                onValueChange={(v) => setNewExam({ ...newExam, batch_semester_id: Number(v) })}
+                                disabled={!batchId}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Semester" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {semesters?.map(s => (
+                                        <SelectItem key={s.id} value={s.id.toString()}>
+                                            Sem {s.semester_no} ({s.semester_name})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                         <div className="space-y-2">
                             <Label>Exam Name</Label>
                             <Input
                                 placeholder="e.g. Fall Mid-Terms"
-                                value={newExam.name}
+                                value={newExam.name || ''}
                                 onChange={(e) => setNewExam({ ...newExam, name: e.target.value })}
                             />
                         </div>
@@ -80,7 +145,7 @@ export function AdminExamPanel() {
                             <Label>Start Date</Label>
                             <Input
                                 type="date"
-                                value={newExam.start_date}
+                                value={newExam.start_date || ''}
                                 onChange={(e) => setNewExam({ ...newExam, start_date: e.target.value })}
                             />
                         </div>
@@ -88,12 +153,12 @@ export function AdminExamPanel() {
                             <Label>End Date</Label>
                             <Input
                                 type="date"
-                                value={newExam.end_date}
+                                value={newExam.end_date || ''}
                                 onChange={(e) => setNewExam({ ...newExam, end_date: e.target.value })}
                             />
                         </div>
                     </div>
-                    <Button onClick={handleCreate} disabled={createExamMutation.isPending}>
+                    <Button onClick={handleCreate} disabled={createExamMutation.isPending || !newExam.batch_semester_id}>
                         {createExamMutation.isPending ? 'Creating...' : 'Create Exam'}
                     </Button>
                 </CardContent>

@@ -4,7 +4,8 @@ import React, { useState } from 'react'
 import {
     Settings, User, Shield, Building2, Globe,
     Bell, Lock, History, ExternalLink, Save,
-    CheckCircle2, AlertCircle, RefreshCcw
+    CheckCircle2, AlertCircle, RefreshCcw,
+    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building, GraduationCap, FileText
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,19 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { InstituteTab } from "./InstituteTab";
+import {
+    AcademicYearTab,
+    AcademicBatchTab,
+    ProgramsTab,
+    FeeHeadTab,
+    BoardTab,
+    ReservationCategoryTab,
+    LeadSourceTab,
+    DesignationTab,
+    PlacementCompanyTab
+} from "./MasterDataTabs";
+import { AcademicStructureTab } from "./AcademicStructureTab";
+import { RegulationsTab } from "./RegulationsTab";
 import { useAuthStore } from "@/store/use-auth-store"
 import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
@@ -65,19 +79,98 @@ export default function SettingsPage() {
                         {(isAdmin || isSuperAdmin) && (
                             <>
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                    Management
+                                    Institution Setup
                                 </div>
                                 <SettingNavItem
                                     icon={<Building2 size={18} />}
-                                    label="Institutional"
+                                    label="College Details"
                                     active={activeTab === 'institute'}
                                     onClick={() => setActiveTab('institute')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Academic Setup
+                                </div>
+                                <SettingNavItem
+                                    icon={<BookOpen size={18} />}
+                                    label="Programs/Courses"
+                                    active={activeTab === 'programs'}
+                                    onClick={() => setActiveTab('programs')}
+                                />
+                                <SettingNavItem
+                                    icon={<Calendar size={18} />}
+                                    label="Academic Years"
+                                    active={activeTab === 'academic-years'}
+                                    onClick={() => setActiveTab('academic-years')}
+                                />
+                                <SettingNavItem
+                                    icon={<FileText size={18} />}
+                                    label="Regulations"
+                                    active={activeTab === 'regulations'}
+                                    onClick={() => setActiveTab('regulations')}
+                                />
+                                <SettingNavItem
+                                    icon={<GraduationCap size={18} />}
+                                    label="Academic Batches"
+                                    active={activeTab === 'academic-batches'}
+                                    onClick={() => setActiveTab('academic-batches')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Fee Configuration
+                                </div>
+                                <SettingNavItem
+                                    icon={<DollarSign size={18} />}
+                                    label="Fee Heads"
+                                    active={activeTab === 'fee-heads'}
+                                    onClick={() => setActiveTab('fee-heads')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Admission Setup
+                                </div>
+                                <SettingNavItem
+                                    icon={<BookOpen size={18} />}
+                                    label="Boards/Universities"
+                                    active={activeTab === 'boards'}
+                                    onClick={() => setActiveTab('boards')}
+                                />
+                                <SettingNavItem
+                                    icon={<Award size={18} />}
+                                    label="Reservation Categories"
+                                    active={activeTab === 'reservations'}
+                                    onClick={() => setActiveTab('reservations')}
+                                />
+                                <SettingNavItem
+                                    icon={<Users size={18} />}
+                                    label="Lead Sources"
+                                    active={activeTab === 'lead-sources'}
+                                    onClick={() => setActiveTab('lead-sources')}
+                                />
+
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    Infrastructure
+                                </div>
+                                <SettingNavItem
+                                    icon={<Briefcase size={18} />}
+                                    label="Designations"
+                                    active={activeTab === 'designations'}
+                                    onClick={() => setActiveTab('designations')}
+                                />
+                                <SettingNavItem
+                                    icon={<Building size={18} />}
+                                    label="Companies/Hotels"
+                                    active={activeTab === 'companies'}
+                                    onClick={() => setActiveTab('companies')}
                                 />
                             </>
                         )}
 
                         {isSuperAdmin && (
                             <>
+                                <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    System
+                                </div>
                                 <SettingNavItem
                                     icon={<Globe size={18} />}
                                     label="Integrations"
@@ -101,6 +194,16 @@ export default function SettingsPage() {
                     {activeTab === 'security' && <SecurityTab />}
                     {activeTab === 'notifications' && <NotificationsTab user={user} setUser={setUser} />}
                     {activeTab === 'institute' && <InstituteTab isAdmin={isAdmin} />}
+                    {activeTab === 'programs' && <ProgramsTab />}
+                    {activeTab === 'academic-years' && <AcademicYearTab />}
+                    {activeTab === 'regulations' && <RegulationsTab />}
+                    {activeTab === 'academic-batches' && <AcademicBatchTab />}
+                    {activeTab === 'fee-heads' && <FeeHeadTab />}
+                    {activeTab === 'boards' && <BoardTab />}
+                    {activeTab === 'reservations' && <ReservationCategoryTab />}
+                    {activeTab === 'lead-sources' && <LeadSourceTab />}
+                    {activeTab === 'designations' && <DesignationTab />}
+                    {activeTab === 'companies' && <PlacementCompanyTab />}
                     {activeTab === 'integrations' && <IntegrationsTab isSuperAdmin={isSuperAdmin} />}
                     {activeTab === 'logs' && <AuditLogsTab />}
                 </main>

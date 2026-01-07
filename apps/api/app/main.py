@@ -5,7 +5,7 @@ from app.config.settings import settings
 from app.api.v1.router import api_router
 from app.api.v1.roles import router as roles_router
 from app.core.rbac import seed_permissions
-from app.db.session import engine
+from app.db.session import engine, init_db
 from sqlmodel import Session
 
 app = FastAPI(
@@ -15,6 +15,8 @@ app = FastAPI(
 
 @app.on_event("startup")
 def on_startup():
+    # Initialize database tables first
+    init_db()
     with Session(engine) as session:
         seed_permissions(session)
 

@@ -1,9 +1,12 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute, files
+from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute, files, master_data, regulations, batches, student_promotion
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
+api_router.include_router(regulations.router, prefix="/regulations", tags=["regulations"])
+api_router.include_router(batches.router, prefix="/batches", tags=["batches"])
+api_router.include_router(student_promotion.router, prefix="/academic", tags=["student-promotion"])  # NEW
 api_router.include_router(odc.router, prefix="/odc", tags=["odc"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 api_router.include_router(admissions.router, prefix="/admissions", tags=["admissions"])
@@ -25,3 +28,4 @@ api_router.include_router(communication.router, prefix="/communication", tags=["
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
 api_router.include_router(institute.router, prefix="/institute", tags=["institute"])
+api_router.include_router(master_data.router, prefix="/master", tags=["master-data"])

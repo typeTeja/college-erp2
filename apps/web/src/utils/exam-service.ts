@@ -7,8 +7,8 @@ import {
 
 export const examService = {
     // --- Exam Management ---
-    getExams: async (semesterId?: number) => {
-        const params = semesterId ? { semester_id: semesterId } : {};
+    getExams: async (batchSemesterId?: number) => {
+        const params = batchSemesterId ? { batch_semester_id: batchSemesterId } : {};
         const response = await api.get<Exam[]>("/exams", { params });
         return response.data;
     },

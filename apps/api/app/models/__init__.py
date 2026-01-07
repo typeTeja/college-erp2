@@ -8,8 +8,8 @@ from .user_role import UserRole
 from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
-from .program_year import ProgramYear
-from .semester import Semester
+from .academic.batch import AcademicBatch
+# Legacy models removed: LegacyProgramYear, Semester
 from .subject import Subject
 from .student import Student
 from .faculty import Faculty
@@ -42,6 +42,29 @@ from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
 from .inventory import Asset, AssetAllocation, AssetMaintenance, AssetAudit, UniformAllocation
 from .communication import Circular, Notification, NotificationLog
 from .settings import SystemSetting, AuditLog
+from .institute import InstituteInfo
+from .master_data import (
+    AcademicYear,
+    # LegacyAcademicBatch removed
+    Section,
+    PracticalBatch,
+    SubjectConfig,
+    FeeHead,
+    InstallmentPlan,
+    ScholarshipSlab,
+    Board,
+    PreviousQualification,
+    StudyGroup,
+    ReservationCategory,
+    LeadSource,
+    Designation,
+    MasterClassroom,
+    PlacementCompany,
+    EmailTemplate,
+    SMSTemplate,
+)
+from .file_metadata import FileMetadata
+from .import_log import ImportLog
 
 __all__ = [
     "User",
@@ -49,8 +72,8 @@ __all__ = [
     "UserRole",
     "Department",
     "Program",
-    "ProgramYear",
-    "Semester",
+    # LegacyProgramYear removed
+    # Semester removed
     "Subject",
     "Student",
     "Parent",
@@ -107,4 +130,26 @@ __all__ = [
     "NotificationLog",
     "SystemSetting",
     "AuditLog",
+    "InstituteInfo",
+    "AcademicYear",
+    "AcademicBatch",
+    # LegacyAcademicBatch removed
+    "Section",
+    "PracticalBatch",
+    "SubjectConfig",
+    "FeeHead",
+    "InstallmentPlan",
+    "ScholarshipSlab",
+    "Board",
+    "PreviousQualification",
+    "StudyGroup",
+    "ReservationCategory",
+    "LeadSource",
+    "Designation",
+    "MasterClassroom",
+    "PlacementCompany",
+    "EmailTemplate",
+    "SMSTemplate",
+    "FileMetadata",
+    "ImportLog",
 ]
