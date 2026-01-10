@@ -12,6 +12,14 @@ export interface Regulation {
     min_internal_pass: number;
     min_external_pass: number;
     min_total_pass: number;
+    theory_max_marks: number;
+    theory_internal_max: number;
+    theory_external_max: number;
+    theory_pass_percentage: number;
+    practical_max_marks: number;
+    practical_internal_max: number;
+    practical_external_max: number;
+    practical_pass_percentage: number;
     created_at: string;
     updated_at: string;
 }
@@ -27,5 +35,15 @@ export interface RegulationCreate {
     min_internal_pass?: number;
     min_external_pass?: number;
     min_total_pass?: number;
+    // Theory Config
+    theory_max_marks?: number;
+    theory_internal_max?: number;
+    theory_external_max?: number;
+    theory_pass_percentage?: number;
+    // Practical Config
+    practical_max_marks?: number;
+    practical_internal_max?: number;
+    practical_external_max?: number;
+    practical_pass_percentage?: number;
     is_active?: boolean;
 }

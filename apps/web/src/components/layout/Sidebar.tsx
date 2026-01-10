@@ -26,12 +26,13 @@ interface NavItem {
 const roleNavItems: Record<string, NavItem[]> = {
     SUPER_ADMIN: [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
-        { icon: <Layers size={20} />, label: 'Programs', path: '/programs' },
+        // Programs is now in Settings
         { icon: <ClipboardList size={20} />, label: 'Admissions', path: '/admissions' },
         { icon: <Users size={20} />, label: 'Students', path: '/students' },
         { icon: <FileText size={20} />, label: 'Import Students', path: '/students/import', badge: 'New' },
         { icon: <GraduationCap size={20} />, label: 'Faculty', path: '/faculty' },
         { icon: <ClipboardList size={20} />, label: 'Academics', path: '/academics' },
+        { icon: <UserCheck size={20} />, label: 'Student Assignment', path: '/academics/assignments', badge: 'New' },
         { icon: <Calendar size={20} />, label: 'Attendance', path: '/attendance' },
         { icon: <DollarSign size={20} />, label: 'Fees Management', path: '/fees' },
         { icon: <FileText size={20} />, label: 'Examinations', path: '/exams' },
@@ -75,12 +76,13 @@ const roleNavItems: Record<string, NavItem[]> = {
     ],
     ADMIN: [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
-        { icon: <Layers size={20} />, label: 'Programs', path: '/programs' },
+        // Programs is now in Settings
         { icon: <ClipboardList size={20} />, label: 'Admissions', path: '/admissions' },
         { icon: <Users size={20} />, label: 'Students', path: '/students' },
         { icon: <FileText size={20} />, label: 'Import Students', path: '/students/import' },
         { icon: <GraduationCap size={20} />, label: 'Faculty', path: '/faculty' },
         { icon: <ClipboardList size={20} />, label: 'Academics', path: '/academics' },
+        { icon: <UserCheck size={20} />, label: 'Student Assignment', path: '/academics/assignments', badge: 'New' },
         { icon: <Calendar size={20} />, label: 'Attendance', path: '/attendance' },
         { icon: <DollarSign size={20} />, label: 'Fees', path: '/fees' },
         { icon: <FileText size={20} />, label: 'Examinations', path: '/exams' },

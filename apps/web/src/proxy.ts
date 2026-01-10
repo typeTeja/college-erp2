@@ -7,11 +7,12 @@ export function proxy(request: NextRequest) {
 
     // Define public routes (no authentication required)
     const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
+    const isPublicPage = pathname.startsWith('/apply');
 
     // If user is NOT authenticated
     if (!token) {
-        // Allow access to auth pages
-        if (isAuthPage) {
+        // Allow access to auth pages and public pages
+        if (isAuthPage || isPublicPage) {
             return NextResponse.next();
         }
         // Redirect all other pages to login

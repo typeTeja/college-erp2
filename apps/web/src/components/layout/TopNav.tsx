@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { communicationService } from '@/utils/communication-service';
 
 interface TopNavProps {
-    onMenuToggle: () => void;
+    onMenuToggle?: () => void;
 }
 
 const roleLabels: Record<string, string> = {
