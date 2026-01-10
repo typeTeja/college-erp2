@@ -9,10 +9,13 @@ CRITICAL WORKFLOW:
 5. Lock regulation
 """
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlmodel import Session, select, func
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
+
+from app.utils.audit import log_create, log_delete
+from app.utils.academic_validation import AcademicValidationError
 
 from app.api import deps
 from app.models.user import User
@@ -33,6 +36,10 @@ from app.schemas.academic.batch import (
     BatchSemesterRead,
     BatchSubjectRead
 )
+from app.schemas.bulk_setup import BulkBatchSetupRequest, BulkBatchSetupResponse
+from app.schemas.batch_cloning import BatchCloneRequest, BatchCloneResponse
+from app.services.bulk_setup_service import BulkBatchSetupService
+from app.services.batch_cloning_service import BatchCloningService
 
 router = APIRouter()
 
@@ -246,6 +253,22 @@ def create_batch(
         session.commit()
         session.refresh(batch)
         
+        # Log batch creation
+        log_create(
+            session=session,
+            table_name="academic_batch",
+            record_id=batch.id,
+            new_values={
+                "batch_code": batch.batch_code,
+                "batch_name": batch.batch_name,
+                "program_id": batch.program_id,
+                "regulation_id": batch.regulation_id,
+                "joining_year": batch.joining_year
+            },
+            user_id=current_user.id,
+            request=None
+        )
+        
         return batch
         
     except SQLAlchemyError as e:
@@ -319,12 +342,69 @@ def delete_batch(
         raise HTTPException(status_code=404, detail="Batch not found")
     
     # CRITICAL: Check if students are admitted
-    # TODO: Add student count check
+    if batch.total_students and batch.total_students > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete batch with {batch.total_students} admitted students. Remove students first."
+        )
+    
+    # Store batch info for audit log
+    batch_info = {
+        "batch_code": batch.batch_code,
+        "batch_name": batch.batch_name,
+        "program_id": batch.program_id,
+        "total_students": batch.total_students
+    }
     
     session.delete(batch)
     session.commit()
     
-    return {"status": "success", "message": "Batch deleted"}
+    # Log deletion
+    log_delete(
+        session=session,
+        table_name="academic_batch",
+        record_id=id,
+                old_values=batch_info,
+        user_id=current_user.id,
+        request=None
+    )
+    
+    return {"message": "Batch deleted successfully"}
+
+
+@router.post("/{batch_id}/clone", response_model=BatchCloneResponse)
+def clone_batch(
+    *,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_active_superuser),
+    request: Request,
+    batch_id: int,
+    data: BatchCloneRequest
+):
+    """
+    Clone an existing batch structure for a new academic year
+    
+    Clones:
+    - Program years
+    - Semesters
+    - Sections (with capacity adjustments)
+    - Labs (with capacity adjustments)
+    - Optionally: Faculty assignments
+    
+    Does NOT clone:
+    - Students
+    - Attendance records
+    - Grades
+    """
+    result = BatchCloningService.clone_batch(
+        session=session,
+        source_batch_id=batch_id,
+        request=data,
+        user_id=current_user.id,
+        http_request=request
+    )
+    
+    return result
 
 
 # ============================================================================
@@ -399,3 +479,88 @@ def list_batch_subjects(
     stmt = stmt.order_by(BatchSubject.semester_no, BatchSubject.subject_code)
     
     return session.exec(stmt).all()
+
+
+# ============================================================================
+# Bulk Batch Setup (Feature 1: One-Click Registration)
+# ============================================================================
+
+@router.post("/bulk-setup", response_model=dict, tags=["Bulk Setup"])
+def bulk_batch_setup(
+    request_data: dict,
+    request: Request,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    🚀 ONE-CLICK BATCH SETUP
+    
+    Creates entire academic structure in one operation:
+    - Academic Batch
+    - Program Years (1st, 2nd, 3rd, etc.)
+    - Batch Semesters (from regulation)
+    - Sections (A, B, C, etc.)
+    - Practical Batches / Labs (P1, P2, P3, etc.)
+    
+    Example:
+    ```json
+    {
+        "program_id": 1,
+        "joining_year": 2024,
+        "regulation_id": 1,
+        "sections_per_semester": 2,
+        "section_capacity": 60,
+        "labs_per_section": 3,
+        "lab_capacity": 20
+    }
+    ```
+    
+    This will create:
+    - 1 Batch (2024-2028)
+    - 4 Program Years
+    - 8 Semesters
+    - 16 Sections (2 per semester)
+    - 48 Labs (3 per section)
+    """
+    check_admin(current_user)
+    
+    # Import here to avoid circular dependency
+    from app.schemas.bulk_setup import BulkBatchSetupRequest
+    from app.services.bulk_setup_service import BulkBatchSetupService
+    from app.utils.audit import log_create
+    
+    # Validate and parse request
+    try:
+        bulk_request = BulkBatchSetupRequest(**request_data)
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid request data: {str(e)}"
+        )
+    
+    # Execute bulk setup
+    result = BulkBatchSetupService.create_bulk_batch(
+        session=session,
+        request=bulk_request,
+        user_id=current_user.id
+    )
+    
+    # Log audit trail
+    log_create(
+        session=session,
+        table_name="academic_batch",
+        record_id=result.batch_id,
+        new_values={
+            "batch_code": result.batch_code,
+            "batch_name": result.batch_name,
+            "years_created": result.years_created,
+            "semesters_created": result.semesters_created,
+            "sections_created": result.sections_created,
+            "labs_created": result.labs_created,
+            "bulk_setup": True
+        },
+        user=current_user,
+        request=request
+    )
+    
+    return result.dict()

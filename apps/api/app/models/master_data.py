@@ -51,6 +51,9 @@ class Section(SQLModel, table=True):
     
     batch_id: Optional[int] = Field(default=None, foreign_key="academic_batches.id", index=True)
     
+    # Faculty assignment (class teacher/coordinator)
+    faculty_id: Optional[int] = Field(default=None, foreign_key="faculty.id", index=True)
+    
     max_strength: int = Field(default=40)
     current_strength: int = Field(default=0)
     

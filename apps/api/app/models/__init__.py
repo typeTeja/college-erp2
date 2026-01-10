@@ -41,7 +41,8 @@ from .hostel import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComp
 from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
 from .inventory import Asset, AssetAllocation, AssetMaintenance, AssetAudit, UniformAllocation
 from .communication import Circular, Notification, NotificationLog
-from .settings import SystemSetting, AuditLog
+from .settings import SystemSetting, AuditLog as SettingsAuditLog
+from .audit_log import AuditLog
 from .institute import InstituteInfo
 from .master_data import (
     AcademicYear,
@@ -129,6 +130,7 @@ __all__ = [
     "Notification",
     "NotificationLog",
     "SystemSetting",
+    "SettingsAuditLog",
     "AuditLog",
     "InstituteInfo",
     "AcademicYear",

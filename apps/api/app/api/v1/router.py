@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute, files, master_data, regulations, batches, student_promotion
+from app.api.v1 import auth, odc, dashboard, admissions, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute, files, master_data, regulations, batches, student_promotion, audit, academic_dashboard, sections, student_assignment
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -28,4 +28,8 @@ api_router.include_router(communication.router, prefix="/communication", tags=["
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
 api_router.include_router(institute.router, prefix="/institute", tags=["institute"])
+api_router.include_router(audit.router, prefix="/audit-logs", tags=["audit"])
+api_router.include_router(academic_dashboard.router, prefix="/academic-setup/dashboard", tags=["academic-dashboard"])
+api_router.include_router(sections.router, prefix="/sections", tags=["sections"])
+api_router.include_router(student_assignment.router, prefix="/assignments", tags=["student-assignment"])
 api_router.include_router(master_data.router, prefix="/master", tags=["master-data"])
