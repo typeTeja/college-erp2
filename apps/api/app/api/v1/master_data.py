@@ -6,6 +6,9 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
+from app.utils.audit import log_create, log_update, log_delete
+from app.utils.academic_validation import validate_batch_deletion, validate_capacity_change
+
 from app.api import deps
 from app.models.user import User
 from app.models.master_data import (
@@ -1312,6 +1315,17 @@ def create_practical_batch(
     session.add(batch)
     session.commit()
     session.refresh(batch)
+    
+    # Log creation
+    log_create(
+        session=session,
+        table_name="practical_batch",
+        record_id=batch.id,
+        new_values={"name": batch.name, "code": batch.code, "max_strength": batch.max_strength},
+        user_id=current_user.id,
+        request=None
+    )
+    
     return batch
 
 @router.patch("/practical-batches/{id}", response_model=PracticalBatchRead, tags=["Academic Setup"])
@@ -1328,12 +1342,32 @@ def update_practical_batch(
     if not batch:
         raise HTTPException(status_code=404, detail="Practical batch not found")
     
-    for key, value in data.model_dump(exclude_unset=True).items():
+    # Store old values for audit
+    old_values = {"name": batch.name, "code": batch.code, "max_strength": batch.max_strength}
+    
+    # Validate capacity change
+    update_data = data.model_dump(exclude_unset=True)
+    if "max_strength" in update_data:
+        validate_capacity_change(batch.current_strength or 0, update_data["max_strength"])
+    
+    for key, value in update_data.items():
         setattr(batch, key, value)
     
     session.add(batch)
     session.commit()
     session.refresh(batch)
+    
+    # Log update
+    log_update(
+        session=session,
+        table_name="practical_batch",
+        record_id=id,
+        old_values=old_values,
+        new_values={"name": batch.name, "code": batch.code, "max_strength": batch.max_strength},
+        user_id=current_user.id,
+        request=None
+    )
+    
     return batch
 
 @router.delete("/practical-batches/{id}", tags=["Academic Setup"])
@@ -1349,6 +1383,29 @@ def delete_practical_batch(
     if not batch:
         raise HTTPException(status_code=404, detail="Practical batch not found")
     
+    # Validate deletion - check if students are enrolled
+    validate_batch_deletion(batch.current_strength or 0)
+    
+    # Store batch info for audit log
+    batch_info = {
+        "name": batch.name,
+        "code": batch.code,
+        "max_strength": batch.max_strength,
+        "current_strength": batch.current_strength
+    }
+    
     session.delete(batch)
     session.commit()
+    
+    # Log deletion
+    log_delete(
+        session=session,
+        table_name="practical_batch",
+        record_id=id,
+        old_values=batch_info,
+        user_id=current_user.id,
+        request=None
+    )
+    
     return {"status": "success", "message": "Practical batch deleted"}
+

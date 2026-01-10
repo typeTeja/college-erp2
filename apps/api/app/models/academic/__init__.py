@@ -20,6 +20,10 @@ from .student_history import (
     StudentRegulationMigration,
     PromotionEligibility
 )
+from .assignment import (
+    StudentSectionAssignment,
+    StudentLabAssignment
+)
 
 __all__ = [
     "Regulation",
@@ -33,5 +37,7 @@ __all__ = [
     "StudentSemesterHistory",
     "StudentPromotionLog",
     "StudentRegulationMigration",
-    "PromotionEligibility"
+    "PromotionEligibility",
+    "StudentSectionAssignment",
+    "StudentLabAssignment",
 ]
