@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     Settings, User, Shield, Building2, Globe,
     Bell, Lock, History, ExternalLink, Save,
@@ -27,6 +27,7 @@ import {
 } from "./MasterDataTabs";
 import { AcademicStructureTab } from "./AcademicStructureTab";
 import { RegulationsTab } from "./RegulationsTab";
+import AcademicDashboardTab from "./AcademicDashboardTab";
 import { useAuthStore } from "@/store/use-auth-store"
 import { settingsService } from "@/utils/settings-service"
 import { toast } from "sonner"
@@ -34,6 +35,15 @@ import { toast } from "sonner"
 export default function SettingsPage() {
     const { user, hasHydrated, setUser } = useAuthStore()
     const [activeTab, setActiveTab] = useState("profile")
+
+    // Read tab from URL params
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab');
+        if (tabParam) {
+            setActiveTab(tabParam);
+        }
+    }, []);
 
     if (!hasHydrated) return <div className="p-6 bg-slate-50 animate-pulse h-screen rounded-xl" />;
 
@@ -114,6 +124,12 @@ export default function SettingsPage() {
                                     label="Academic Batches"
                                     active={activeTab === 'academic-batches'}
                                     onClick={() => setActiveTab('academic-batches')}
+                                />
+                                <SettingNavItem
+                                    icon={<BookOpen size={18} />}
+                                    label="Academic Dashboard"
+                                    active={activeTab === 'academic-dashboard'}
+                                    onClick={() => setActiveTab('academic-dashboard')}
                                 />
 
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
@@ -198,6 +214,7 @@ export default function SettingsPage() {
                     {activeTab === 'academic-years' && <AcademicYearTab />}
                     {activeTab === 'regulations' && <RegulationsTab />}
                     {activeTab === 'academic-batches' && <AcademicBatchTab />}
+                    {activeTab === 'academic-dashboard' && <AcademicDashboardTab />}
                     {activeTab === 'fee-heads' && <FeeHeadTab />}
                     {activeTab === 'boards' && <BoardTab />}
                     {activeTab === 'reservations' && <ReservationCategoryTab />}
