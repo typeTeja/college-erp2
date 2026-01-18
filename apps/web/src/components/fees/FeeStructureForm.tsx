@@ -12,7 +12,7 @@ import type { FeeStructureCreate, FeeComponent, FeeInstallment, FeeCategory } fr
 import { Plus, Trash2, Save, Settings as SettingsIcon, Award } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { api } from '@/lib/proxy';
+import { api } from '@/utils/api';
 
 interface FeeStructureFormProps {
     onSuccess?: () => void;
@@ -48,7 +48,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                 const [heads, slabs, programsData] = await Promise.all([
                     getFeeHeads(true),
                     getScholarshipSlabs(true),
-                    api.get('/academic/programs')
+                    api.get('/programs/')
                 ]);
                 setFeeHeads(heads);
                 setScholarshipSlabs(slabs);
