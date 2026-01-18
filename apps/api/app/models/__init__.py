@@ -35,6 +35,7 @@ from .fee import (
     FeeFine,
 )
 from .attendance import AttendanceSession, AttendanceRecord
+from .academic.entrance_exam import EntranceTestConfig, EntranceExamResult
 from .admissions import Application, ApplicationPayment, EntranceExamScore, ApplicationDocument, ApplicationActivityLog
 from .library import Book, BookIssue, LibraryFine
 from .hostel import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComplaint

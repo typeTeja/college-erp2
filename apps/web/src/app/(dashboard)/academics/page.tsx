@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { BookOpen, CheckCircle2, Circle, Plus, FileText, Search, Filter, Trash2, Download } from 'lucide-react'
-import { lessonService } from '@/utils/lesson-service'
-import { facultyService } from '@/utils/faculty-service'
+import { BookOpen, CheckCircle2, Circle, Plus, FileText, Search, Filter, Trash2, Download, Clock } from 'lucide-react'
+import { useLessonPlans, useQuestionBank, useMarkTopicCompleted, useAddQuestion } from '@/hooks/use-academics'
+import { useMyProfile } from '@/hooks/use-faculty'
 import { TopicStatus, DifficultyLevel, QuestionType } from '@/types/lesson-plan'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -17,16 +17,16 @@ export default function AcademicsPage() {
     const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null)
     const [activeTab, setActiveTab] = useState<'syllabus' | 'questions'>('syllabus')
 
-    const { data: facultyProfile } = facultyService.useMyProfile()
-    const { data: lessonPlans } = lessonService.useLessonPlans(selectedSubjectId || 0)
-    const { data: questionBank } = lessonService.useQuestionBank(selectedSubjectId || 0)
+    const { data: facultyProfile } = useMyProfile()
+    const { data: lessonPlans } = useLessonPlans(selectedSubjectId || 0)
+    const { data: questionBank } = useQuestionBank(selectedSubjectId || 0)
 
-    const markCompletedMutation = lessonService.useMarkTopicCompleted()
-    const addQuestionMutation = lessonService.useAddQuestion()
+    const markCompletedMutation = useMarkTopicCompleted()
+    // const addQuestionMutation = useAddQuestion() // Uncomment when needed
 
     // Derived data
     const activePlan = lessonPlans?.[0]
-    const completedTopics = activePlan?.topics.filter(t => t.status === TopicStatus.COMPLETED).length || 0
+    const completedTopics = activePlan?.topics.filter((t: any) => t.status === TopicStatus.COMPLETED).length || 0
     const totalTopics = activePlan?.topics.length || 0
     const progress = totalTopics > 0 ? (completedTopics / totalTopics) * 100 : 0
 
@@ -45,7 +45,7 @@ export default function AcademicsPage() {
                         value={selectedSubjectId || ''}
                     >
                         <option value="" disabled>Select Subject</option>
-                        {facultyProfile?.subjects?.map(s => (
+                        {facultyProfile?.subjects?.map((s: any) => (
                             <option key={s.id} value={s.id}>{s.code} - {s.name}</option>
                         ))}
                         {!facultyProfile?.subjects?.length && <option disabled>No subjects assigned</option>}
@@ -142,7 +142,7 @@ export default function AcademicsPage() {
                                 </Card>
                             ) : (
                                 <div className="grid gap-4">
-                                    {activePlan.topics.sort((a, b) => a.unit_number - b.unit_number).map((topic) => (
+                                    {activePlan.topics.sort((a: any, b: any) => a.unit_number - b.unit_number).map((topic: any) => (
                                         <Card key={topic.id} className={`transition-all ${topic.status === TopicStatus.COMPLETED ? 'bg-slate-50 opacity-75' : 'hover:shadow-md'}`}>
                                             <CardContent className="p-4 flex items-center gap-4">
                                                 <div className={`p-2 rounded-full ${topic.status === TopicStatus.COMPLETED ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}`}>
@@ -206,7 +206,7 @@ export default function AcademicsPage() {
                                             <p className="text-sm">No questions added yet.</p>
                                         </div>
                                     ) : (
-                                        questionBank?.questions.map((q) => (
+                                        questionBank?.questions.map((q: any) => (
                                             <div key={q.id} className="p-4 hover:bg-slate-50 transition-colors flex gap-4">
                                                 <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
                                                     <Badge variant="outline" className="text-[10px] uppercase font-bold text-slate-500">{q.type}</Badge>
@@ -242,22 +242,4 @@ export default function AcademicsPage() {
     )
 }
 
-function Clock(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-        </svg>
-    )
-}
+

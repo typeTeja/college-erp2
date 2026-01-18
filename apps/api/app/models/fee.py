@@ -32,16 +32,36 @@ class PaymentStatus(str, Enum):
     REFUNDED = "REFUNDED"
 
 class FeeStructure(SQLModel, table=True):
-    """Fee structure for a program and academic year"""
+    """Fee structure for a program and academic year with scholarship slab support"""
     __tablename__ = "fee_structure"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     program_id: int = Field(foreign_key="program.id", index=True)
     academic_year: str = Field(index=True)  # e.g., "2024-2025"
     year: int  # Which year of the program (1, 2, 3, 4)
-    category: FeeCategory = Field(default=FeeCategory.GENERAL)
-    total_amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
     
+    # Scholarship slab (A, B, C, D, or GENERAL)
+    slab: str = Field(default="GENERAL", max_length=20)  # A, B, C, D, GENERAL
+    
+    # Fee heads (Annual amounts)
+    tuition_fee: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    library_fee: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    lab_fee: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    uniform_fee: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    caution_deposit: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    digital_fee: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    miscellaneous_fee: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    
+    # Total and installments
+    total_annual_fee: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    number_of_installments: int = Field(default=4)
+    installment_amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    
+    # Legacy field for backward compatibility
+    category: FeeCategory = Field(default=FeeCategory.GENERAL)
+    total_amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))  # Same as total_annual_fee
+    
+    is_active: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -57,6 +77,7 @@ class FeeComponent(SQLModel, table=True):
     
     id: Optional[int] = Field(default=None, primary_key=True)
     fee_structure_id: int = Field(foreign_key="fee_structure.id", index=True)
+    fee_head_id: Optional[int] = Field(default=None, foreign_key="fee_head.id", index=True)  # Link to master fee head
     name: str  # e.g., "Tuition Fee", "Library Fee"
     amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
     is_refundable: bool = Field(default=False)
@@ -65,7 +86,7 @@ class FeeComponent(SQLModel, table=True):
     fee_structure: "FeeStructure" = Relationship(back_populates="components")
 
 class FeeInstallment(SQLModel, table=True):
-    """Installment schedule for a fee structure"""
+    """Installment schedule for a fee structure (template)"""
     __tablename__ = "fee_installment"
     
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -73,12 +94,13 @@ class FeeInstallment(SQLModel, table=True):
     installment_number: int  # 1, 2, 3, etc.
     amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
     due_date: date
+    description: Optional[str] = None  # e.g., "First Installment"
     
     # Relationships
     fee_structure: "FeeStructure" = Relationship(back_populates="installments")
 
 class StudentFee(SQLModel, table=True):
-    """Links a student to their fee structure for an academic year"""
+    """Links a student to their fee structure for an academic year with detailed tracking"""
     __tablename__ = "student_fee"
     
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -86,10 +108,30 @@ class StudentFee(SQLModel, table=True):
     fee_structure_id: int = Field(foreign_key="fee_structure.id", index=True)
     academic_year: str = Field(index=True)
     
-    total_fee: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    # Fee amounts
+    total_annual_fee: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
     concession_amount: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    net_annual_fee: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))  # After concession
+    
+    # Installment configuration
+    number_of_installments: int = Field(default=4)
+    installment_amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    
+    # Fee heads breakdown (JSON for head-wise clearance)
+    # Example: {"tuition": {"amount": 50000, "cleared": 25000, "pending": 25000}}
+    fee_heads: Optional[str] = None  # JSON
+    
+    # Old dues from previous years
+    old_dues: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    
+    # Totals
+    total_paid: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    total_pending: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    
+    # Legacy fields for backward compatibility
+    total_fee: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))  # Same as total_annual_fee
     fine_amount: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
-    paid_amount: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    paid_amount: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))  # Same as total_paid
     
     is_blocked: bool = Field(default=False)  # Block exam/promotion if dues pending
     
@@ -102,6 +144,7 @@ class StudentFee(SQLModel, table=True):
     payments: List["FeePayment"] = Relationship(back_populates="student_fee", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     concessions: List["FeeConcession"] = Relationship(back_populates="student_fee", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
     fines: List["FeeFine"] = Relationship(back_populates="student_fee", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    student_installments: List["StudentFeeInstallment"] = Relationship(back_populates="student_fee", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
 class FeePayment(SQLModel, table=True):
     """Individual payment transactions"""
@@ -169,3 +212,43 @@ class FeeFine(SQLModel, table=True):
     
     # Relationships
     student_fee: "StudentFee" = Relationship(back_populates="fines")
+
+class StudentFeeInstallment(SQLModel, table=True):
+    """Individual student installments with fine tracking"""
+    __tablename__ = "student_fee_installment"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    student_fee_id: int = Field(foreign_key="student_fee.id", index=True)
+    student_id: int = Field(foreign_key="student.id", index=True)
+    installment_number: int  # 1, 2, 3, 4
+    
+    # Amount details
+    amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    due_date: date
+    
+    # Additional fees for this installment
+    individual_fee_heads: Optional[str] = None  # JSON: [{"head": "Exam Fee", "amount": 500}]
+    bulk_fee_heads: Optional[str] = None  # JSON: [{"head": "Event Fee", "amount": 200}]
+    supply_exam_fee: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    old_dues_included: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    
+    # Total for this installment
+    total_amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    
+    # Payment tracking
+    paid_amount: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    payment_status: str = Field(default="pending")  # pending, partial, paid, overdue
+    payment_date: Optional[date] = None
+    
+    # Fine management
+    fine_amount: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
+    fine_waived: bool = Field(default=False)
+    fine_waived_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    fine_waived_date: Optional[datetime] = None
+    fine_waiver_reason: Optional[str] = None
+    
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    student_fee: "StudentFee" = Relationship(back_populates="student_installments")

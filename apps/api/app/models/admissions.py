@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from .program import Program
     from .student import Student
     from .user import User
+    from .academic.entrance_exam import EntranceExamResult
 
 class ApplicationStatus(str, Enum):
     PENDING_PAYMENT = "PENDING_PAYMENT"
@@ -86,6 +87,53 @@ class Application(SQLModel, table=True):
     applied_for_scholarship: bool = Field(default=False)
     hostel_required: bool = Field(default=False)
     
+    # Photo
+    photo_url: Optional[str] = None
+    
+    # Payment tracking
+    application_fee: float = Field(default=500.0)
+    payment_status: str = Field(default="pending")  # pending, paid, failed
+    payment_id: Optional[str] = None
+    payment_date: Optional[datetime] = None
+    
+    # Hall Ticket
+    hall_ticket_number: Optional[str] = Field(default=None, unique=True, index=True)
+    hall_ticket_generated: bool = Field(default=False)
+    hall_ticket_generated_date: Optional[datetime] = None
+    hall_ticket_url: Optional[str] = None
+    
+    # Entrance Exam (link to EntranceExamResult)
+    entrance_marks: Optional[float] = None  # Denormalized for quick access
+    entrance_percentage: Optional[float] = None
+    
+    # Scholarship
+    scholarship_slab_id: Optional[int] = Field(default=None, foreign_key="scholarship_slab.id")
+    scholarship_amount: Optional[float] = None
+    scholarship_percentage: Optional[float] = None
+    
+    # Offer Letter
+    offer_letter_url: Optional[str] = None
+    offer_letter_generated: bool = Field(default=False)
+    offer_letter_generated_date: Optional[datetime] = None
+    
+    # Confirmation
+    first_installment_paid: bool = Field(default=False)
+    first_installment_amount: Optional[float] = None
+    first_installment_payment_id: Optional[str] = None
+    first_installment_payment_date: Optional[datetime] = None
+    
+    admission_number: Optional[str] = Field(default=None, unique=True, index=True)
+    admission_date: Optional[datetime] = None
+    
+    # Document tracking (JSON)
+    documents_submitted: Optional[str] = None  # JSON: {"10th": {"uploaded": true, "verified": false}}
+    affidavits_submitted: Optional[str] = None  # JSON: {"anti_ragging": {"uploaded": true}}
+    original_documents: Optional[str] = None  # JSON: [{"name": "10th Cert", "number": "123"}]
+    
+    documents_verified: bool = Field(default=False)
+    verified_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    verification_date: Optional[datetime] = None
+    
     # Payment Mode & Offline Payment Tracking
     fee_mode: FeeMode = Field(default=FeeMode.ONLINE)
     payment_proof_url: Optional[str] = None  # For offline payment proof
@@ -106,6 +154,7 @@ class Application(SQLModel, table=True):
     documents: List["ApplicationDocument"] = Relationship(back_populates="application")
     activity_logs: List["ApplicationActivityLog"] = Relationship(back_populates="application")
     entrance_exam_score: Optional["EntranceExamScore"] = Relationship(back_populates="application")
+    entrance_result: Optional["EntranceExamResult"] = Relationship(back_populates="admission")
 
 class ApplicationPayment(SQLModel, table=True):
     """Tracks application fee payments via Easebuzz or other gateways"""

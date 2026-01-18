@@ -2,6 +2,18 @@
 ## Run Backend Server ##
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
+## Build Backend Server ##
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+
 ## Run Frontend Server ##
 npm run dev
+
+## Build Frontend Server ##
+npm run build
+
+## Start Frontend Server ##
+npm run start
+
     

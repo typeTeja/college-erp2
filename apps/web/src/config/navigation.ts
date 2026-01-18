@@ -7,7 +7,7 @@ import {
     Building2, ClipboardList, Megaphone, Settings,
     BookOpen, Calendar, FileText, UserCheck, Briefcase,
     BedDouble, Library, Package, HeadphonesIcon,
-    FileCheck, Clock, Layers, BarChart3, Menu
+    FileCheck, Clock, Layers, BarChart3, Menu, Award
 } from 'lucide-react';
 import type { NavigationConfig } from '@/types/navigation';
 
@@ -124,6 +124,18 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                         path: '/fees',
                         icon: DollarSign,
                         shortcut: 'g f'
+                    },
+                    {
+                        id: 'fee-heads',
+                        label: 'Fee Heads',
+                        path: '/settings?tab=fee-heads',
+                        icon: FileText
+                    },
+                    {
+                        id: 'scholarship-slabs',
+                        label: 'Scholarship Slabs',
+                        path: '/settings?tab=scholarship-slabs',
+                        icon: Award
                     },
                     {
                         id: 'reports',

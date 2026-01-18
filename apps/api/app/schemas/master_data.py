@@ -231,7 +231,7 @@ class ScholarshipSlabBase(BaseModel):
     discount_type: str = "PERCENTAGE"
     discount_value: Decimal
     max_discount_amount: Optional[Decimal] = None
-    applicable_fee_heads: List[str] = []
+    applicable_fee_heads: List[int] = []  # Changed from List[str] to List[int]
     academic_year_id: Optional[int] = None
     program_id: Optional[int] = None
     is_active: bool = True
@@ -247,7 +247,7 @@ class ScholarshipSlabUpdate(BaseModel):
     discount_type: Optional[str] = None
     discount_value: Optional[Decimal] = None
     max_discount_amount: Optional[Decimal] = None
-    applicable_fee_heads: Optional[List[str]] = None
+    applicable_fee_heads: Optional[List[int]] = None  # Changed from List[str] to List[int]
     is_active: Optional[bool] = None
 
 class ScholarshipSlabRead(ScholarshipSlabBase):

@@ -5,19 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
     Package, Plus, Search, Filter, AlertTriangle,
     ArrowUpRight, ArrowDownRight, History, Settings,
     QrCode, UserPlus, Boxes
 } from 'lucide-react'
-import { inventoryService } from '@/utils/inventory-service'
+import { useAssets } from '@/hooks/use-inventory'
 import { AssetCategory, AllocationStatus } from '@/types/inventory'
 
 export default function InventoryPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedCategory, setSelectedCategory] = useState<string>('')
 
-    const { data: assets, isLoading } = inventoryService.useAssets({
+    const { data: assets, isLoading, error } = useAssets({
         category: selectedCategory || undefined,
         query: searchQuery || undefined
     })

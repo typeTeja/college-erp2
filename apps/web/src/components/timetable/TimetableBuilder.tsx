@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { timetableService } from "@/utils/timetable-service";
+import { useTimeSlots, useTimetableSchedule, useCreateTimetableEntry } from "@/hooks/use-timetable";
 import { getAcademicBatches, getBatchSemesters } from "@/utils/master-data-service";
 import { DayOfWeek, ClassSchedule, CreateScheduleDTO } from "@/types/timetable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,34 +46,12 @@ export function TimetableBuilder() {
         enabled: !!batchId,
     });
 
-    const { data: slots } = useQuery({
-        queryKey: ["time-slots"],
-        queryFn: timetableService.getSlots,
-    });
+    const { data: slots } = useTimeSlots();
 
-    const { data: schedule, isLoading: scheduleLoading } = useQuery({
-        queryKey: ["timetable", academicYearId, batchSemesterId, sectionId],
-        queryFn: () => timetableService.getSchedule(academicYearId, batchSemesterId!, sectionId),
-        enabled: !!slots && !!batchSemesterId,
-    });
+    const { data: schedule, isLoading: scheduleLoading } = useTimetableSchedule(academicYearId, batchSemesterId, sectionId);
 
     // Mutations
-    const createEntryMutation = useMutation({
-        mutationFn: timetableService.createScheduleEntry,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["timetable"] });
-            toast({ title: "Success", description: "Class scheduled successfully" });
-            setIsOpen(false);
-            resetForm();
-        },
-        onError: (error: any) => {
-            toast({
-                title: "Conflict Detected",
-                description: error.response?.data?.detail || "Failed to schedule class",
-                variant: "destructive"
-            });
-        }
-    });
+    const createEntryMutation = useCreateTimetableEntry();
 
     const handleCellClick = (day: DayOfWeek, periodId: number) => {
         if (!batchSemesterId) {
@@ -99,7 +77,20 @@ export function TimetableBuilder() {
             room_id: roomId ? parseInt(roomId) : undefined,
         };
 
-        createEntryMutation.mutate(payload);
+        createEntryMutation.mutate(payload, {
+            onSuccess: () => {
+                toast({ title: "Success", description: "Class scheduled successfully" });
+                setIsOpen(false);
+                resetForm();
+            },
+            onError: (error: any) => {
+                toast({
+                    title: "Conflict Detected",
+                    description: error.message || "Failed to schedule class",
+                    variant: "destructive"
+                });
+            }
+        });
     };
 
     const resetForm = () => {

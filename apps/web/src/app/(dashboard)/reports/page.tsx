@@ -9,13 +9,13 @@ import {
     BookOpen, DollarSign, Package, Calendar,
     ArrowUpRight, ArrowDownRight, Filter
 } from 'lucide-react'
-import { reportService } from '@/utils/report-service'
+import { useAcademicSyllabus, useAcademicAttendance, useFinancialFeeCollection, useInventoryStock } from '@/hooks/use-reports'
 
 export default function ReportsDashboard() {
-    const { data: academicSyllabus } = reportService.useAcademicSyllabus()
-    const { data: academicAttendance } = reportService.useAcademicAttendance()
-    const { data: financialFees } = reportService.useFinancialFeeCollection()
-    const { data: inventoryStock } = reportService.useInventoryStock()
+    const { data: academicSyllabus } = useAcademicSyllabus()
+    const { data: academicAttendance } = useAcademicAttendance()
+    const { data: financialFees } = useFinancialFeeCollection()
+    const { data: inventoryStock } = useInventoryStock()
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">

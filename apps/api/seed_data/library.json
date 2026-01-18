@@ -1,0 +1,36 @@
+{
+    "books": [
+        {
+            "title": "Theory of Cookery",
+            "author": "K. Arora",
+            "isbn": "978812000001",
+            "publisher": "Frank Bros",
+            "edition": "5th",
+            "copies": 10
+        },
+        {
+            "title": "Modern Cookery",
+            "author": "Thangam Philip",
+            "isbn": "978812000002",
+            "publisher": "Orient Blackswan",
+            "edition": "6th",
+            "copies": 15
+        },
+        {
+            "title": "Hotel Front Office Management",
+            "author": "James A. Bardi",
+            "isbn": "978812000003",
+            "publisher": "Wiley",
+            "edition": "5th",
+            "copies": 5
+        },
+        {
+            "title": "Food and Beverage Service",
+            "author": "R. Singaravelavan",
+            "isbn": "978812000004",
+            "publisher": "Oxford",
+            "edition": "1st",
+            "copies": 20
+        }
+    ]
+}

@@ -18,6 +18,10 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/hooks/use-toast'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { admissionSchema, AdmissionFormValues } from '@/schemas/admission-schema'
+// Removed missing form components imports
 
 interface AddOfflineApplicationDialogProps {
     open: boolean
@@ -29,70 +33,56 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
     const { data: programs } = programService.usePrograms()
     const quickApplyMutation = admissionsService.useQuickApply()
 
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        gender: '',
-        program_id: '',
-        state: '',
-        board: '',
-        group_of_study: '',
-        fee_mode: FeeMode.OFFLINE // Default to offline for walk-in applications
+    const form = useForm<AdmissionFormValues>({
+        resolver: zodResolver(admissionSchema),
+        defaultValues: {
+            student_name: "",
+            email: "",
+            phone: "",
+            gender: "MALE",
+            program_id: 0,
+            state: "",
+            board: "",
+            group_of_study: "",
+            fee_mode: "OFFLINE",
+            status: "PENDING",
+            documents_submitted: false,
+            fee_paid: false
+        }
     })
 
-    const resetForm = () => {
-        setFormData({
-            name: '',
-            email: '',
-            phone: '',
-            gender: '',
-            program_id: '',
-            state: '',
-            board: '',
-            group_of_study: '',
-            fee_mode: FeeMode.OFFLINE
+    const onSubmit = (data: AdmissionFormValues) => {
+        quickApplyMutation.mutate({
+            ...data,
+            name: data.student_name, // Map back to API expected format
+            program_id: Number(data.course_id)
+        }, {
+            onSuccess: (res: any) => {
+                toast({
+                    title: "Application Created!",
+                    description: `Application ${res.application_number} created successfully.`,
+                })
+                form.reset()
+                onOpenChange(false)
+            },
+            onError: (err: any) => {
+                toast({
+                    title: "Error",
+                    description: err.response?.data?.detail || "Failed to create application.",
+                    variant: "destructive"
+                })
+            }
         })
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        // Validation
-        if (!formData.name || !formData.email || !formData.phone || !formData.gender ||
-            !formData.program_id || !formData.state || !formData.board || !formData.group_of_study) {
-            toast({
-                title: "Validation Error",
-                description: "Please fill in all required fields",
-                variant: "destructive"
-            })
-            return
-        }
-
-        try {
-            const application = await quickApplyMutation.mutateAsync({
-                ...formData,
-                program_id: parseInt(formData.program_id)
-            })
-
-            toast({
-                title: "Application Created!",
-                description: `Application ${application.application_number} created successfully.`,
-            })
-
-            resetForm()
-            onOpenChange(false)
-        } catch (error: any) {
-            toast({
-                title: "Error",
-                description: error.response?.data?.detail || "Failed to create application. Please try again.",
-                variant: "destructive"
-            })
-        }
+    // Reset form when dialog closes
+    const handleOpenChange = (open: boolean) => {
+        if (!open) form.reset()
+        onOpenChange(open)
     }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Add Offline Application</DialogTitle>
@@ -101,18 +91,18 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Full Name *</Label>
+                            <Label htmlFor="student_name">Full Name *</Label>
                             <Input
-                                id="name"
+                                id="student_name"
                                 placeholder="John Doe"
-                                required
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                autoFocus
+                                {...form.register('student_name')}
                             />
+                            {form.formState.errors.student_name && (
+                                <p className="text-xs text-red-500">{form.formState.errors.student_name.message}</p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email">Email *</Label>
@@ -120,10 +110,11 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                                 id="email"
                                 type="email"
                                 placeholder="john@example.com"
-                                required
-                                value={formData.email}
-                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                {...form.register('email')}
                             />
+                            {form.formState.errors.email && (
+                                <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>
+                            )}
                         </div>
                     </div>
 
@@ -133,14 +124,18 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                             <Input
                                 id="phone"
                                 placeholder="9876543210"
-                                required
-                                value={formData.phone}
-                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                {...form.register('phone')}
                             />
+                            {form.formState.errors.phone && (
+                                <p className="text-xs text-red-500">{form.formState.errors.phone.message}</p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label>Gender *</Label>
-                            <Select onValueChange={v => setFormData({ ...formData, gender: v })} required>
+                            <Select
+                                onValueChange={(val) => form.setValue('gender', val as "MALE" | "FEMALE" | "OTHER")}
+                                defaultValue={form.getValues('gender')}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select gender" />
                                 </SelectTrigger>
@@ -150,12 +145,18 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                                     <SelectItem value="OTHER">Other</SelectItem>
                                 </SelectContent>
                             </Select>
+                            {form.formState.errors.gender && (
+                                <p className="text-xs text-red-500">{form.formState.errors.gender.message}</p>
+                            )}
                         </div>
                     </div>
 
                     <div className="space-y-2">
                         <Label>Program *</Label>
-                        <Select onValueChange={v => setFormData({ ...formData, program_id: v })} required>
+                        <Select
+                            onValueChange={(val) => form.setValue('course_id', Number(val))}
+                            defaultValue={form.getValues('course_id')?.toString() || undefined}
+                        >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a program" />
                             </SelectTrigger>
@@ -165,6 +166,9 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                                 ))}
                             </SelectContent>
                         </Select>
+                        {form.formState.errors.course_id && (
+                            <p className="text-xs text-red-500">{form.formState.errors.course_id.message}</p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -173,55 +177,54 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                             <Input
                                 id="state"
                                 placeholder="Karnataka"
-                                required
-                                value={formData.state}
-                                onChange={e => setFormData({ ...formData, state: e.target.value })}
+                                {...form.register('state')}
                             />
+                            {form.formState.errors.state && (
+                                <p className="text-xs text-red-500">{form.formState.errors.state.message}</p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="board">Board (10+2) *</Label>
                             <Input
                                 id="board"
                                 placeholder="CBSE / State Board"
-                                required
-                                value={formData.board}
-                                onChange={e => setFormData({ ...formData, board: e.target.value })}
+                                {...form.register('board')}
                             />
+                            {form.formState.errors.board && (
+                                <p className="text-xs text-red-500">{form.formState.errors.board.message}</p>
+                            )}
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="group">Group of Study *</Label>
+                        <Label htmlFor="group_of_study">Group of Study *</Label>
                         <Input
-                            id="group"
+                            id="group_of_study"
                             placeholder="MPC / BiPC / CEC"
-                            required
-                            value={formData.group_of_study}
-                            onChange={e => setFormData({ ...formData, group_of_study: e.target.value })}
+                            {...form.register('group_of_study')}
                         />
+                        {form.formState.errors.group_of_study && (
+                            <p className="text-xs text-red-500">{form.formState.errors.group_of_study.message}</p>
+                        )}
                     </div>
 
                     <div className="space-y-2">
                         <Label>Payment Mode *</Label>
                         <RadioGroup
-                            value={formData.fee_mode}
-                            onValueChange={(v) => setFormData({ ...formData, fee_mode: v as FeeMode })}
+                            onValueChange={(val) => form.setValue('fee_mode', val as "ONLINE" | "OFFLINE")}
+                            defaultValue={form.getValues('fee_mode')}
                         >
                             <div className="flex items-center space-x-2">
-                                <RadioGroupItem value={FeeMode.ONLINE} id="online" />
-                                <Label htmlFor="online" className="font-normal cursor-pointer">
-                                    Online Payment
-                                </Label>
+                                <RadioGroupItem value="ONLINE" id="online" />
+                                <Label htmlFor="online" className="font-normal cursor-pointer">Online Payment</Label>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <RadioGroupItem value={FeeMode.OFFLINE} id="offline" />
-                                <Label htmlFor="offline" className="font-normal cursor-pointer">
-                                    Offline Payment (Pay at College)
-                                </Label>
+                                <RadioGroupItem value="OFFLINE" id="offline" />
+                                <Label htmlFor="offline" className="font-normal cursor-pointer">Offline Payment (Pay at College)</Label>
                             </div>
                         </RadioGroup>
                         <p className="text-xs text-muted-foreground">
-                            {formData.fee_mode === FeeMode.ONLINE
+                            {form.watch('fee_mode') === 'ONLINE'
                                 ? "Student will receive payment link via email"
                                 : "Student can pay at the college office"}
                         </p>
@@ -231,10 +234,7 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => {
-                                resetForm()
-                                onOpenChange(false)
-                            }}
+                            onClick={() => handleOpenChange(false)}
                         >
                             Cancel
                         </Button>

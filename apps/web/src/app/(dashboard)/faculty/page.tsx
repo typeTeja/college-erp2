@@ -4,27 +4,29 @@ import { useState } from 'react'
 import {
     Users, Plus, Search, Filter, GraduationCap,
     Mail, Phone, BookOpen, Clock, MoreVertical,
-    FileText, UserPlus
+    FileText, UserPlus, AlertCircle
 } from 'lucide-react'
-import { facultyService } from '@/utils/faculty-service'
+import { useFaculty } from '@/hooks/use-faculty'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Faculty } from '@/types/faculty'
 
 export default function FacultyPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedDept, setSelectedDept] = useState<string>('')
 
-    const { data: faculties, isLoading } = facultyService.useFaculties(selectedDept || undefined)
+    const { data: faculties, isLoading, error } = useFaculty({ department: selectedDept || undefined })
 
-    const filteredFaculties = faculties?.filter(f =>
+    const filteredFaculties = faculties?.filter((f: any) =>
         f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         f.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         f.department?.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
-    const departments = Array.from(new Set(faculties?.map(f => f.department).filter(Boolean)))
+    const departments = Array.from(new Set(faculties?.map((f: Faculty) => f.department).filter(Boolean))) as string[]
 
     return (
         <div className="space-y-6">
@@ -66,7 +68,7 @@ export default function FacultyPage() {
                         <div>
                             <p className="text-sm font-medium text-slate-500">PhD Holders</p>
                             <p className="text-2xl font-bold text-slate-900">
-                                {faculties?.filter(f => f.qualification?.toLowerCase().includes('phd')).length || 0}
+                                {faculties?.filter((f: Faculty) => f.qualification?.toLowerCase().includes('phd')).length || 0}
                             </p>
                         </div>
                     </CardContent>
@@ -103,8 +105,8 @@ export default function FacultyPage() {
                         onChange={(e) => setSelectedDept(e.target.value)}
                     >
                         <option value="">All Departments</option>
-                        {departments.map(dept => (
-                            <option key={dept} value={dept || ''}>{dept}</option>
+                        {departments.map((dept: string) => (
+                            <option key={dept} value={dept}>{dept}</option>
                         ))}
                     </select>
                     <Button variant="outline" size="sm">

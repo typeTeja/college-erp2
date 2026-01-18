@@ -28,8 +28,9 @@ import {
 import { AcademicStructureTab } from "./AcademicStructureTab";
 import { RegulationsTab } from "./RegulationsTab";
 import AcademicDashboardTab from "./AcademicDashboardTab";
+import { ScholarshipSlabTab } from "./ScholarshipSlabTab";
 import { useAuthStore } from "@/store/use-auth-store"
-import { settingsService } from "@/utils/settings-service"
+import { useUpdateProfile, useChangePassword, useSettings, useTestConnection, useUpdateSetting, useAuditLogs } from "@/hooks/use-settings"
 import { toast } from "sonner"
 
 export default function SettingsPage() {
@@ -141,6 +142,12 @@ export default function SettingsPage() {
                                     active={activeTab === 'fee-heads'}
                                     onClick={() => setActiveTab('fee-heads')}
                                 />
+                                <SettingNavItem
+                                    icon={<Award size={18} />}
+                                    label="Scholarship Slabs"
+                                    active={activeTab === 'scholarship-slabs'}
+                                    onClick={() => setActiveTab('scholarship-slabs')}
+                                />
 
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                     Admission Setup
@@ -216,6 +223,7 @@ export default function SettingsPage() {
                     {activeTab === 'academic-batches' && <AcademicBatchTab />}
                     {activeTab === 'academic-dashboard' && <AcademicDashboardTab />}
                     {activeTab === 'fee-heads' && <FeeHeadTab />}
+                    {activeTab === 'scholarship-slabs' && <ScholarshipSlabTab />}
                     {activeTab === 'boards' && <BoardTab />}
                     {activeTab === 'reservations' && <ReservationCategoryTab />}
                     {activeTab === 'lead-sources' && <LeadSourceTab />}
@@ -246,7 +254,7 @@ function SettingNavItem({ icon, label, active, onClick }: { icon: any, label: st
 
 function ProfileTab({ user, setUser }: { user: any, setUser: any }) {
     const [fullName, setFullName] = useState(user?.full_name || "")
-    const updateProfile = settingsService.useUpdateProfile()
+    const updateProfile = useUpdateProfile()
 
     const handleSave = async () => {
         try {
@@ -321,7 +329,7 @@ function ProfileTab({ user, setUser }: { user: any, setUser: any }) {
 
 function SecurityTab() {
     const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" })
-    const changePassword = settingsService.useChangePassword()
+    const changePassword = useChangePassword()
 
     const handleUpdate = async () => {
         if (passwords.new !== passwords.confirm) {
@@ -422,7 +430,7 @@ function NotificationsTab({ user, setUser }: { user: any, setUser: any }) {
         email: user?.preferences?.notifications?.email ?? true,
         sms: user?.preferences?.notifications?.sms ?? false,
     })
-    const updateProfile = settingsService.useUpdateProfile()
+    const updateProfile = useUpdateProfile()
 
     const handleSave = async () => {
         try {
@@ -502,9 +510,9 @@ function NotificationsTab({ user, setUser }: { user: any, setUser: any }) {
 
 
 function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
-    const { data: settings } = settingsService.useSettings('INTEGRATION')
-    const testMutation = settingsService.useTestConnection()
-    const updateSetting = settingsService.useUpdateSetting()
+    const { data: settings } = useSettings('INTEGRATION')
+    const testMutation = useTestConnection()
+    const updateSetting = useUpdateSetting()
     const [editValues, setEditValues] = useState<Record<number, string>>({})
 
     if (!isSuperAdmin) return null
@@ -617,7 +625,7 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 }
 
 function AuditLogsTab() {
-    const { data: logs } = settingsService.useAuditLogs()
+    const { data: logs } = useAuditLogs()
 
     return (
         <Card className="animate-in fade-in slide-in-from-bottom-2 duration-300">

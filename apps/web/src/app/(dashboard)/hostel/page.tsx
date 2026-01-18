@@ -6,18 +6,20 @@ import {
     Plus, Search, Filter, AlertTriangle,
     Home, UserPlus, FileText, Settings
 } from 'lucide-react'
-import { hostelService } from '@/utils/hostel-service'
+import { useHostels, useRooms } from '@/hooks/use-hostel'
 import { HostelType, RoomType, ComplaintStatus, HostelBlock, HostelRoom, HostelComplaint } from '@/types/hostel'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function HostelPage() {
     const [selectedBlock, setSelectedBlock] = useState<number | undefined>(undefined)
 
-    const { data: blocks } = hostelService.useBlocks()
-    const { data: rooms, isLoading: roomsLoading } = hostelService.useRooms(selectedBlock)
-    const { data: complaints } = hostelService.useComplaints()
+    const { data: blocks, isLoading: blocksLoading, error: blocksError } = useHostels()
+    const { data: rooms, isLoading: roomsLoading, error: roomsError } = useRooms({ hostel_id: selectedBlock })
+    const complaints: HostelComplaint[] = [] // TODO: Add complaints hook when available
 
     const stats = [
         { label: 'Total Blocks', value: blocks?.length || 0, icon: <Building2 className="text-blue-600" /> },

@@ -1,21 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus } from 'lucide-react';
-import { studentService } from '@/utils/student-service';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Search, Plus, AlertCircle } from 'lucide-react';
+import { useStudents } from '@/hooks/use-students';
+
+import { AddStudentDialog } from "@/components/students/AddStudentDialog"; // Ensure this path is correct
 
 export default function StudentsPage() {
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { data: students, isLoading } = useQuery({
-        queryKey: ['students', searchTerm],
-        queryFn: () => studentService.getAll({ search: searchTerm }),
+    const { data: students, isLoading, error } = useStudents({
+        search: searchTerm,
+        status: 'ACTIVE',
     });
 
     return (
@@ -24,10 +27,11 @@ export default function StudentsPage() {
                 <h2 className="text-3xl font-bold tracking-tight">Students</h2>
                 <div className="flex items-center space-x-2">
                     <Link href="/students/import">
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" /> Import Students
+                        <Button variant="outline">
+                            <Plus className="mr-2 h-4 w-4" /> Import CSV
                         </Button>
                     </Link>
+                    <AddStudentDialog />
                 </div>
             </div>
 
@@ -50,7 +54,19 @@ export default function StudentsPage() {
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
-                        <div className="text-center py-4">Loading students...</div>
+                        <div className="space-y-2">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                    ) : error ? (
+                        <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                                Failed to load students. Please try again later.
+                            </AlertDescription>
+                        </Alert>
                     ) : (
                         <Table>
                             <TableHeader>

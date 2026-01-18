@@ -6,44 +6,26 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { Building2, ClipboardList, Wallet, Users } from 'lucide-react';
-import { odcService } from '@/utils/odc-service';
-import { useState, useEffect } from 'react';
+import { useODCHotels, useODCRequests, useODCPendingPayouts, useODCBilling } from '@/hooks/use-odc';
 import { ODCStatus, BillingStatus } from '@/types/odc';
 
 export default function ODCDashboard() {
     const { user } = useAuthStore();
-    const [stats, setStats] = useState({
-        totalHotels: 0,
-        activeRequests: 0,
-        pendingPayouts: 0,
-        totalCollected: 0
-    });
 
-    useEffect(() => {
-        const loadStats = async () => {
-            try {
-                const [hotels, requests, pendingPayouts, billings] = await Promise.all([
-                    odcService.getHotels(),
-                    odcService.getRequests(),
-                    odcService.getPendingPayouts(),
-                    odcService.getBilling()
-                ]);
+    // Fetch data using hooks
+    const { data: hotels } = useODCHotels();
+    const { data: requests } = useODCRequests();
+    const { data: pendingPayouts } = useODCPendingPayouts();
+    const { data: billings } = useODCBilling();
 
-                setStats({
-                    totalHotels: hotels.length,
-                    activeRequests: requests.filter(r => r.status === ODCStatus.OPEN).length,
-                    pendingPayouts: pendingPayouts.length,
-                    totalCollected: billings
-                        .filter(b => b.status === BillingStatus.PAID)
-                        .reduce((sum, b) => sum + (b.total_amount || 0), 0)
-                });
-            } catch (error) {
-                console.error('Failed to load ODC stats', error);
-            }
-        };
-
-        if (user) loadStats();
-    }, [user]);
+    const stats = {
+        totalHotels: hotels?.length || 0,
+        activeRequests: requests?.filter((r: any) => r.status === ODCStatus.OPEN).length || 0,
+        pendingPayouts: pendingPayouts?.length || 0,
+        totalCollected: billings
+            ?.filter((b: any) => b.status === BillingStatus.PAID)
+            .reduce((sum: number, b: any) => sum + (b.total_amount || 0), 0) || 0
+    };
 
     const isStudent = user?.roles?.includes('STUDENT');
     const isAdmin = user?.roles?.some(role =>

@@ -6,7 +6,9 @@ import {
     Plus, Search, Info, History, Save, X,
     ChevronRight, AlertCircle
 } from 'lucide-react'
-import { roleService } from '@/utils/role-service'
+import { useRoles, usePermissions, useAuditLogs, useUpdateRole } from '@/hooks/use-roles'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -17,14 +19,14 @@ export default function RoleManagementPage() {
     const [isEditing, setIsEditing] = useState(false)
     const [activeTab, setActiveTab] = useState<'permissions' | 'audit'>('permissions')
 
-    const { data: roles, isLoading: rolesLoading } = roleService.useRoles()
-    const { data: permissionGroups, isLoading: permsLoading } = roleService.usePermissions()
-    const { data: auditLogs } = roleService.useAuditLogs()
+    const { data: roles, isLoading: rolesLoading, error: rolesError } = useRoles()
+    const { data: permissionGroups, isLoading: permsLoading } = usePermissions()
+    const { data: auditLogs } = useAuditLogs()
 
     const selectedRole = roles?.find(r => r.id === selectedRoleId)
     const [editedPermissionIds, setEditedPermissionIds] = useState<number[]>([])
 
-    const updateRoleMutation = roleService.useUpdateRole(selectedRoleId || 0)
+    const updateRoleMutation = useUpdateRole(selectedRoleId || 0)
 
     const handleRoleSelect = (role: Role) => {
         setSelectedRoleId(role.id)

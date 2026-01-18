@@ -1,0 +1,64 @@
+{
+    "blocks": [
+        {
+            "name": "Boys Hostel Block A",
+            "type": "BOYS",
+            "total_floors": 4,
+            "warden_name": "Mr. Ramesh",
+            "contact_number": "9988776655",
+            "rooms": [
+                {
+                    "room_number": "A-101",
+                    "floor": 1,
+                    "capacity": 3,
+                    "room_type": "NON_AC",
+                    "monthly_rent": 5000
+                },
+                {
+                    "room_number": "A-102",
+                    "floor": 1,
+                    "capacity": 3,
+                    "room_type": "NON_AC",
+                    "monthly_rent": 5000
+                },
+                {
+                    "room_number": "A-201",
+                    "floor": 2,
+                    "capacity": 2,
+                    "room_type": "AC",
+                    "monthly_rent": 8000
+                }
+            ]
+        },
+        {
+            "name": "Girls Hostel Block B",
+            "type": "GIRLS",
+            "total_floors": 3,
+            "warden_name": "Mrs. Sarita",
+            "contact_number": "9988776644",
+            "rooms": [
+                {
+                    "room_number": "B-101",
+                    "floor": 1,
+                    "capacity": 3,
+                    "room_type": "NON_AC",
+                    "monthly_rent": 5000
+                },
+                {
+                    "room_number": "B-102",
+                    "floor": 1,
+                    "capacity": 3,
+                    "room_type": "NON_AC",
+                    "monthly_rent": 5000
+                },
+                {
+                    "room_number": "B-201",
+                    "floor": 2,
+                    "capacity": 2,
+                    "room_type": "AC",
+                    "monthly_rent": 8000
+                }
+            ]
+        }
+    ]
+}

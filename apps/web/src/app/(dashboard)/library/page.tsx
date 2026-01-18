@@ -7,12 +7,14 @@ import {
     CheckCircle, XCircle, AlertCircle,
     Info
 } from 'lucide-react'
-import { libraryService } from '@/utils/library-service'
+import { useBooks, useIssueBook } from '@/hooks/use-library'
 import { BookStatus, Book } from '@/types/library'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
     Dialog,
     DialogContent,
@@ -31,8 +33,8 @@ export default function LibraryPage() {
         dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Default 14 days
     })
 
-    const { data: books, isLoading } = libraryService.useBooks(searchTerm)
-    const issueMutation = libraryService.useIssueBook()
+    const { data: books, isLoading, error } = useBooks({ search: searchTerm })
+    const issueMutation = useIssueBook()
 
     const handleIssueSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -90,19 +92,36 @@ export default function LibraryPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {stats.map((stat, i) => (
-                    <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-                        <div className="p-3 bg-slate-50 rounded-lg">
-                            {stat.icon}
+            {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="bg-white p-6 rounded-xl border">
+                            <Skeleton className="h-20 w-full" />
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                            <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                    ))}
+                </div>
+            ) : error ? (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                        Failed to load library data. Please try again later.
+                    </AlertDescription>
+                </Alert>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {stats.map((stat, i) => (
+                        <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+                            <div className="p-3 bg-slate-50 rounded-lg">
+                                {stat.icon}
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
+                                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {/* Catalog */}
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

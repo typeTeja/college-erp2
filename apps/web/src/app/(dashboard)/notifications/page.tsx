@@ -4,19 +4,21 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
     Bell, CheckCircle2, AlertCircle, Info,
     XCircle, ArrowLeft, MoreVertical, Trash2,
     Check
 } from 'lucide-react'
 import Link from 'next/link'
-import { communicationService } from '@/utils/communication-service'
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '@/hooks/use-portal'
 import { NotificationType } from '@/types/communication'
 
 export default function NotificationsPage() {
-    const { data: notifications, isLoading } = communicationService.useNotifications()
-    const markAsRead = communicationService.useMarkAsRead()
-    const markAllRead = communicationService.useMarkAllAsRead()
+    const { data: notifications, isLoading, error } = useNotifications()
+    const markAsRead = useMarkNotificationRead()
+    const markAllRead = useMarkAllNotificationsRead()
 
     const getIcon = (type: NotificationType) => {
         switch (type) {

@@ -5,19 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
     Megaphone, Search, Filter, Plus, FileText,
     Calendar, User, Download, ExternalLink,
-    Clock, Tag
+    Clock, Tag, AlertCircle
 } from 'lucide-react'
-import { communicationService } from '@/utils/communication-service'
+import { useCirculars } from '@/hooks/use-circulars'
 import { CircularTarget } from '@/types/communication'
 
 export default function CircularsPage() {
     const [searchQuery, setSearchQuery] = useState('')
-    const { data: circulars, isLoading } = communicationService.useCirculars()
+    const { data: circulars, isLoading, error } = useCirculars()
 
-    const filteredCirculars = circulars?.filter(c =>
+    const filteredCirculars = circulars?.filter((c: any) =>
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.content.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -60,7 +62,7 @@ export default function CircularsPage() {
                 ) : filteredCirculars?.length === 0 ? (
                     <div className="py-12 text-center text-slate-400">No active circulars found.</div>
                 ) : (
-                    filteredCirculars?.map((circular) => (
+                    filteredCirculars?.map((circular: any) => (
                         <Card key={circular.id} className="border-slate-200 hover:shadow-md transition-shadow">
                             <CardHeader className="pb-3">
                                 <div className="flex justify-between items-start">

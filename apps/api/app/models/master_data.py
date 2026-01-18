@@ -9,6 +9,9 @@ from enum import Enum as PyEnum
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON
 from sqlalchemy import DECIMAL, Text
 
+if TYPE_CHECKING:
+    from .academic.entrance_exam import EntranceExamResult
+
 # ============================================================================
 # SECTION 2: Academic Setup
 # ============================================================================
@@ -195,7 +198,7 @@ class ScholarshipSlab(SQLModel, table=True):
     
     # Discount
     discount_type: str = Field(default="PERCENTAGE")  # PERCENTAGE or FIXED
-    discount_value: Decimal = Field(sa_column=Column(DECIMAL(10, 2)))
+    discount_value: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
     max_discount_amount: Optional[Decimal] = Field(default=None, sa_column=Column(DECIMAL(10, 2)))
     
     # Applicable to
@@ -208,6 +211,9 @@ class ScholarshipSlab(SQLModel, table=True):
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    results: List["EntranceExamResult"] = Relationship(back_populates="scholarship_slab")
 
 
 # ============================================================================

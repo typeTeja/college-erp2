@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { admissionsService } from '@/utils/admissions-service'
 import { ApplicationStatus } from '@/types/admissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,23 +14,35 @@ import {
     TableRow
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
     Users,
     CreditCard,
     CheckCircle,
     FileText,
     Eye,
-    Check
+    Check,
+    AlertCircle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useAdmissions, useConfirmAdmission } from '@/hooks/use-admissions'
 import AddOfflineApplicationDialog from '@/components/admissions/AddOfflineApplicationDialog'
 
 export default function AdmissionsDashboard() {
     const { toast } = useToast()
     const [filterStatus, setFilterStatus] = useState<ApplicationStatus | undefined>()
     const [dialogOpen, setDialogOpen] = useState(false)
-    const { data: applications, isLoading } = admissionsService.useApplications(filterStatus)
-    const confirmMutation = admissionsService.useConfirmAdmission()
+
+    // Form setup for inline adding (optional, or pass to dialog)
+    // For now, we are keeping the existing structure but preparing for the dialog integration
+    // The AddOfflineApplicationDialog should be the one using the schema mostly.
+
+    const { data: applications, isLoading, error } = useAdmissions({
+        status: filterStatus,
+    })
+
+    const confirmMutation = useConfirmAdmission()
 
     const stats = {
         total: applications?.length || 0,
@@ -80,44 +91,66 @@ export default function AdmissionsDashboard() {
             <AddOfflineApplicationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Total Apps</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.total}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Paid (Leads)</CardTitle>
-                        <CreditCard className="h-4 w-4 text-blue-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.paid}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Form Completed</CardTitle>
-                        <FileText className="h-4 w-4 text-orange-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.completed}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Admitted</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.admitted}</div>
-                    </CardContent>
-                </Card>
-            </div>
+            {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                        <Card key={i}>
+                            <CardHeader className="pb-2">
+                                <Skeleton className="h-4 w-24" />
+                            </CardHeader>
+                            <CardContent>
+                                <Skeleton className="h-8 w-16" />
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            ) : error ? (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                        Failed to load admissions data. Please try again later.
+                    </AlertDescription>
+                </Alert>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Total Apps</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats.total}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Paid (Leads)</CardTitle>
+                            <CreditCard className="h-4 w-4 text-blue-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats.paid}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Form Completed</CardTitle>
+                            <FileText className="h-4 w-4 text-orange-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats.completed}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Admitted</CardTitle>
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats.admitted}</div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
 
             {/* Applications Table */}
             <Card>

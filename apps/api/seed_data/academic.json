@@ -1,153 +1,126 @@
 {
+    "academic_years": [
+        {
+            "name": "2024-2025",
+            "start_date": "2024-06-01",
+            "end_date": "2025-05-31",
+            "status": "ACTIVE",
+            "is_current": true
+        },
+        {
+            "name": "2025-2026",
+            "start_date": "2025-06-01",
+            "end_date": "2026-05-31",
+            "status": "UPCOMING",
+            "is_current": false
+        }
+    ],
     "departments": [
         {
-            "name": "Front Office",
-            "code": "FO"
+            "name": "Culinary Arts",
+            "code": "CA"
         },
         {
-            "name": "Food & Beverage",
-            "code": "F&B"
+            "name": "Hotel Management",
+            "code": "HM"
         },
         {
-            "name": "Housekeeping",
-            "code": "HK"
-        },
-        {
-            "name": "Kitchen / Food Production",
-            "code": "FP"
-        },
-        {
-            "name": "Bakery",
-            "code": "BKY"
-        },
-        {
-            "name": "Management",
-            "code": "MGT"
+            "name": "General Management",
+            "code": "GM"
         }
     ],
     "programs": [
         {
-            "name": "Bachelor of Hotel Management",
-            "code": "BHM",
-            "departments": [
-                "FO",
-                "F&B",
-                "HK",
-                "FP",
-                "BKY",
-                "MGT"
-            ],
-            "years": [
-                {
-                    "year": 1,
-                    "semesters": [
-                        1,
-                        2
-                    ]
-                },
-                {
-                    "year": 2,
-                    "semesters": [
-                        3,
-                        4
-                    ]
-                },
-                {
-                    "year": 3,
-                    "semesters": [
-                        5,
-                        6
-                    ]
-                }
-            ]
+            "name": "Bachelor of Hotel Management & Catering Technology",
+            "code": "BHMCT",
+            "department_code": "HM",
+            "duration_years": 4
         },
         {
-            "name": "Bachelor of Culinary Technology",
-            "code": "BCT",
-            "departments": [
-                "FP",
-                "BKY",
-                "MGT"
-            ],
-            "years": [
-                {
-                    "year": 1,
-                    "semesters": [
-                        1,
-                        2
-                    ]
-                },
-                {
-                    "year": 2,
-                    "semesters": [
-                        3,
-                        4
-                    ]
-                },
-                {
-                    "year": 3,
-                    "semesters": [
-                        5,
-                        6
-                    ]
-                }
-            ]
+            "name": "BBA in Culinary Arts",
+            "code": "BBA-CA",
+            "department_code": "CA",
+            "duration_years": 3
+        }
+    ],
+    "designations": [
+        {
+            "name": "Professor",
+            "code": "PROF",
+            "level": 1,
+            "is_teaching": true
+        },
+        {
+            "name": "Associate Professor",
+            "code": "ASSOC_PROF",
+            "level": 2,
+            "is_teaching": true
+        },
+        {
+            "name": "Assistant Professor",
+            "code": "ASST_PROF",
+            "level": 3,
+            "is_teaching": true
+        },
+        {
+            "name": "Lecturer",
+            "code": "LECT",
+            "level": 4,
+            "is_teaching": true
+        },
+        {
+            "name": "Lab Assistant",
+            "code": "LAB_ASST",
+            "level": 5,
+            "is_teaching": false
         }
     ],
     "subjects": [
         {
             "name": "Food Production Foundation",
             "code": "FP101",
-            "sem": 1,
+            "credits": 4,
             "type": "THEORY"
         },
         {
-            "name": "Food Production Practical",
-            "code": "FP102",
-            "sem": 1,
-            "type": "PRACTICAL"
-        },
-        {
-            "name": "F&B Service Foundation",
+            "name": "Food & Beverage Service I",
             "code": "FBS101",
-            "sem": 1,
-            "type": "THEORY"
-        },
-        {
-            "name": "Housekeeping Operations",
-            "code": "HK101",
-            "sem": 2,
+            "credits": 3,
             "type": "THEORY"
         },
         {
             "name": "Front Office Operations",
             "code": "FO101",
-            "sem": 2,
+            "credits": 3,
             "type": "THEORY"
         },
         {
-            "name": "Indian Regional Cuisine",
-            "code": "FP201",
-            "sem": 3,
+            "name": "Accommodation Operations",
+            "code": "HK101",
+            "credits": 3,
             "type": "THEORY"
         },
         {
-            "name": "Bakery & Patisserie",
-            "code": "BKY201",
-            "sem": 3,
+            "name": "Culinary Skills Lab",
+            "code": "CSL101",
+            "credits": 2,
             "type": "PRACTICAL"
         },
         {
-            "name": "Hotel Law",
-            "code": "MGT301",
-            "sem": 5,
-            "type": "THEORY"
+            "name": "Service Skills Lab",
+            "code": "SSL101",
+            "credits": 2,
+            "type": "PRACTICAL"
+        }
+    ],
+    "sections": [
+        {
+            "name": "Section A",
+            "code": "A"
         },
         {
-            "name": "Marketing Management",
-            "code": "MGT302",
-            "sem": 6,
-            "type": "THEORY"
+            "name": "Section B",
+            "code": "B"
         }
     ]
 }
