@@ -161,7 +161,7 @@ def create_batch(
             
             # Calculate batch details
             end_year = data.joining_year + program.duration_years
-            batch_code = f"{data.joining_year}-{end_year}"
+            batch_code = f"{program.code}-{data.joining_year}-{end_year}"
             batch_name = f"Batch {data.joining_year}-{end_year}"
             
             # 1. Create batch
@@ -265,7 +265,7 @@ def create_batch(
                 "regulation_id": batch.regulation_id,
                 "joining_year": batch.joining_year
             },
-            user_id=current_user.id,
+            user=current_user,
             request=None
         )
         

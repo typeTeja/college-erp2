@@ -298,7 +298,7 @@ class StudentAssignmentService:
         assigned_student_ids_query = select(StudentSectionAssignment.student_id).where(
             StudentSectionAssignment.batch_id == batch_id,
             StudentSectionAssignment.semester_no == semester_no,
-            StudentSectionAssignment.deleted_at.is_(None)
+            StudentSectionAssignment.is_active == True
         )
         assigned_student_ids = session.exec(assigned_student_ids_query).all()
         
@@ -309,7 +309,7 @@ class StudentAssignmentService:
                 Student.batch_id == batch_id,
                 Student.id.not_in(assigned_student_ids) if assigned_student_ids else True
             )
-            .order_by(Student.registration_number)
+            .order_by(Student.admission_number)
         ).all()
         
         return unassigned_students
