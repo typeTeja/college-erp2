@@ -3,7 +3,7 @@
  * 
  * Provides methods to interact with fee management endpoints
  */
-import axios from '@/lib/axios';
+import { api } from '@/utils/api';
 import type {
     FeeStructure,
     FeeStructureCreate,
@@ -20,7 +20,7 @@ import type {
     PaymentFilters
 } from '@/types/fee';
 
-const BASE_URL = '/api/v1/fees';
+const BASE_URL = '/fees';
 
 // ============================================================================
 // Fee Structure APIs
@@ -31,7 +31,7 @@ export const feeStructureApi = {
      * Create a new fee structure
      */
     create: async (data: FeeStructureCreate): Promise<FeeStructure> => {
-        const response = await axios.post(`${BASE_URL}/structures`, data);
+        const response = await api.post(`${BASE_URL}/structures`, data);
         return response.data;
     },
 
@@ -39,7 +39,7 @@ export const feeStructureApi = {
      * List fee structures with optional filters
      */
     list: async (filters?: FeeStructureFilters): Promise<FeeStructure[]> => {
-        const response = await axios.get(`${BASE_URL}/structures`, { params: filters });
+        const response = await api.get(`${BASE_URL}/structures`, { params: filters });
         return response.data;
     },
 
@@ -47,7 +47,7 @@ export const feeStructureApi = {
      * Get a specific fee structure
      */
     get: async (id: number): Promise<FeeStructure> => {
-        const response = await axios.get(`${BASE_URL}/structures/${id}`);
+        const response = await api.get(`${BASE_URL}/structures/${id}`);
         return response.data;
     },
 
@@ -55,7 +55,7 @@ export const feeStructureApi = {
      * Update a fee structure
      */
     update: async (id: number, data: Partial<FeeStructureCreate>): Promise<FeeStructure> => {
-        const response = await axios.put(`${BASE_URL}/structures/${id}`, data);
+        const response = await api.put(`${BASE_URL}/structures/${id}`, data);
         return response.data;
     },
 
@@ -63,7 +63,7 @@ export const feeStructureApi = {
      * Delete a fee structure
      */
     delete: async (id: number): Promise<void> => {
-        await axios.delete(`${BASE_URL}/structures/${id}`);
+        await api.delete(`${BASE_URL}/structures/${id}`);
     },
 };
 
@@ -76,7 +76,7 @@ export const studentFeeApi = {
      * Assign fee structure to a student
      */
     assign: async (data: StudentFeeCreate): Promise<StudentFee> => {
-        const response = await axios.post(`${BASE_URL}/student-fees`, data);
+        const response = await api.post(`${BASE_URL}/student-fees`, data);
         return response.data;
     },
 
@@ -84,7 +84,7 @@ export const studentFeeApi = {
      * List student fees with optional filters
      */
     list: async (filters?: StudentFeeFilters): Promise<StudentFee[]> => {
-        const response = await axios.get(`${BASE_URL}/student-fees`, { params: filters });
+        const response = await api.get(`${BASE_URL}/student-fees`, { params: filters });
         return response.data;
     },
 
@@ -92,7 +92,7 @@ export const studentFeeApi = {
      * Get a specific student fee
      */
     get: async (id: number): Promise<StudentFee> => {
-        const response = await axios.get(`${BASE_URL}/student-fees/${id}`);
+        const response = await api.get(`${BASE_URL}/student-fees/${id}`);
         return response.data;
     },
 
@@ -101,7 +101,7 @@ export const studentFeeApi = {
      */
     getSummary: async (studentId: number, academicYear?: string): Promise<StudentFeeSummary> => {
         const params = academicYear ? { academic_year: academicYear } : {};
-        const response = await axios.get(`${BASE_URL}/students/${studentId}/fee-summary`, { params });
+        const response = await api.get(`${BASE_URL}/students/${studentId}/fee-summary`, { params });
         return response.data;
     },
 
@@ -109,7 +109,7 @@ export const studentFeeApi = {
      * Get installments for a student fee
      */
     getInstallments: async (studentFeeId: number): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/student-fees/${studentFeeId}/installments`);
+        const response = await api.get(`${BASE_URL}/student-fees/${studentFeeId}/installments`);
         return response.data;
     },
 
@@ -117,7 +117,7 @@ export const studentFeeApi = {
      * Generate installments for a student fee
      */
     generateInstallments: async (studentFeeId: number): Promise<any[]> => {
-        const response = await axios.post(`${BASE_URL}/student-fees/${studentFeeId}/generate-installments`);
+        const response = await api.post(`${BASE_URL}/student-fees/${studentFeeId}/generate-installments`);
         return response.data;
     },
 };
@@ -131,7 +131,7 @@ export const paymentApi = {
      * Record a fee payment
      */
     record: async (data: FeePaymentCreate): Promise<FeePayment> => {
-        const response = await axios.post(`${BASE_URL}/payments`, data);
+        const response = await api.post(`${BASE_URL}/payments`, data);
         return response.data;
     },
 
@@ -139,7 +139,7 @@ export const paymentApi = {
      * List payments with optional filters
      */
     list: async (filters?: PaymentFilters): Promise<FeePayment[]> => {
-        const response = await axios.get(`${BASE_URL}/payments`, { params: filters });
+        const response = await api.get(`${BASE_URL}/payments`, { params: filters });
         return response.data;
     },
 
@@ -147,7 +147,7 @@ export const paymentApi = {
      * Get a specific payment
      */
     get: async (id: number): Promise<FeePayment> => {
-        const response = await axios.get(`${BASE_URL}/payments/${id}`);
+        const response = await api.get(`${BASE_URL}/payments/${id}`);
         return response.data;
     },
 };
@@ -161,7 +161,7 @@ export const concessionApi = {
      * Apply a fee concession
      */
     apply: async (data: FeeConcessionCreate): Promise<FeeConcession> => {
-        const response = await axios.post(`${BASE_URL}/concessions`, data);
+        const response = await api.post(`${BASE_URL}/concessions`, data);
         return response.data;
     },
 
@@ -170,7 +170,7 @@ export const concessionApi = {
      */
     list: async (studentFeeId?: number): Promise<FeeConcession[]> => {
         const params = studentFeeId ? { student_fee_id: studentFeeId } : {};
-        const response = await axios.get(`${BASE_URL}/concessions`, { params });
+        const response = await api.get(`${BASE_URL}/concessions`, { params });
         return response.data;
     },
 };
@@ -184,7 +184,7 @@ export const fineApi = {
      * Calculate fine for an installment
      */
     calculate: async (installmentId: number, finePerDay: number = 10): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/installments/${installmentId}/calculate-fine`, null, {
+        const response = await api.post(`${BASE_URL}/installments/${installmentId}/calculate-fine`, null, {
             params: { fine_per_day: finePerDay }
         });
         return response.data;
@@ -194,7 +194,7 @@ export const fineApi = {
      * Waive fine for an installment
      */
     waive: async (installmentId: number, waiverReason: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/installments/${installmentId}/waive-fine`, null, {
+        const response = await api.post(`${BASE_URL}/installments/${installmentId}/waive-fine`, null, {
             params: { waiver_reason: waiverReason }
         });
         return response.data;
@@ -213,7 +213,7 @@ export const feeReportsApi = {
         const params: any = { min_due_amount: minDueAmount };
         if (academicYear) params.academic_year = academicYear;
 
-        const response = await axios.get(`${BASE_URL}/reports/defaulters`, { params });
+        const response = await api.get(`${BASE_URL}/reports/defaulters`, { params });
         return response.data;
     },
 
@@ -221,7 +221,7 @@ export const feeReportsApi = {
      * Get collection summary for an academic year
      */
     getCollectionSummary: async (academicYear: string): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/reports/collection-summary`, {
+        const response = await api.get(`${BASE_URL}/reports/collection-summary`, {
             params: { academic_year: academicYear }
         });
         return response.data;

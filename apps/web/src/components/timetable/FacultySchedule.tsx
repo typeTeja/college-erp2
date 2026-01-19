@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { timetableService } from "@/utils/timetable-service";
-import { DayOfWeek, ClassSchedule, SlotType } from "@/types/timetable";
+import { DayOfWeek, ClassSchedule, SlotType, TimeSlot } from "@/types/timetable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
@@ -23,7 +23,7 @@ export function FacultySchedule({ facultyId }: { facultyId: number }) {
     }
 
     const getEntry = (day: DayOfWeek, periodId: number) => {
-        return schedule?.find(s => s.day_of_week === day && s.period_id === periodId);
+        return schedule?.find((s: ClassSchedule) => s.day_of_week === day && s.period_id === periodId);
     };
 
     return (
@@ -43,7 +43,7 @@ export function FacultySchedule({ facultyId }: { facultyId: number }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {slots?.map((slot) => (
+                            {slots?.map((slot: TimeSlot) => (
                                 <tr key={slot.id} className="border-b">
                                     <td className="px-6 py-4 font-medium bg-gray-50 whitespace-nowrap">
                                         {slot.name}

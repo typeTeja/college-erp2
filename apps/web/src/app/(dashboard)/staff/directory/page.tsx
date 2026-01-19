@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStaff, useShifts, useCreateStaff, useUpdateStaff, useDeleteStaff } from "@/hooks/use-staff";
-import { Staff, StaffCreateDTO } from "@/types/staff";
+import { Staff, StaffCreateDTO, Shift } from "@/types/staff";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { staffSchema, StaffFormValues } from "@/schemas/staff-schema";
@@ -163,10 +163,10 @@ export default function StaffDirectoryPage() {
                                 <Label>Assigned Shift</Label>
                                 <select
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
-                                    {...form.register("shift_id")}
+                                    {...form.register("shift_id", { valueAsNumber: true })}
                                 >
                                     <option value="">No Shift Assigned</option>
-                                    {shifts?.map((s: any) => (
+                                    {shifts?.map((s: Shift) => (
                                         <option key={s.id} value={s.id}>{s.name} ({s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)})</option>
                                     ))}
                                 </select>
@@ -216,13 +216,13 @@ export default function StaffDirectoryPage() {
                                     <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">No staff found.</TableCell>
                                 </TableRow>
                             ) : (
-                                filteredStaff?.map((staff) => (
+                                filteredStaff?.map((staff: Staff) => (
                                     <TableRow key={staff.id}>
                                         <TableCell className="font-medium">{staff.name}</TableCell>
                                         <TableCell>{staff.designation}</TableCell>
                                         <TableCell>{staff.department || "-"}</TableCell>
                                         <TableCell>
-                                            {shifts?.find(s => s.id === staff.shift_id)?.name || <span className="text-muted-foreground italic">None</span>}
+                                            {shifts?.find((s: Shift) => s.id === staff.shift_id)?.name || <span className="text-muted-foreground italic">None</span>}
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant={staff.is_active ? "default" : "secondary"}>

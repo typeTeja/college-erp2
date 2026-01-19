@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTimeSlots, useTimetableSchedule, useCreateTimetableEntry } from "@/hooks/use-timetable";
 import { getAcademicBatches, getBatchSemesters } from "@/utils/master-data-service";
-import { DayOfWeek, ClassSchedule, CreateScheduleDTO } from "@/types/timetable";
+import { DayOfWeek, ClassSchedule, CreateScheduleDTO, TimeSlot } from "@/types/timetable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -101,7 +101,7 @@ export function TimetableBuilder() {
 
     // Helper to find existing entry
     const getEntry = (day: DayOfWeek, periodId: number) => {
-        return schedule?.find(s => s.day_of_week === day && s.period_id === periodId);
+        return schedule?.find((s: ClassSchedule) => s.day_of_week === day && s.period_id === periodId);
     };
 
     return (
@@ -168,7 +168,7 @@ export function TimetableBuilder() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {slots?.map((slot) => (
+                                        {slots?.map((slot: TimeSlot) => (
                                             <tr key={slot.id} className="border-b">
                                                 <td className="px-6 py-4 font-medium bg-gray-50">
                                                     {slot.name}

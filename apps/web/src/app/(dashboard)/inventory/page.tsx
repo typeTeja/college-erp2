@@ -13,7 +13,7 @@ import {
     QrCode, UserPlus, Boxes
 } from 'lucide-react'
 import { useAssets } from '@/hooks/use-inventory'
-import { AssetCategory, AllocationStatus } from '@/types/inventory'
+import { Asset, AssetCategory, AllocationStatus } from '@/types/inventory'
 
 export default function InventoryPage() {
     const [searchQuery, setSearchQuery] = useState('')
@@ -24,7 +24,7 @@ export default function InventoryPage() {
         query: searchQuery || undefined
     })
 
-    const lowStockAssets = assets?.filter(a => a.available_stock <= a.reorder_level) || []
+    const lowStockAssets = assets?.filter((a: Asset) => a.available_stock <= a.reorder_level) || []
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -80,7 +80,7 @@ export default function InventoryPage() {
                             <div>
                                 <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">Value (Total)</p>
                                 <h3 className="text-3xl font-bold mt-2 text-slate-900">
-                                    ₹{assets?.reduce((acc, curr) => acc + (curr.total_stock * Number(curr.unit_price)), 0).toLocaleString()}
+                                    ₹{assets?.reduce((acc: number, curr: Asset) => acc + (curr.total_stock * Number(curr.unit_price)), 0).toLocaleString()}
                                 </h3>
                             </div>
                             <div className="p-2 bg-green-50 text-green-600 rounded-lg">
@@ -158,7 +158,7 @@ export default function InventoryPage() {
                                     <td colSpan={7} className="px-6 py-12 text-center text-slate-400">No assets found matching your criteria.</td>
                                 </tr>
                             ) : (
-                                assets?.map((asset) => (
+                                assets?.map((asset: Asset) => (
                                     <tr key={asset.id} className="hover:bg-slate-50/50 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">

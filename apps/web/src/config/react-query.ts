@@ -44,6 +44,19 @@ export const queryKeys = {
     },
 
     // Fees
+
+
+    // Exams
+    exams: {
+        internal: {
+            all: ['exams', 'internal'] as const,
+            list: (filters?: any) => ['exams', 'internal', { filters }] as const,
+            detail: (id: number) => ['exams', 'internal', id] as const,
+            marks: (examId: number) => ['exams', 'internal', 'marks', examId] as const,
+        },
+    },
+
+    // Fees extended
     fees: {
         all: ['fees'] as const,
         structures: {
@@ -55,13 +68,13 @@ export const queryKeys = {
             list: (filters?: any) => ['fees', 'student-fees', { filters }] as const,
             summary: (studentId: number) => ['fees', 'student-fees', 'summary', studentId] as const,
         },
-    },
-
-    // Exams
-    exams: {
-        internal: {
-            all: ['exams', 'internal'] as const,
-            list: (filters?: any) => ['exams', 'internal', { filters }] as const,
+        payments: {
+            all: ['fees', 'payments'] as const,
+            list: (filters?: any) => ['fees', 'payments', { filters }] as const,
+        },
+        concessions: {
+            all: ['fees', 'concessions'] as const,
+            list: (studentFeeId?: number) => ['fees', 'concessions', { studentFeeId }] as const,
         },
     },
 
@@ -71,5 +84,27 @@ export const queryKeys = {
         dashboard: ['portal', 'dashboard'],
         notifications: ['portal', 'notifications'],
         profile: ['portal', 'profile'],
+    },
+
+    // Analytics
+    analytics: {
+        dashboard: ['analytics', 'dashboard'] as const,
+        trends: (type: string, filters?: any) => ['analytics', 'trends', type, { filters }] as const,
+    },
+
+    // Hostel
+    hostel: {
+        all: ['hostel'] as const,
+        hostels: ['hostel', 'hostels'] as const,
+        rooms: (filters?: any) => ['hostel', 'rooms', { filters }] as const,
+    },
+
+    // Library
+    library: {
+        books: {
+            all: ['library', 'books'] as const,
+            list: (filters?: any) => ['library', 'books', { filters }] as const,
+        },
+        members: ['library', 'members'] as const,
     },
 };

@@ -7,7 +7,7 @@ export const staffSchema = z.object({
     department: z.string().optional(),
     designation: z.string().min(2, { message: "Designation is required" }),
     join_date: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date" }),
-    shift_id: z.coerce.number().optional(),
+    shift_id: z.number().optional(),
 });
 
 export type StaffFormValues = z.infer<typeof staffSchema>;

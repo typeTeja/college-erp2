@@ -13,8 +13,8 @@ export const studentSchema = z.object({
     guardian_name: z.string().min(2, "Guardian name is required"),
     guardian_contact: z.string().regex(/^\d{10}$/, { message: "Guardian number must be 10 digits" }),
     admission_date: z.string().optional(),
-    department_id: z.coerce.number().min(1, "Department is required"),
-    semester: z.coerce.number().min(1, "Semester is required"),
+    department_id: z.number().min(1, "Department is required"),
+    semester: z.number().min(1, "Semester is required"),
 });
 
 export type StudentFormValues = z.infer<typeof studentSchema>;

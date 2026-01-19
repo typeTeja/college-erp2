@@ -33,6 +33,21 @@ import { useAuthStore } from "@/store/use-auth-store"
 import { useUpdateProfile, useChangePassword, useSettings, useTestConnection, useUpdateSetting, useAuditLogs } from "@/hooks/use-settings"
 import { toast } from "sonner"
 
+
+interface Setting {
+    id: number;
+    key: string;
+    value: string;
+}
+
+interface AuditLog {
+    id: number;
+    timestamp: string;
+    action: string;
+    module: string;
+    description: string;
+}
+
 export default function SettingsPage() {
     const { user, hasHydrated, setUser } = useAuthStore()
     const [activeTab, setActiveTab] = useState("profile")
@@ -557,7 +572,7 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                             </Button>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
-                            {settings?.filter(s => s.key.includes('msg91')).map(s => (
+                            {settings?.filter((s: Setting) => s.key.includes('msg91')).map((s: Setting) => (
                                 <div key={s.id} className="space-y-2">
                                     <Label className="text-xs text-slate-500">{s.key.split('.').pop()?.replace('_', ' ')}</Label>
                                     <div className="flex gap-2">
@@ -648,7 +663,7 @@ function AuditLogsTab() {
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {logs?.map(log => (
+                            {logs?.map((log: AuditLog) => (
                                 <tr key={log.id} className="bg-white hover:bg-slate-50 transition-colors">
                                     <td className="px-4 py-3 text-[10px] whitespace-nowrap">
                                         {new Date(log.timestamp).toLocaleString()}

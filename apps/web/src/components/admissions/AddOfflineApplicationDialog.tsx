@@ -40,11 +40,11 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
             email: "",
             phone: "",
             gender: "MALE",
-            program_id: 0,
+            course_id: 0,
             state: "",
             board: "",
             group_of_study: "",
-            fee_mode: "OFFLINE",
+            fee_mode: FeeMode.OFFLINE,
             status: "PENDING",
             documents_submitted: false,
             fee_paid: false
@@ -211,7 +211,7 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
                     <div className="space-y-2">
                         <Label>Payment Mode *</Label>
                         <RadioGroup
-                            onValueChange={(val) => form.setValue('fee_mode', val as "ONLINE" | "OFFLINE")}
+                            onValueChange={(val) => form.setValue('fee_mode', val as FeeMode)}
                             defaultValue={form.getValues('fee_mode')}
                         >
                             <div className="flex items-center space-x-2">

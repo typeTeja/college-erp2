@@ -218,3 +218,28 @@ export interface FeeDefaulter {
     last_payment_date?: string;
     days_overdue: number;
 }
+
+// ============================================================================
+// Filter Types
+// ============================================================================
+
+export interface FeeStructureFilters {
+    academic_year?: string;
+    program_id?: number;
+    year?: number;
+    category?: FeeCategory;
+}
+
+export interface StudentFeeFilters {
+    student_id?: number;
+    program_id?: number;
+    academic_year?: string;
+    payment_status?: string;
+}
+
+export interface PaymentFilters {
+    student_id?: number;
+    from_date?: string;
+    to_date?: string;
+    payment_mode?: PaymentMode;
+}

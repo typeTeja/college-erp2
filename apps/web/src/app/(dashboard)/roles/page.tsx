@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Role, Permission, PermissionGroup } from '@/types/role'
+import { Role, Permission, PermissionGroup, PermissionAuditLog } from '@/types/role'
 
 export default function RoleManagementPage() {
     const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null)
@@ -23,7 +23,7 @@ export default function RoleManagementPage() {
     const { data: permissionGroups, isLoading: permsLoading } = usePermissions()
     const { data: auditLogs } = useAuditLogs()
 
-    const selectedRole = roles?.find(r => r.id === selectedRoleId)
+    const selectedRole = roles?.find((r: Role) => r.id === selectedRoleId)
     const [editedPermissionIds, setEditedPermissionIds] = useState<number[]>([])
 
     const updateRoleMutation = useUpdateRole(selectedRoleId || 0)
@@ -78,7 +78,7 @@ export default function RoleManagementPage() {
                             <div className="space-y-1">
                                 {rolesLoading ? (
                                     [1, 2, 3].map(i => <div key={i} className="h-14 bg-slate-50 animate-pulse rounded-lg" />)
-                                ) : roles?.map((role) => (
+                                ) : roles?.map((role: Role) => (
                                     <button
                                         key={role.id}
                                         onClick={() => handleRoleSelect(role)}
@@ -154,7 +154,7 @@ export default function RoleManagementPage() {
                                                 <>
                                                     <Button variant="outline" onClick={() => {
                                                         setIsEditing(false)
-                                                        setEditedPermissionIds(selectedRole.permissions.map(p => p.id))
+                                                        setEditedPermissionIds(selectedRole.permissions.map((p: Permission) => p.id))
                                                     }}>
                                                         <X className="w-4 h-4 mr-2" />
                                                         Cancel
@@ -174,7 +174,7 @@ export default function RoleManagementPage() {
 
                                     {/* Permission Matrix */}
                                     <div className="space-y-4">
-                                        {permissionGroups?.map((group) => (
+                                        {permissionGroups?.map((group: PermissionGroup) => (
                                             <Card key={group.module} className="overflow-hidden">
                                                 <CardHeader className="bg-slate-50/50 py-3">
                                                     <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-600">
@@ -183,7 +183,7 @@ export default function RoleManagementPage() {
                                                 </CardHeader>
                                                 <CardContent className="p-0">
                                                     <div className="divide-y">
-                                                        {group.permissions.map((perm) => (
+                                                        {group.permissions.map((perm: Permission) => (
                                                             <div
                                                                 key={perm.id}
                                                                 className={`flex items-center justify-between p-4 transition-colors ${editedPermissionIds.includes(perm.id) ? 'bg-blue-50/20' : ''
@@ -215,7 +215,7 @@ export default function RoleManagementPage() {
                                 <Card>
                                     <CardContent className="p-0">
                                         <div className="divide-y">
-                                            {auditLogs?.filter(l => l.role_id === selectedRoleId).map((log) => (
+                                            {auditLogs?.filter((l: PermissionAuditLog) => l.role_id === selectedRoleId).map((log: PermissionAuditLog) => (
                                                 <div key={log.id} className="p-4 flex gap-4">
                                                     <div className={`p-2 rounded-full h-fit ${log.action === 'ADD_PERMISSION' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                                         {log.action === 'ADD_PERMISSION' ? <Plus size={16} /> : <X size={16} />}
@@ -229,7 +229,7 @@ export default function RoleManagementPage() {
                                                     </div>
                                                 </div>
                                             ))}
-                                            {(!auditLogs || auditLogs.filter(l => l.role_id === selectedRoleId).length === 0) && (
+                                            {(!auditLogs || auditLogs.filter((l: PermissionAuditLog) => l.role_id === selectedRoleId).length === 0) && (
                                                 <div className="p-12 text-center text-slate-400">
                                                     <History size={32} className="mx-auto mb-2 opacity-20" />
                                                     <p className="text-sm">No audit logs found for this role.</p>

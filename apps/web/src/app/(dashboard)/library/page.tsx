@@ -43,7 +43,7 @@ export default function LibraryPage() {
         try {
             await issueMutation.mutateAsync({
                 book_id: selectedBook.id,
-                student_id: parseInt(issueData.studentId),
+                member_id: parseInt(issueData.studentId),
                 due_date: issueData.dueDate
             })
             setIsIssueOpen(false)
