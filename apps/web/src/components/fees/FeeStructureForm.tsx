@@ -41,6 +41,30 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
         ],
     });
 
+    const [batches, setBatches] = useState<any[]>([]);
+    const [loadingBatches, setLoadingBatches] = useState(false);
+
+    // Fetch batches when program changes
+    useEffect(() => {
+        if (formData.program_id) {
+            const fetchBatches = async () => {
+                setLoadingBatches(true);
+                try {
+                    const response = await api.get(`/batches/?program_id=${formData.program_id}`);
+                    setBatches(response.data);
+                } catch (error) {
+                    console.error('Failed to load batches:', error);
+                    toast.error('Failed to load batches');
+                } finally {
+                    setLoadingBatches(false);
+                }
+            };
+            fetchBatches();
+        } else {
+            setBatches([]);
+        }
+    }, [formData.program_id]);
+
     // Fetch fee heads, scholarship slabs, and programs on mount
     useEffect(() => {
         const fetchData = async () => {
@@ -260,13 +284,24 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Batch
                             </label>
-                            <Input
-                                type="text"
-                                value={formData.academic_year}
-                                onChange={(e) => setFormData({ ...formData, academic_year: e.target.value })}
-                                placeholder="e.g., 2024-2028"
-                                required
-                            />
+                            {loadingBatches ? (
+                                <div className="text-sm text-gray-500">Loading batches...</div>
+                            ) : (
+                                <select
+                                    value={formData.academic_year}
+                                    onChange={(e) => setFormData({ ...formData, academic_year: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                    disabled={!formData.program_id}
+                                >
+                                    <option value="">Select a batch</option>
+                                    {batches.map((batch: any) => (
+                                        <option key={batch.id} value={batch.batch_code}>
+                                            {batch.batch_name} ({batch.batch_code})
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
