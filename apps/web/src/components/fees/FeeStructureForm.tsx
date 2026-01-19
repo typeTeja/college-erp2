@@ -258,13 +258,13 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Academic Year
+                                Batch
                             </label>
                             <Input
                                 type="text"
                                 value={formData.academic_year}
                                 onChange={(e) => setFormData({ ...formData, academic_year: e.target.value })}
-                                placeholder="e.g., 2024-2025"
+                                placeholder="e.g., 2024-2028"
                                 required
                             />
                         </div>
