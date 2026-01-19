@@ -15,7 +15,7 @@ class BulkBatchSetupRequest(BaseModel):
     section_capacity: int = Field(default=60, ge=10, le=200, description="Maximum students per section")
     
     # Lab/Practical batch configuration
-    labs_per_section: int = Field(default=0, ge=0, le=5, description="Number of lab groups per section (0 for no labs)")
+    labs_per_section: int = Field(default=0, ge=0, le=50, description="Number of lab groups per section (0 for no labs)")
     lab_capacity: int = Field(default=20, ge=5, le=50, description="Maximum students per lab group")
     
     # Optional customization
