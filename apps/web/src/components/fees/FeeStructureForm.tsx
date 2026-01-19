@@ -278,10 +278,15 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required
                             >
-                                <option value={1}>1st Year</option>
-                                <option value={2}>2nd Year</option>
-                                <option value={3}>3rd Year</option>
-                                <option value={4}>4th Year</option>
+                                {(() => {
+                                    const selectedProgram = programs.find(p => p.id === formData.program_id);
+                                    const duration = selectedProgram?.duration_years || 4;
+                                    return Array.from({ length: duration }, (_, i) => i + 1).map(year => (
+                                        <option key={year} value={year}>
+                                            {year === 1 ? '1st' : year === 2 ? '2nd' : year === 3 ? '3rd' : `${year}th`} Year
+                                        </option>
+                                    ));
+                                })()}
                             </select>
                         </div>
                         <div>
