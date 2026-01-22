@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Copy, Eye, EyeOff } from 'lucide-react'
+import { CheckCircle, Copy, Eye, EyeOff, CreditCard, Banknote, DollarSign } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface QuickApplyResponse {
@@ -12,6 +12,9 @@ interface QuickApplyResponse {
     portal_username?: string
     portal_password?: string
     message: string
+    payment_mode?: string
+    fee_amount?: number
+    fee_enabled?: boolean
 }
 
 export default function ApplySuccessPage() {
@@ -52,6 +55,9 @@ export default function ApplySuccessPage() {
         )
     }
 
+    const hasCredentials = response.portal_username && response.portal_password
+    const requiresPayment = response.fee_enabled && !hasCredentials
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="max-w-2xl mx-auto shadow-xl">
@@ -82,8 +88,68 @@ export default function ApplySuccessPage() {
                         </div>
                     </div>
 
-                    {/* Portal Credentials */}
-                    {response.portal_username && response.portal_password && (
+                    {/* Payment Instructions (if payment required) */}
+                    {requiresPayment && (
+                        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <DollarSign className="h-6 w-6 text-orange-600" />
+                                <h3 className="text-lg font-semibold text-orange-900">
+                                    Payment Required
+                                </h3>
+                            </div>
+
+                            <div className="bg-white rounded-lg p-4 mb-4 border border-orange-200">
+                                <p className="text-sm text-gray-600 mb-2">Application Fee</p>
+                                <p className="text-3xl font-bold text-orange-600">₹{response.fee_amount}</p>
+                            </div>
+
+                            {response.payment_mode === 'ONLINE' ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-green-700">
+                                        <CreditCard className="h-5 w-5" />
+                                        <span className="font-semibold">Online Payment Selected</span>
+                                    </div>
+                                    <Button
+                                        className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3"
+                                        onClick={() => {
+                                            // TODO: Redirect to payment gateway
+                                            toast({
+                                                title: "Payment Gateway",
+                                                description: "Redirecting to payment gateway...",
+                                            })
+                                        }}
+                                    >
+                                        Proceed to Payment Gateway
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-blue-700">
+                                        <Banknote className="h-5 w-5" />
+                                        <span className="font-semibold">Offline Payment Selected</span>
+                                    </div>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <p className="text-sm text-blue-800">
+                                            <strong>Payment Instructions:</strong><br />
+                                            1. Visit the college admissions office<br />
+                                            2. Pay ₹{response.fee_amount} at the counter<br />
+                                            3. Collect payment receipt<br />
+                                            4. Upload receipt proof in student portal
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                <p className="text-xs text-yellow-800">
+                                    <strong>📧 After Payment:</strong> You will receive your student portal login credentials via email and SMS once payment is confirmed.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Portal Credentials (if no payment required) */}
+                    {hasCredentials && (
                         <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-purple-900 mb-4">
                                 🎓 Your Student Portal Credentials
@@ -149,29 +215,44 @@ export default function ApplySuccessPage() {
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">📋 Next Steps</h3>
                         <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-                            <li>Check your email and SMS for login credentials</li>
-                            <li>Login to the student portal using the credentials above</li>
-                            <li>Complete the remaining application form</li>
-                            <li>Upload required documents</li>
-                            <li>Complete payment (if applicable)</li>
+                            {requiresPayment ? (
+                                <>
+                                    <li>Complete the application fee payment</li>
+                                    <li>Wait for payment confirmation email/SMS</li>
+                                    <li>Receive your student portal login credentials</li>
+                                    <li>Login to the student portal</li>
+                                    <li>Complete the remaining application form</li>
+                                    <li>Upload required documents</li>
+                                </>
+                            ) : (
+                                <>
+                                    <li>Check your email and SMS for login credentials</li>
+                                    <li>Login to the student portal using the credentials above</li>
+                                    <li>Complete the remaining application form</li>
+                                    <li>Upload required documents</li>
+                                </>
+                            )}
                         </ol>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <Button
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3"
-                            onClick={() => router.push('/auth/login')}
-                        >
-                            Login to Student Portal
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="flex-1 py-3"
-                            onClick={() => router.push('/')}
-                        >
-                            Back to Home
-                        </Button>
+                        {hasCredentials ? (
+                            <Button
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3"
+                                onClick={() => router.push('/login')}
+                            >
+                                Login to Student Portal
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="outline"
+                                className="flex-1 py-3"
+                                onClick={() => router.push('/')}
+                            >
+                                Back to Home
+                            </Button>
+                        )}
                     </div>
 
                     {/* Contact Information */}

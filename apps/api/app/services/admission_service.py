@@ -83,17 +83,25 @@ class AdmissionService:
         state: str,
         board: str,
         group_of_study: str,
-    ) -> tuple[Application, str, str]:
+        payment_mode: str = "ONLINE",
+    ) -> Application:
         """
-        Create Quick Apply application and student portal account
+        Create Quick Apply application WITHOUT portal account
+        Portal account will be created after payment completion
         
-        Returns: (application, portal_username, portal_password)
+        Returns: application
         """
         # Get admission settings
         admission_settings = AdmissionService.get_admission_settings(session)
         
         # Generate application number
         app_number = AdmissionService.generate_application_number(session)
+        
+        # Determine initial status based on payment requirement
+        if admission_settings.application_fee_enabled:
+            initial_status = ApplicationStatus.PENDING_PAYMENT
+        else:
+            initial_status = ApplicationStatus.QUICK_APPLY_SUBMITTED
         
         # Create application
         application = Application(
@@ -106,58 +114,27 @@ class AdmissionService:
             state=state,
             board=board,
             group_of_study=group_of_study,
-            status=ApplicationStatus.QUICK_APPLY_SUBMITTED,
+            status=initial_status,
             quick_apply_completed_at=datetime.utcnow(),
-            application_fee=admission_settings.application_fee_amount,
+            application_fee=admission_settings.application_fee_amount if admission_settings.application_fee_enabled else 0,
+            fee_mode=payment_mode,
         )
         
         session.add(application)
         session.flush()  # Get application ID
         
-        # Create student portal account if enabled
-        portal_username = None
-        portal_password = None
-        
-        if admission_settings.auto_create_student_account:
-            portal_username, portal_password = AdmissionService.generate_portal_credentials()
-            
-            # Create user account
-            student_role = session.exec(select(Role).where(Role.name == "STUDENT")).first()
-            if not student_role:
-                raise ValueError("STUDENT role not found in database")
-            
-            portal_user = User(
-                username=portal_username,
-                email=email,
-                phone=phone,
-                full_name=name,
-                hashed_password=AdmissionService.hash_password(portal_password),
-                is_active=True,
-            )
-            session.add(portal_user)
-            session.flush()
-            
-            # Link user to application
-            application.portal_user_id = portal_user.id
-            application.portal_password_hash = AdmissionService.hash_password(portal_password)
-            
-            # Assign student role
-            from app.models.user_role import UserRole
-            user_role = UserRole(user_id=portal_user.id, role_id=student_role.id)
-            session.add(user_role)
-        
         # Log activity
         activity_log = ApplicationActivityLog(
             application_id=application.id,
             activity_type=ActivityType.APPLICATION_CREATED,
-            description=f"Quick Apply submitted by {name}",
+            description=f"Quick Apply submitted by {name} - Payment Mode: {payment_mode}",
         )
         session.add(activity_log)
         
         session.commit()
         session.refresh(application)
         
-        return application, portal_username, portal_password
+        return application
     
     @staticmethod
     def update_login_timestamp(session: Session, application: Application):
@@ -245,3 +222,66 @@ class AdmissionService:
             "offline_enabled": settings_obj.offline_payment_enabled,
             "payment_gateway": settings_obj.payment_gateway,
         }
+    
+    @staticmethod
+    def create_portal_account_after_payment(
+        session: Session,
+        application: Application
+    ) -> tuple[str, str]:
+        """
+        Create student portal account AFTER payment completion
+        
+        Returns: (portal_username, portal_password)
+        """
+        # Get admission settings
+        admission_settings = AdmissionService.get_admission_settings(session)
+        
+        if not admission_settings.auto_create_student_account:
+            raise ValueError("Auto account creation is disabled")
+        
+        # Check if account already exists
+        if application.portal_user_id:
+            raise ValueError("Portal account already exists for this application")
+        
+        # Generate credentials
+        portal_username, portal_password = AdmissionService.generate_portal_credentials()
+        
+        # Create user account
+        student_role = session.exec(select(Role).where(Role.name == "STUDENT")).first()
+        if not student_role:
+            raise ValueError("STUDENT role not found in database")
+        
+        portal_user = User(
+            username=portal_username,
+            email=application.email,
+            phone=application.phone,
+            full_name=application.name,
+            hashed_password=AdmissionService.hash_password(portal_password),
+            is_active=True,
+        )
+        session.add(portal_user)
+        session.flush()
+        
+        # Link user to application
+        application.portal_user_id = portal_user.id
+        application.portal_password_hash = AdmissionService.hash_password(portal_password)
+        application.status = ApplicationStatus.QUICK_APPLY_SUBMITTED
+        
+        # Assign student role
+        from app.models.user_role import UserRole
+        user_role = UserRole(user_id=portal_user.id, role_id=student_role.id)
+        session.add(user_role)
+        
+        # Log activity
+        activity_log = ApplicationActivityLog(
+            application_id=application.id,
+            activity_type=ActivityType.PAYMENT_COMPLETED,
+            description="Portal account created after payment completion",
+        )
+        session.add(activity_log)
+        
+        session.add(application)
+        session.commit()
+        session.refresh(application)
+        
+        return portal_username, portal_password
