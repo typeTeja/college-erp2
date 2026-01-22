@@ -17,6 +17,17 @@ export const admissionSchema = z.object({
     documents_submitted: z.boolean(),
     fee_paid: z.boolean(),
     remarks: z.string().optional(),
+    
+    // Stage 2 Fields (Optional for full entry)
+    aadhaar_number: z.string().regex(/^\d{12}$/, "Aadhaar must be 12 digits").optional().or(z.literal('')),
+    father_name: z.string().optional(),
+    father_phone: z.string().regex(/^\d{10}$/, "Phone must be 10 digits").optional().or(z.literal('')),
+    address: z.string().optional(),
+    previous_marks_percentage: z.coerce.number().min(0).max(100).optional(),
+    applied_for_scholarship: z.boolean().default(false),
+    hostel_required: z.boolean().default(false),
+    is_full_entry: z.boolean().default(false), // Toggle for UI
+    is_paid: z.boolean().default(false), // Admin checkbox
 });
 
 export type AdmissionFormValues = z.infer<typeof admissionSchema>;

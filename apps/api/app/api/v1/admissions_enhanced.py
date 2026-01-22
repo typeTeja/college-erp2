@@ -17,7 +17,9 @@ from app.schemas.admissions import (
     ApplicationRead,
     AdmissionSettingsRead,
     AdmissionSettingsUpdate,
-    PaymentConfigResponse
+    AdmissionSettingsUpdate,
+    PaymentConfigResponse,
+    OfflineApplicationCreate
 )
 from app.services.admission_service import AdmissionService
 from typing import Optional

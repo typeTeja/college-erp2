@@ -220,3 +220,20 @@ class PaymentConfigResponse(BaseModel):
     online_enabled: bool
     offline_enabled: bool
     payment_gateway: str
+
+class OfflineApplicationCreate(ApplicationBase):
+    """Schema for Full Offline Application Creation (Admin)"""
+    # Stage 1 fields inherited from ApplicationBase
+    
+    # Stage 2 fields (Optional for admin flexibility)
+    aadhaar_number: Optional[str] = None
+    father_name: Optional[str] = None
+    father_phone: Optional[str] = None
+    address: Optional[str] = None
+    previous_marks_percentage: Optional[float] = None
+    applied_for_scholarship: bool = False
+    hostel_required: bool = False
+    
+    # Payment & Status
+    fee_mode: FeeMode = FeeMode.OFFLINE
+    is_paid: bool = False  # If true, marks as PAID instantly
