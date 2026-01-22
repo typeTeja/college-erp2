@@ -12,6 +12,7 @@ export interface BatchSemester {
     end_date?: string;
     is_active: boolean;
     sections?: Section[];
+    practical_batches?: PracticalBatch[];
 }
 
 export interface BatchSubject {
@@ -35,14 +36,15 @@ export interface Section {
     max_strength: number;
     current_strength: number;
     is_active: boolean;
-    practical_batches?: PracticalBatch[];
+    // practical_batches removed
 }
 
 export interface PracticalBatch {
     id: number;
-    name: string; // "P1"
-    code: string; // "P1"
-    section_id: number;
+    name: string; // "Lab Batch A1"
+    code: string; // "L1"
+    batch_semester_id: number; // Linked to semester
+    // section_id removed
     max_strength: number;
     current_strength: number;
     is_active: boolean;

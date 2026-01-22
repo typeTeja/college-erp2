@@ -11,6 +11,7 @@ CRITICAL WORKFLOW:
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlmodel import Session, select, func
+from sqlalchemy.orm import selectinload
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -34,6 +35,7 @@ from app.schemas.academic.batch import (
     AcademicBatchWithDetails,
     ProgramYearRead,
     BatchSemesterRead,
+    BatchSemesterUpdate,
     BatchSubjectRead
 )
 from app.schemas.bulk_setup import BulkBatchSetupRequest, BulkBatchSetupResponse
@@ -450,9 +452,47 @@ def list_batch_semesters(
     
     stmt = select(BatchSemester).where(
         BatchSemester.batch_id == batch_id
+    ).options(
+        selectinload(BatchSemester.sections),
+        selectinload(BatchSemester.practical_batches)
     ).order_by(BatchSemester.semester_no)
     
     return session.exec(stmt).all()
+
+
+@router.patch("/{batch_id}/semesters/{semester_id}", response_model=BatchSemesterRead, tags=["Batch Semesters"])
+def update_batch_semester(
+    batch_id: int,
+    semester_id: int,
+    data: BatchSemesterUpdate,
+    session: Session = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    Update batch semester dates and active status.
+    Setting 'is_active=True' can trigger auto-promotion logic.
+    """
+    check_admin(current_user)
+    
+    # Verify batch
+    batch = session.get(AcademicBatch, batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+        
+    # Verify semester
+    semester = session.get(BatchSemester, semester_id)
+    if not semester or semester.batch_id != batch_id:
+        raise HTTPException(status_code=404, detail="Semester not found in this batch")
+        
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(semester, key, value)
+        
+    session.add(semester)
+    session.commit()
+    session.refresh(semester)
+    
+    return semester
 
 
 # ============================================================================

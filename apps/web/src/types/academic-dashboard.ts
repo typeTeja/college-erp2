@@ -16,7 +16,6 @@ export interface DashboardSection {
     utilization_percentage: number;
     faculty_id?: number;
     faculty_name?: string;
-    lab_groups: DashboardLabGroup[];
 }
 
 export interface DashboardSemester {
@@ -25,6 +24,7 @@ export interface DashboardSemester {
     semester_name: string;
     total_credits: number;
     sections: DashboardSection[];
+    lab_groups: DashboardLabGroup[];
     total_students: number;
     total_capacity: number;
 }

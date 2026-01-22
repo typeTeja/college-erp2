@@ -10,9 +10,17 @@ if TYPE_CHECKING:
     from .academic.entrance_exam import EntranceExamResult
 
 class ApplicationStatus(str, Enum):
+    # Enhanced Workflow Statuses
+    QUICK_APPLY_SUBMITTED = "QUICK_APPLY_SUBMITTED"  # Stage 1 complete, account created
+    LOGGED_IN = "LOGGED_IN"  # Student logged in but form incomplete
+    FORM_IN_PROGRESS = "FORM_IN_PROGRESS"  # Student started full form
+    
+    # Payment Statuses
     PENDING_PAYMENT = "PENDING_PAYMENT"
     PAYMENT_FAILED = "PAYMENT_FAILED"
     PAID = "PAID"
+    
+    # Application Processing Statuses
     FORM_COMPLETED = "FORM_COMPLETED"
     UNDER_REVIEW = "UNDER_REVIEW"
     APPROVED = "APPROVED"
@@ -90,6 +98,17 @@ class Application(SQLModel, table=True):
     # Photo
     photo_url: Optional[str] = None
     
+    # Student Portal Access (for progressive application completion)
+    portal_user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
+    portal_password_hash: Optional[str] = None  # Hashed password for student portal
+    portal_first_login: Optional[datetime] = None
+    portal_last_login: Optional[datetime] = None
+    
+    # Application Completion Tracking
+    quick_apply_completed_at: Optional[datetime] = None
+    full_form_started_at: Optional[datetime] = None
+    full_form_completed_at: Optional[datetime] = None
+    
     # Payment tracking
     application_fee: float = Field(default=500.0)
     payment_status: str = Field(default="pending")  # pending, paid, failed
@@ -141,7 +160,7 @@ class Application(SQLModel, table=True):
     offline_payment_verified_by: Optional[int] = Field(default=None, foreign_key="user.id")
     offline_payment_verified_at: Optional[datetime] = None
     
-    status: ApplicationStatus = Field(default=ApplicationStatus.PENDING_PAYMENT, index=True)
+    status: ApplicationStatus = Field(default=ApplicationStatus.QUICK_APPLY_SUBMITTED, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     

@@ -154,3 +154,69 @@ class PaymentInitiate(BaseModel):
     """Schema for initiating online payment"""
     amount: float
     return_url: str
+
+# Enhanced Admission Workflow Schemas
+
+class QuickApplyCreate(BaseModel):
+    """Stage 1: Quick Apply - Minimal fields for lead capture"""
+    name: str
+    email: EmailStr
+    phone: str
+    gender: str
+    program_id: int
+    state: str
+    board: str
+    group_of_study: str
+
+class QuickApplyResponse(BaseModel):
+    """Response after Quick Apply submission"""
+    application_number: str
+    portal_username: Optional[str] = None
+    portal_password: Optional[str] = None  # Only sent once
+    message: str
+    
+class ApplicationCompleteUpdate(BaseModel):
+    """Stage 2: Complete Application - Full form fields"""
+    aadhaar_number: Optional[str] = None
+    father_name: Optional[str] = None
+    father_phone: Optional[str] = None
+    address: Optional[str] = None
+    previous_marks_percentage: Optional[float] = None
+    applied_for_scholarship: bool = False
+    hostel_required: bool = False
+
+class AdmissionSettingsRead(BaseModel):
+    """Read admission settings"""
+    id: int
+    application_fee_enabled: bool
+    application_fee_amount: float
+    online_payment_enabled: bool
+    offline_payment_enabled: bool
+    payment_gateway: str
+    send_credentials_email: bool
+    send_credentials_sms: bool
+    auto_create_student_account: bool
+    portal_base_url: str
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class AdmissionSettingsUpdate(BaseModel):
+    """Update admission settings"""
+    application_fee_enabled: Optional[bool] = None
+    application_fee_amount: Optional[float] = None
+    online_payment_enabled: Optional[bool] = None
+    offline_payment_enabled: Optional[bool] = None
+    send_credentials_email: Optional[bool] = None
+    send_credentials_sms: Optional[bool] = None
+    auto_create_student_account: Optional[bool] = None
+    portal_base_url: Optional[str] = None
+
+class PaymentConfigResponse(BaseModel):
+    """Payment configuration for frontend"""
+    fee_enabled: bool
+    fee_amount: float
+    online_enabled: bool
+    offline_enabled: bool
+    payment_gateway: str

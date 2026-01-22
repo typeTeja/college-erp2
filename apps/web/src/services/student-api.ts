@@ -3,9 +3,9 @@
  * 
  * Provides methods to interact with student management endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/students';
+const BASE_URL = '/students';
 
 // ============================================================================
 // Student APIs
@@ -22,7 +22,7 @@ export const studentApi = {
         status?: string;
         search?: string;
     }): Promise<any[]> => {
-        const response = await axios.get(BASE_URL, { params: filters });
+        const response = await api.get(BASE_URL, { params: filters });
         return response.data;
     },
 
@@ -30,7 +30,7 @@ export const studentApi = {
      * Get a specific student by ID
      */
     get: async (id: number): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/${id}`);
+        const response = await api.get(`${BASE_URL}/${id}`);
         return response.data;
     },
 
@@ -38,7 +38,7 @@ export const studentApi = {
      * Create a new student
      */
     create: async (data: any): Promise<any> => {
-        const response = await axios.post(BASE_URL, data);
+        const response = await api.post(BASE_URL, data);
         return response.data;
     },
 
@@ -46,7 +46,7 @@ export const studentApi = {
      * Update a student
      */
     update: async (id: number, data: any): Promise<any> => {
-        const response = await axios.put(`${BASE_URL}/${id}`, data);
+        const response = await api.put(`${BASE_URL}/${id}`, data);
         return response.data;
     },
 
@@ -54,7 +54,7 @@ export const studentApi = {
      * Delete a student
      */
     delete: async (id: number): Promise<void> => {
-        await axios.delete(`${BASE_URL}/${id}`);
+        await api.delete(`${BASE_URL}/${id}`);
     },
 
     /**
@@ -65,7 +65,7 @@ export const studentApi = {
         formData.append('file', file);
         formData.append('document_type', documentType);
 
-        const response = await axios.post(`${BASE_URL}/${id}/documents`, formData, {
+        const response = await api.post(`${BASE_URL}/${id}/documents`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
@@ -75,7 +75,7 @@ export const studentApi = {
      * Get student activity history
      */
     getActivity: async (id: number): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/${id}/activity`);
+        const response = await api.get(`${BASE_URL}/${id}/activity`);
         return response.data;
     },
 
@@ -83,7 +83,7 @@ export const studentApi = {
      * Deactivate a student
      */
     deactivate: async (id: number, reason: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${id}/deactivate`, { reason });
+        const response = await api.post(`${BASE_URL}/${id}/deactivate`, { reason });
         return response.data;
     },
 
@@ -91,7 +91,7 @@ export const studentApi = {
      * Reactivate a student
      */
     reactivate: async (id: number): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${id}/reactivate`);
+        const response = await api.post(`${BASE_URL}/${id}/reactivate`);
         return response.data;
     },
 };

@@ -2,8 +2,9 @@
 Batch Pydantic Schemas
 """
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel, Field, field_validator
+from app.schemas.master_data import SectionRead, PracticalBatchRead
 
 
 # ============================================================================
@@ -98,10 +99,22 @@ class BatchSemesterRead(BaseModel):
     semester_name: str
     total_credits: int
     min_credits_to_pass: int
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    is_active: bool
+    sections: List[SectionRead] = []
+    practical_batches: List[PracticalBatchRead] = []
     created_at: datetime
     
     class Config:
         from_attributes = True
+
+
+class BatchSemesterUpdate(BaseModel):
+    """Update semester dates"""
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    is_active: Optional[bool] = None
 
 
 # ============================================================================

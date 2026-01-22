@@ -24,24 +24,26 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
     const [currentStep, setCurrentStep] = useState<WizardStep>('program');
     const [loading, setLoading] = useState(false);
 
+    const currentYear = new Date().getFullYear();
+
     const [formData, setFormData] = useState<Partial<BulkBatchSetupRequest>>({
+        joining_year: currentYear,
         sections_per_semester: 1,
         section_capacity: 60,
         labs_per_section: 0,
         lab_capacity: 20,
     });
 
-    // Ensure labs_per_section is never null/undefined
+    // Ensure labs_per_section is never null/undefined/NaN
     const ensureLabsValue = (value: number | undefined | null): number => {
-        return value === null || value === undefined ? 0 : value;
+        if (value === null || value === undefined || isNaN(value)) return 0;
+        return value;
     };
 
     const selectedProgram = programs.find(p => p.id === formData.program_id);
     const selectedRegulation = regulations.find(r => r.id === formData.regulation_id);
     // Show all regulations - backend will validate compatibility
     const filteredRegulations = regulations;
-
-    const currentYear = new Date().getFullYear();
 
     // Calculate statistics
     const calculateStats = () => {
@@ -286,8 +288,11 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                         type="number"
                                         min={1}
                                         max={10}
-                                        value={formData.sections_per_semester}
-                                        onChange={(e) => setFormData({ ...formData, sections_per_semester: parseInt(e.target.value) })}
+                                        value={formData.sections_per_semester || ''}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            setFormData({ ...formData, sections_per_semester: isNaN(val) ? 0 : val });
+                                        }}
                                     />
                                     <p className="text-sm text-gray-500 mt-1">e.g., 2 for Section A, B</p>
                                 </div>
@@ -299,8 +304,11 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                         type="number"
                                         min={10}
                                         max={200}
-                                        value={formData.section_capacity}
-                                        onChange={(e) => setFormData({ ...formData, section_capacity: parseInt(e.target.value) })}
+                                        value={formData.section_capacity || ''}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            setFormData({ ...formData, section_capacity: isNaN(val) ? 0 : val });
+                                        }}
                                     />
                                     <p className="text-sm text-gray-500 mt-1">Max students per section</p>
                                 </div>
@@ -312,8 +320,11 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                         type="number"
                                         min={0}
                                         max={5}
-                                        value={formData.labs_per_section}
-                                        onChange={(e) => setFormData({ ...formData, labs_per_section: parseInt(e.target.value) })}
+                                        value={formData.labs_per_section === 0 ? 0 : (formData.labs_per_section || '')}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            setFormData({ ...formData, labs_per_section: isNaN(val) ? 0 : val });
+                                        }}
                                     />
                                     <p className="text-sm text-gray-500 mt-1">0 for no labs</p>
                                 </div>
@@ -325,8 +336,11 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                         type="number"
                                         min={5}
                                         max={50}
-                                        value={formData.lab_capacity}
-                                        onChange={(e) => setFormData({ ...formData, lab_capacity: parseInt(e.target.value) })}
+                                        value={formData.lab_capacity || ''}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            setFormData({ ...formData, lab_capacity: isNaN(val) ? 0 : val });
+                                        }}
                                         disabled={!formData.labs_per_section}
                                     />
                                     <p className="text-sm text-gray-500 mt-1">Max students per lab</p>

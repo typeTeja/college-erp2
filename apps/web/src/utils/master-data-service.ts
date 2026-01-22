@@ -708,7 +708,7 @@ export const deleteSMSTemplate = async (id: number): Promise<void> => {
 // Batch Semesters (New Academic Foundation)
 // ============================================================================
 
-import { BatchSemester } from '../types/academic-batch';
+import { BatchSemester, BatchSubject } from '../types/academic-batch';
 
 export const getBatchSemesters = async (batchId: number): Promise<BatchSemester[]> => {
     // Updated endpoint: /batches/{id}/semesters
@@ -717,4 +717,53 @@ export const getBatchSemesters = async (batchId: number): Promise<BatchSemester[
 };
 
 // Note: Semesters are now auto-generated via Regulation/Batch and are not manually created.
+
+export const updateBatchSemester = async (batchId: number, semesterId: number, data: Partial<BatchSemester>): Promise<BatchSemester> => {
+    const response = await api.patch(`/batches/${batchId}/semesters/${semesterId}`, data);
+    return response.data;
+};
+
+export const getBatchSubjects = async (batchId: number, semesterNo?: number): Promise<BatchSubject[]> => {
+    const params: any = {};
+    if (semesterNo) params.semester_no = semesterNo;
+    const response = await api.get(`/batches/${batchId}/subjects`, { params });
+    return response.data;
+};
+
+
+// ============================================================================
+// Lab Batch Allocations
+// ============================================================================
+
+export interface LabAllocation {
+    id: number;
+    student_id: number;
+    student_name: string;
+    admission_number: string;
+    practical_batch_id: number;
+    subject_id: number;
+}
+
+export interface BulkAllocationRequest {
+    student_ids: number[];
+    practical_batch_id: number;
+    subject_id: number;
+    batch_semester_id: number;
+}
+
+export const getLabAllocations = async (batchId: number, subjectId?: number): Promise<LabAllocation[]> => {
+    const params: any = {};
+    if (subjectId) params.subject_id = subjectId;
+    const response = await api.get(`/allocations/batch/${batchId}`, { params });
+    return response.data;
+};
+
+export const assignStudentsToLab = async (data: BulkAllocationRequest): Promise<{ allocated: number, capacity_remaining: number }> => {
+    const response = await api.post('/allocations/bulk', data);
+    return response.data;
+};
+
+export const removeStudentFromLab = async (studentId: number, subjectId: number): Promise<void> => {
+    await api.delete(`/allocations/${studentId}/${subjectId}`);
+};
 

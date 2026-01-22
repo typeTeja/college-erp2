@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,27 +12,42 @@ import { attendanceService } from '@/utils/attendance-service';
 import { CreateSessionDTO } from '@/types/attendance';
 import { useAuthStore } from '@/store/use-auth-store';
 
+import { CreateSessionDialog } from './CreateSessionDialog';
+
 export function FacultyAttendancePanel() {
     const { user } = useAuthStore();
     const queryClient = useQueryClient();
-    const [newSession, setNewSession] = useState<Partial<CreateSessionDTO>>({
-        session_date: new Date().toISOString().split('T')[0],
-        start_time: '09:00',
-        end_time: '10:00',
-        section: 'A',
-    });
+    const [createOpen, setCreateOpen] = useState(false);
 
     const { data: sessions, isLoading } = useQuery({
         queryKey: ['attendance-sessions'],
-        queryFn: () => attendanceService.getSessions(), // Filter by faculty ID from user if needed
+        queryFn: () => attendanceService.getSessions(),
     });
+
+    const handleCreateSession = async (data: CreateSessionDTO) => {
+        try {
+            await attendanceService.createSession(data);
+            queryClient.invalidateQueries({ queryKey: ['attendance-sessions'] });
+            toast.success("Session created successfully");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to create session");
+            throw error;
+        }
+    };
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold tracking-tight">Class Attendance</h2>
-                <Button>Create New Session</Button>
+                <Button onClick={() => setCreateOpen(true)}>Create New Session</Button>
             </div>
+
+            <CreateSessionDialog
+                open={createOpen}
+                onClose={() => setCreateOpen(false)}
+                onSubmit={handleCreateSession}
+            />
 
             <Card>
                 <CardHeader>

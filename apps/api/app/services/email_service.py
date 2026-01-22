@@ -286,6 +286,97 @@ class EmailService:
         """
         
         return self.send_email(to_email, subject, html_content)
+    
+    def send_portal_credentials(
+        self,
+        to_email: str,
+        name: str,
+        application_number: str,
+        username: str,
+        password: str,
+        portal_url: str = "https://portal.college.edu"
+    ) -> bool:
+        """Send student portal login credentials email"""
+        subject = f"Your Student Portal Login Credentials - {application_number}"
+        
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #2563eb;">🎓 Welcome to Our Student Portal!</h2>
+                    
+                    <p>Dear {name},</p>
+                    
+                    <p>Thank you for submitting your application. Your student portal account has been created successfully.</p>
+                    
+                    <div style="background-color: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2563eb;">
+                        <strong>Application Number:</strong> <strong>{application_number}</strong>
+                    </div>
+                    
+                    <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #16a34a;">
+                        <h3 style="color: #16a34a; margin-top: 0;">🔐 Your Login Credentials</h3>
+                        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Username:</strong> <code style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 3px; font-size: 14px;">{username}</code><br><br>
+                            <strong>Password:</strong> <code style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 3px; font-size: 14px;">{password}</code>
+                        </div>
+                        <p style="margin-bottom: 0; font-size: 12px; color: #666;">
+                            ⚠️ <strong>Important:</strong> Please save these credentials securely. You can change your password after logging in.
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{portal_url}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Login to Portal</a>
+                    </div>
+                    
+                    <div style="background-color: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                        <strong>📋 Next Steps:</strong>
+                        <ol style="margin: 10px 0;">
+                            <li>Login to the student portal using the credentials above</li>
+                            <li>Complete the remaining application form</li>
+                            <li>Upload required documents</li>
+                            <li>Complete payment (if applicable)</li>
+                        </ol>
+                    </div>
+                    
+                    <p>If you have any questions or face any issues logging in, please contact our admissions office.</p>
+                    
+                    <p>Best regards,<br>
+                    Admissions Team</p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        text_content = f"""
+        Welcome to Our Student Portal!
+        
+        Dear {name},
+        
+        Thank you for submitting your application. Your student portal account has been created successfully.
+        
+        Application Number: {application_number}
+        
+        Your Login Credentials:
+        Username: {username}
+        Password: {password}
+        
+        Portal URL: {portal_url}
+        
+        Next Steps:
+        1. Login to the student portal using the credentials above
+        2. Complete the remaining application form
+        3. Upload required documents
+        4. Complete payment (if applicable)
+        
+        Important: Please save these credentials securely. You can change your password after logging in.
+        
+        If you have any questions or face any issues logging in, please contact our admissions office.
+        
+        Best regards,
+        Admissions Team
+        """
+        
+        return self.send_email(to_email, subject, html_content, text_content)
 
 # Singleton instance
 email_service = EmailService()

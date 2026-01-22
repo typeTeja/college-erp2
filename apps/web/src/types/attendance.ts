@@ -77,6 +77,8 @@ export interface CreateSessionDTO {
     start_time: string;
     end_time: string;
     topic_covered?: string;
+    section_id?: number;
+    practical_batch_id?: number;
 }
 
 export interface UpdateRecordDTO {

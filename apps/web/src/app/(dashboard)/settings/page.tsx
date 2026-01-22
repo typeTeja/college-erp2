@@ -5,7 +5,7 @@ import {
     Settings, User, Shield, Building2, Globe,
     Bell, Lock, History, ExternalLink, Save,
     CheckCircle2, AlertCircle, RefreshCcw,
-    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building, GraduationCap, FileText
+    Calendar, DollarSign, BookOpen, Award, Users, Briefcase, Building, GraduationCap, FileText, Layers
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,7 @@ import { AcademicStructureTab } from "./AcademicStructureTab";
 import { RegulationsTab } from "./RegulationsTab";
 import AcademicDashboardTab from "./AcademicDashboardTab";
 import { ScholarshipSlabTab } from "./ScholarshipSlabTab";
+import { AdmissionSettingsTab } from "./AdmissionSettingsTab";
 import { useAuthStore } from "@/store/use-auth-store"
 import { useUpdateProfile, useChangePassword, useSettings, useTestConnection, useUpdateSetting, useAuditLogs } from "@/hooks/use-settings"
 import { toast } from "sonner"
@@ -147,6 +148,12 @@ export default function SettingsPage() {
                                     active={activeTab === 'academic-dashboard'}
                                     onClick={() => setActiveTab('academic-dashboard')}
                                 />
+                                <SettingNavItem
+                                    icon={<Layers size={18} />}
+                                    label="Academic Structure"
+                                    active={activeTab === 'academic-structure'}
+                                    onClick={() => setActiveTab('academic-structure')}
+                                />
 
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                     Fee Configuration
@@ -184,6 +191,12 @@ export default function SettingsPage() {
                                     label="Lead Sources"
                                     active={activeTab === 'lead-sources'}
                                     onClick={() => setActiveTab('lead-sources')}
+                                />
+                                <SettingNavItem
+                                    icon={<DollarSign size={18} />}
+                                    label="Admission Settings"
+                                    active={activeTab === 'admission-settings'}
+                                    onClick={() => setActiveTab('admission-settings')}
                                 />
 
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
@@ -237,11 +250,13 @@ export default function SettingsPage() {
                     {activeTab === 'regulations' && <RegulationsTab />}
                     {activeTab === 'academic-batches' && <AcademicBatchTab />}
                     {activeTab === 'academic-dashboard' && <AcademicDashboardTab />}
+                    {activeTab === 'academic-structure' && <AcademicStructureTab />}
                     {activeTab === 'fee-heads' && <FeeHeadTab />}
                     {activeTab === 'scholarship-slabs' && <ScholarshipSlabTab />}
                     {activeTab === 'boards' && <BoardTab />}
                     {activeTab === 'reservations' && <ReservationCategoryTab />}
                     {activeTab === 'lead-sources' && <LeadSourceTab />}
+                    {activeTab === 'admission-settings' && <AdmissionSettingsTab />}
                     {activeTab === 'designations' && <DesignationTab />}
                     {activeTab === 'companies' && <PlacementCompanyTab />}
                     {activeTab === 'integrations' && <IntegrationsTab isSuperAdmin={isSuperAdmin} />}

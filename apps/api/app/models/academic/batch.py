@@ -8,7 +8,7 @@ CRITICAL RULES:
 - ProgramYear is SYSTEM-OWNED and READ-ONLY
 """
 from typing import TYPE_CHECKING, List, Optional
-from datetime import datetime
+from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import Text, UniqueConstraint
 
@@ -120,6 +120,11 @@ class BatchSemester(SQLModel, table=True):
     total_credits: int = Field(default=0, ge=0)
     min_credits_to_pass: int = Field(default=0, ge=0)
     
+    # Semester Dates (For Auto-Promotion)
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    is_active: bool = Field(default=False)
+    
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -127,6 +132,7 @@ class BatchSemester(SQLModel, table=True):
     batch: "AcademicBatch" = Relationship(back_populates="semesters")
     program_year: "ProgramYear" = Relationship(back_populates="semesters")
     sections: List["Section"] = Relationship(back_populates="batch_semester")
+    practical_batches: List["PracticalBatch"] = Relationship(back_populates="batch_semester")
 
 
 class BatchSubject(SQLModel, table=True):

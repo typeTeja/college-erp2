@@ -27,7 +27,9 @@ class AttendanceSession(SQLModel, table=True):
     program_year_id: int = Field(foreign_key="program_years.id")
     
     semester: int
-    section: str = Field(max_length=10)
+    semester: int
+    section: Optional[str] = Field(default=None, max_length=10) # Made optional
+    practical_batch_id: Optional[int] = Field(default=None, foreign_key="practical_batch.id")
     session_date: date
     start_time: time
     end_time: time

@@ -10,6 +10,7 @@ from app.models.program import Program
 from app.models.academic.batch import AcademicBatch, ProgramYear, BatchSemester
 from app.models.academic.regulation import Regulation, RegulationSemester
 from app.models.master_data import Section, PracticalBatch
+from app.models.user import User
 from app.schemas.bulk_setup import BulkBatchSetupRequest, BulkBatchSetupResponse
 from app.utils.audit import log_create
 
@@ -26,23 +27,11 @@ class BulkBatchSetupService:
     ) -> BulkBatchSetupResponse:
         """
         Create complete academic structure in one operation
-        
-        Steps:
-        1. Validate program and regulation
-        2. Create AcademicBatch
-        3. Auto-generate ProgramYears
-        4. Auto-generate BatchSemesters (from regulation)
-        5. Auto-generate Sections
-        6. Auto-generate PracticalBatches (labs)
-        
-        Args:
-            session: Database session
-            request: Bulk setup request
-            user_id: User creating the batch
-            
-        Returns:
-            BulkBatchSetupResponse with statistics
+        ...
         """
+        # Fetch user for audit logging
+        user = session.get(User, user_id)
+        
         # Step 1: Validate program
         program = session.get(Program, request.program_id)
         if not program:
@@ -114,7 +103,7 @@ class BulkBatchSetupService:
                 "regulation_id": batch.regulation_id,
                 "joining_year": batch.joining_year
             },
-            user_id=user_id,
+            user=user,
             request=http_request
         )
         
@@ -143,7 +132,7 @@ class BulkBatchSetupService:
                     "year_no": program_year.year_no,
                     "year_name": program_year.year_name
                 },
-                user_id=user_id,
+                    user=user,
                 request=http_request
             )
         
@@ -164,7 +153,7 @@ class BulkBatchSetupService:
         for reg_sem in regulation_semesters:
             # Find corresponding program year
             program_year = next(
-                (py for py in program_years if py.year_no == reg_sem.year_no),
+                (py for py in program_years if py.year_no == reg_sem.program_year),
                 None
             )
             if not program_year:
@@ -173,7 +162,7 @@ class BulkBatchSetupService:
             batch_semester = BatchSemester(
                 batch_id=batch.id,
                 program_year_id=program_year.id,
-                year_no=reg_sem.year_no,
+                year_no=reg_sem.program_year,
                 semester_no=reg_sem.semester_no,
                 semester_name=reg_sem.semester_name,
                 total_credits=reg_sem.total_credits,
@@ -196,7 +185,7 @@ class BulkBatchSetupService:
                     "semester_name": batch_semester.semester_name,
                     "total_credits": batch_semester.total_credits
                 },
-                user_id=user_id,
+                    user=user,
                 request=http_request
             )
         
@@ -240,51 +229,56 @@ class BulkBatchSetupService:
                     "batch_semester_id": section.batch_semester_id,
                     "max_strength": section.max_strength
                 },
-                user_id=user_id,
+                    user=user,
                 request=http_request
             )
         
         # Step 8: Auto-generate PracticalBatches (labs)
         labs_created = 0
-        if request.labs_per_section > 0:
-            for section in sections:
-                for lab_no in range(1, request.labs_per_section + 1):
-                    lab_code = f"P{lab_no}"
-                    lab_name = f"Lab {lab_code}"
+        section_letters = ['A', 'B', 'C', 'D', 'E', 'F'] # Just for naming if needed, but labs might be L1, L2 etc. 
+        # Requirement: "120 students -> 3x40 lab capacity". 
+        # Typically lab batches are per semester. If we have 2 sections (A, B) and request 3 labs per section, 
+        # in the new model we just create Total Labs = Sections * Labs_Per_Section attached to the semester.
+        # Naming: B1, B2, B3... or L1, L2, L3...
+        
+        total_labs_needed = request.sections_per_semester * request.labs_per_section
+        
+        practical_batches = []
+        if total_labs_needed > 0:
+            for batch_semester in batch_semesters:
+                for lab_no in range(1, total_labs_needed + 1):
+                    lab_code = f"L{lab_no}" # Universal Lab Code L1, L2...
+                    lab_name = f"Lab Batch {lab_code}"
                     
                     practical_batch = PracticalBatch(
                         name=lab_name,
                         code=lab_code,
-                        section_id=section.id,
+                        batch_semester_id=batch_semester.id, # Link to Semester
                         max_strength=request.lab_capacity,
                         current_strength=0,
                         is_active=True
                     )
                     session.add(practical_batch)
+                    practical_batches.append(practical_batch)
                     labs_created += 1
         
         session.flush()  # Get practical_batch IDs
         
         # Audit log practical batch creation
-        if request.labs_per_section > 0:
-            for section in sections:
-                labs = session.exec(
-                    select(PracticalBatch).where(PracticalBatch.section_id == section.id)
-                ).all()
-                for lab in labs:
-                    log_create(
-                        session=session,
-                        table_name="practical_batch",
-                        record_id=lab.id,
-                        new_values={
-                            "name": lab.name,
-                            "code": lab.code,
-                            "section_id": lab.section_id,
-                            "max_strength": lab.max_strength
-                        },
-                        user_id=user_id,
-                        request=http_request
-                    )
+        for lab in practical_batches:
+            log_create(
+                session=session,
+                table_name="practical_batch",
+                record_id=lab.id,
+                new_values={
+                    "name": lab.name,
+                    "code": lab.code,
+                    "batch_semester_id": lab.batch_semester_id,
+                    "max_strength": lab.max_strength
+                },
+                    user=user,
+                request=http_request
+            )
         
         # Commit all changes
         session.commit()

@@ -64,7 +64,9 @@ class ClassSchedule(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     academic_year_id: int
     batch_semester_id: int = Field(foreign_key="batch_semesters.id")
-    section_id: Optional[int] = None # Or link to a Section model if it exists
+    batch_semester_id: int = Field(foreign_key="batch_semesters.id")
+    section_id: Optional[int] = None # Link to Section model
+    practical_batch_id: Optional[int] = Field(default=None, foreign_key="practical_batch.id")
     
     day_of_week: DayOfWeek
     period_id: int = Field(foreign_key="timeslot.id")

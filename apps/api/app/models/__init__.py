@@ -37,6 +37,7 @@ from .fee import (
 from .attendance import AttendanceSession, AttendanceRecord
 from .academic.entrance_exam import EntranceTestConfig, EntranceExamResult
 from .admissions import Application, ApplicationPayment, EntranceExamScore, ApplicationDocument, ApplicationActivityLog
+from .admission_settings import AdmissionSettings
 from .library import Book, BookIssue, LibraryFine
 from .hostel import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComplaint
 from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
@@ -65,6 +66,7 @@ from .master_data import (
     EmailTemplate,
     SMSTemplate,
 )
+from .academic.allocation import StudentPracticalBatchAllocation
 from .file_metadata import FileMetadata
 from .import_log import ImportLog
 
@@ -107,6 +109,7 @@ __all__ = [
     "EntranceExamScore",
     "ApplicationDocument",
     "ApplicationActivityLog",
+    "AdmissionSettings",
     "Book",
     "BookIssue",
     "LibraryFine",
@@ -147,6 +150,7 @@ __all__ = [
     "PreviousQualification",
     "StudyGroup",
     "ReservationCategory",
+    "StudentPracticalBatchAllocation",
     "LeadSource",
     "Designation",
     "MasterClassroom",

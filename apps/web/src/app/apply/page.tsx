@@ -2,21 +2,33 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { admissionsService } from '@/utils/admissions-service'
-import { programService } from '@/utils/program-service'
-import { FeeMode } from '@/types/admissions'
+import { admissionApi } from '@/services/admission-api'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '@/utils/api'
+
+interface Program {
+    id: number
+    name: string
+}
 
 export default function QuickApplyPage() {
     const router = useRouter()
     const { toast } = useToast()
-    const { data: programs } = programService.usePrograms()
-    const quickApplyMutation = admissionsService.useQuickApply()
+
+    // Fetch programs
+    const { data: programs } = useQuery<Program[]>({
+        queryKey: ['programs'],
+        queryFn: async () => {
+            const response = await api.get('/programs')
+            return response.data
+        }
+    })
 
     const [formData, setFormData] = useState({
         name: '',
@@ -27,45 +39,56 @@ export default function QuickApplyPage() {
         state: '',
         board: '',
         group_of_study: '',
-        fee_mode: FeeMode.ONLINE
     })
+
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setIsSubmitting(true)
+
         try {
-            const application = await quickApplyMutation.mutateAsync({
+            const response = await admissionApi.quickApplyV2({
                 ...formData,
                 program_id: parseInt(formData.program_id)
             })
+
+            // Store credentials in session storage for success page
+            sessionStorage.setItem('quickApplyResponse', JSON.stringify(response))
+
             toast({
                 title: "Application Submitted!",
-                description: "Your application has been received. Please complete the full form.",
+                description: response.message,
             })
-            // Redirect to application detail page (Step 2)
-            router.push(`/admissions/${application.id}`)
-        } catch (error) {
+
+            // Redirect to success page
+            router.push('/apply/success')
+        } catch (error: any) {
+            console.error('Quick Apply error:', error)
             toast({
                 title: "Error",
-                description: "Failed to submit application. Please try again.",
+                description: error.response?.data?.detail || "Failed to submit application. Please try again.",
                 variant: "destructive"
             })
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <Card className="max-w-xl mx-auto">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-3xl font-bold">Apply Now</CardTitle>
-                    <CardDescription>
-                        Start your journey with Regency College. Fill in the basics to get started.
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+            <Card className="max-w-2xl mx-auto shadow-xl">
+                <CardHeader className="text-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+                    <CardTitle className="text-3xl font-bold">Quick Apply</CardTitle>
+                    <CardDescription className="text-blue-100">
+                        Start your journey with us. Fill in the basics to get started.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6" method="POST">
+                <CardContent className="mt-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Full Name</Label>
+                                <Label htmlFor="name">Full Name *</Label>
                                 <Input
                                     id="name"
                                     placeholder="John Doe"
@@ -75,7 +98,7 @@ export default function QuickApplyPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="email">Email *</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -89,7 +112,7 @@ export default function QuickApplyPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="phone">Mobile Number</Label>
+                                <Label htmlFor="phone">Mobile Number *</Label>
                                 <Input
                                     id="phone"
                                     placeholder="+91 98765 43210"
@@ -99,7 +122,7 @@ export default function QuickApplyPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Gender</Label>
+                                <Label>Gender *</Label>
                                 <Select onValueChange={v => setFormData({ ...formData, gender: v })} required>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select gender" />
@@ -114,7 +137,7 @@ export default function QuickApplyPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Course Applying For</Label>
+                            <Label>Course Applying For *</Label>
                             <Select onValueChange={v => setFormData({ ...formData, program_id: v })} required>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a program" />
@@ -129,7 +152,7 @@ export default function QuickApplyPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="state">State</Label>
+                                <Label htmlFor="state">State *</Label>
                                 <Input
                                     id="state"
                                     placeholder="Telangana"
@@ -139,7 +162,7 @@ export default function QuickApplyPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="board">Board (10+2)</Label>
+                                <Label htmlFor="board">Board (10+2) *</Label>
                                 <Input
                                     id="board"
                                     placeholder="CBSE / State Board"
@@ -151,7 +174,7 @@ export default function QuickApplyPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="group">Group of Study</Label>
+                            <Label htmlFor="group">Group of Study *</Label>
                             <Input
                                 id="group"
                                 placeholder="MPC / BiPC / CEC"
@@ -161,30 +184,19 @@ export default function QuickApplyPage() {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>Payment Mode</Label>
-                            <Select value={formData.fee_mode} onValueChange={(v) => setFormData({ ...formData, fee_mode: v as FeeMode })}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value={FeeMode.ONLINE}>Online Payment</SelectItem>
-                                    <SelectItem value={FeeMode.OFFLINE}>Offline Payment (Pay at College)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground">
-                                {formData.fee_mode === FeeMode.ONLINE
-                                    ? "You will be redirected to payment gateway"
-                                    : "You can pay at the college office and upload proof later"}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p className="text-sm text-blue-800">
+                                <strong>What happens next?</strong><br />
+                                After submission, you'll receive login credentials via email and SMS to access your student portal and complete the remaining application steps.
                             </p>
                         </div>
 
                         <Button
                             type="submit"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
-                            disabled={quickApplyMutation.isPending}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 text-lg"
+                            disabled={isSubmitting}
                         >
-                            {quickApplyMutation.isPending ? "Submitting..." : "Apply Now"}
+                            {isSubmitting ? "Submitting..." : "Submit Application"}
                         </Button>
                     </form>
                 </CardContent>

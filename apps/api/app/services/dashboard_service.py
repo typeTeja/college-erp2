@@ -77,8 +77,7 @@ class AcademicDashboardService:
             for year in dashboard_batch.years:
                 for semester in year.semesters:
                     total_sections += len(semester.sections)
-                    for section in semester.sections:
-                        total_labs += len(section.lab_groups)
+                    total_labs += len(semester.lab_groups)
         
         # Build summary
         summary = {
@@ -142,6 +141,7 @@ class AcademicDashboardService:
                 semester_total_students = 0
                 semester_total_capacity = 0
                 
+                # 1. Process Sections
                 for section in sections:
                     # Get faculty name if assigned
                     faculty_name = None
@@ -149,30 +149,6 @@ class AcademicDashboardService:
                         faculty = session.get(Faculty, section.faculty_id)
                         if faculty:
                             faculty_name = faculty.name
-                    
-                    # Get lab groups for this section
-                    lab_groups = session.exec(
-                        select(PracticalBatch)
-                        .where(PracticalBatch.section_id == section.id)
-                        .where(PracticalBatch.is_active == True)
-                        .order_by(PracticalBatch.code)
-                    ).all()
-                    
-                    dashboard_labs = [
-                        DashboardLabGroup(
-                            id=lab.id,
-                            name=lab.name,
-                            code=lab.code,
-                            max_strength=lab.max_strength,
-                            current_strength=lab.current_strength,
-                            utilization_percentage=round(
-                                (lab.current_strength / lab.max_strength * 100)
-                                if lab.max_strength > 0 else 0,
-                                2
-                            )
-                        )
-                        for lab in lab_groups
-                    ]
                     
                     dashboard_sections.append(
                         DashboardSection(
@@ -187,13 +163,39 @@ class AcademicDashboardService:
                                 2
                             ),
                             faculty_id=section.faculty_id,
-                            faculty_name=faculty_name,
-                            lab_groups=dashboard_labs
+                            faculty_name=faculty_name
                         )
                     )
                     
                     semester_total_students += section.current_strength
                     semester_total_capacity += section.max_strength
+
+                # 2. Process Lab Groups (Independent of Sections)
+                lab_groups = session.exec(
+                    select(PracticalBatch)
+                    .where(PracticalBatch.batch_semester_id == semester.id)
+                    .where(PracticalBatch.is_active == True)
+                    .order_by(PracticalBatch.code)
+                ).all()
+
+                dashboard_labs = [
+                    DashboardLabGroup(
+                        id=lab.id,
+                        name=lab.name,
+                        code=lab.code,
+                        max_strength=lab.max_strength,
+                        current_strength=lab.current_strength,
+                        utilization_percentage=round(
+                            (lab.current_strength / lab.max_strength * 100)
+                            if lab.max_strength > 0 else 0,
+                            2
+                        )
+                    )
+                    for lab in lab_groups
+                ]
+
+                # Note: Lab students are subsets of Section students usually, 
+                # so we don't add lab capacity/strength to semester total to avoid double counting.
                 
                 dashboard_semesters.append(
                     DashboardSemester(
@@ -202,6 +204,7 @@ class AcademicDashboardService:
                         semester_name=semester.semester_name,
                         total_credits=semester.total_credits,
                         sections=dashboard_sections,
+                        lab_groups=dashboard_labs,
                         total_students=semester_total_students,
                         total_capacity=semester_total_capacity
                     )

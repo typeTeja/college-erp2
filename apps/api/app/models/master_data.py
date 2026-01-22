@@ -66,18 +66,21 @@ class Section(SQLModel, table=True):
     
     # Relationships
     batch_semester: Optional["BatchSemester"] = Relationship(back_populates="sections")
-    practical_batches: List["PracticalBatch"] = Relationship(back_populates="section")
+    # practical_batches relationship removed as PracticalBatch is now a sibling
 
 
 class PracticalBatch(SQLModel, table=True):
-    """Practical Batch within a section - smaller groups for lab work"""
+    """Practical Batch within a semester - independent of sections"""
     __tablename__ = "practical_batch"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str  # e.g., "P1", "P2"
+    name: str  # e.g., "Batch A1", "Batch B1"
     code: str = Field(index=True)
     
-    section_id: int = Field(foreign_key="section.id", index=True)
+    # Linked to BatchSemester directly (Sibling to Section)
+    batch_semester_id: int = Field(foreign_key="batch_semesters.id", index=True)
+    
+    # Removed: section_id: int = Field(foreign_key="section.id", index=True)
     
     max_strength: int = Field(default=20)
     current_strength: int = Field(default=0)
@@ -87,7 +90,7 @@ class PracticalBatch(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Relationships
-    section: Optional["Section"] = Relationship(back_populates="practical_batches")
+    batch_semester: Optional["BatchSemester"] = Relationship(back_populates="practical_batches")
 
 
 class SubjectType(str, PyEnum):

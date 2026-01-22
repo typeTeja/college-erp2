@@ -23,7 +23,6 @@ class DashboardSection(BaseModel):
     utilization_percentage: float
     faculty_id: Optional[int] = None
     faculty_name: Optional[str] = None
-    lab_groups: List[DashboardLabGroup] = []
 
 class DashboardSemester(BaseModel):
     """Semester information with sections"""
@@ -32,6 +31,7 @@ class DashboardSemester(BaseModel):
     semester_name: str
     total_credits: int
     sections: List[DashboardSection] = []
+    lab_groups: List[DashboardLabGroup] = []
     total_students: int
     total_capacity: int
 

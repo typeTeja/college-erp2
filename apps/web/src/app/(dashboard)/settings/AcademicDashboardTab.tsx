@@ -8,6 +8,7 @@ import { ChevronDown, ChevronRight, Users, BookOpen, FlaskConical, GraduationCap
 import Link from 'next/link';
 import { InlineEditableField } from '@/components/ui/InlineEditableField';
 import { academicDashboardService } from '@/utils/academic-dashboard-service';
+import { api } from '@/utils/api';
 import { sectionService } from '@/utils/section-service';
 import { BatchCloneDialog } from '@/components/academics/BatchCloneDialog';
 import type { AcademicDashboardResponse, DashboardBatch, DashboardYear, DashboardSemester, DashboardSection } from '@/types/academic-dashboard';
@@ -23,7 +24,6 @@ export default function AcademicDashboardTab() {
     const [selectedBatch, setSelectedBatch] = useState<DashboardBatch | null>(null);
     const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
     const [expandedSemesters, setExpandedSemesters] = useState<Set<number>>(new Set());
-    const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         fetchDashboard();
@@ -33,7 +33,7 @@ export default function AcademicDashboardTab() {
         try {
             const [dashboardData, regulationsData] = await Promise.all([
                 academicDashboardService.getDashboard(),
-                fetch('/api/v1/regulations/').then(r => r.json())
+                api.get('/regulations/').then(r => r.data)
             ]);
             setDashboard(dashboardData);
             setRegulations(regulationsData);
@@ -60,20 +60,14 @@ export default function AcademicDashboardTab() {
 
     const handleUpdateLabCapacity = async (labId: number, newCapacity: number) => {
         try {
-            const response = await fetch(`/api/v1/master/practical-batches/${labId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ max_strength: newCapacity }),
-            });
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Failed to update');
-            }
+            const response = await api.patch(`/master/practical-batches/${labId}`, { max_strength: newCapacity });
+            // if (!response.ok) { ... } // Axios throws on error, so try/catch handles it.
+            // const error = await response.json();
             toast.success('Lab capacity updated');
             // Refresh data
             await fetchDashboard();
         } catch (error: any) {
-            toast.error(error.message || 'Failed to update capacity');
+            toast.error(error.response?.data?.detail || 'Failed to update capacity');
             throw error;
         }
     };
@@ -305,23 +299,14 @@ export default function AcademicDashboardTab() {
                                                                     </span>
                                                                 </div>
 
-                                                                {/* Sections */}
+                                                                {/* Semester Content (Sections + Labs) */}
                                                                 {expandedSemesters.has(semester.id) && (
-                                                                    <div className="pl-8">
+                                                                    <div className="pl-8 pb-2">
+                                                                        {/* Sections List */}
                                                                         {semester.sections.map((section) => (
                                                                             <div key={section.id} className="border-l-2 border-slate-200 ml-2">
-                                                                                <div
-                                                                                    className="flex items-center gap-2 p-2 hover:bg-slate-50 cursor-pointer"
-                                                                                    onClick={() => setExpandedSections(toggleExpand(expandedSections, section.id))}
-                                                                                >
-                                                                                    {section.lab_groups.length > 0 && (
-                                                                                        expandedSections.has(section.id) ? (
-                                                                                            <ChevronDown className="h-4 w-4 text-slate-400 ml-2" />
-                                                                                        ) : (
-                                                                                            <ChevronRight className="h-4 w-4 text-slate-400 ml-2" />
-                                                                                        )
-                                                                                    )}
-                                                                                    {section.lab_groups.length === 0 && <div className="w-4 ml-2" />}
+                                                                                <div className="flex items-center gap-2 p-2 hover:bg-slate-50">
+                                                                                    <div className="w-4 ml-2" />
                                                                                     <Users className="h-4 w-4 text-orange-600" />
                                                                                     <span className="text-sm text-slate-700">{section.name}</span>
                                                                                     {section.faculty_name && (
@@ -343,33 +328,35 @@ export default function AcademicDashboardTab() {
                                                                                         {section.utilization_percentage}%
                                                                                     </Badge>
                                                                                 </div>
-
-                                                                                {/* Labs */}
-                                                                                {expandedSections.has(section.id) && section.lab_groups.length > 0 && (
-                                                                                    <div className="pl-8">
-                                                                                        {section.lab_groups.map((lab) => (
-                                                                                            <div key={lab.id} className="flex items-center gap-2 p-2 border-l-2 border-slate-200 ml-2">
-                                                                                                <FlaskConical className="h-3 w-3 text-cyan-600 ml-2" />
-                                                                                                <span className="text-xs text-slate-600">{lab.name}</span>
-                                                                                                <span className="text-xs text-slate-500 ml-auto">
-                                                                                                    {lab.current_strength} /
-                                                                                                </span>
-                                                                                                <InlineEditableField
-                                                                                                    value={lab.max_strength}
-                                                                                                    type="number"
-                                                                                                    min={lab.current_strength}
-                                                                                                    max={100}
-                                                                                                    onSave={(newValue) => handleUpdateLabCapacity(lab.id, newValue as number)}
-                                                                                                />
-                                                                                                <Badge className={`text-xs ${getUtilizationColor(lab.utilization_percentage)}`}>
-                                                                                                    {lab.utilization_percentage}%
-                                                                                                </Badge>
-                                                                                            </div>
-                                                                                        ))}
-                                                                                    </div>
-                                                                                )}
                                                                             </div>
                                                                         ))}
+
+                                                                        {/* Independent Lab Groups List */}
+                                                                        {semester.lab_groups.length > 0 && (
+                                                                            <div className="mt-2 pt-2 border-t border-slate-100 ml-2">
+                                                                                <h4 className="text-xs font-semibold text-slate-500 mb-2 pl-2">Practical Lab Batches</h4>
+                                                                                {semester.lab_groups.map((lab) => (
+                                                                                    <div key={lab.id} className="flex items-center gap-2 p-2 border-l-2 border-emerald-200 ml-2 hover:bg-slate-50">
+                                                                                        <FlaskConical className="h-3 w-3 text-emerald-600 ml-2" />
+                                                                                        <span className="text-sm text-slate-700">{lab.name}</span>
+                                                                                        <span className="text-xs text-slate-600 uppercase tracking-wider bg-slate-100 px-1 rounded">{lab.code}</span>
+                                                                                        <span className="text-xs text-slate-500 ml-auto">
+                                                                                            {lab.current_strength} /
+                                                                                        </span>
+                                                                                        <InlineEditableField
+                                                                                            value={lab.max_strength}
+                                                                                            type="number"
+                                                                                            min={lab.current_strength}
+                                                                                            max={100}
+                                                                                            onSave={(newValue) => handleUpdateLabCapacity(lab.id, newValue as number)}
+                                                                                        />
+                                                                                        <Badge className={`text-xs ${getUtilizationColor(lab.utilization_percentage)}`}>
+                                                                                            {lab.utilization_percentage}%
+                                                                                        </Badge>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 )}
                                                             </div>
