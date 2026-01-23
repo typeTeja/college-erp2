@@ -136,9 +136,14 @@ class Settings(BaseSettings):
         import os
         if os.getenv("ENVIRONMENT") == "production":
             # Ensure at least one HTTPS origin in production
-            if not any(origin.startswith("https://") for origin in v):
+            # Check if any origin in the list starts with https://
+            has_https = any(
+                isinstance(origin, str) and origin.startswith("https://") 
+                for origin in v
+            )
+            if not has_https:
                 raise ValueError(
-                    "Production CORS must include at least one HTTPS origin"
+                    f"Production CORS must include at least one HTTPS origin. Got: {v}"
                 )
         return v
     
