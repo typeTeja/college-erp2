@@ -1,8 +1,9 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+const productionUrl = process.env.NEXT_PUBLIC_API_URL_PROD || process.env.NEXT_PUBLIC_API_URL || "https://api.rchmct.org";
 const API_URL = process.env.NODE_ENV === "production"
-    ? (process.env.NEXT_PUBLIC_API_URL_PROD || process.env.NEXT_PUBLIC_API_URL || "https://api.rchmct.org")
+    ? productionUrl.replace(/^http:/, "https:")
     : (process.env.NEXT_PUBLIC_API_URL_DEV || "http://localhost:8000");
 export const api = axios.create({
     baseURL: `${API_URL}/api/v1`,
