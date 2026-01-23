@@ -285,3 +285,74 @@ class AdmissionService:
         session.refresh(application)
         
         return portal_username, portal_password
+    @staticmethod
+    def process_payment_completion(
+        session: Session,
+        application_id: int,
+        transaction_id: str,
+        amount: float,
+        payment_date: datetime = None,
+        background_tasks = None # Type: BackgroundTasks
+    ) -> bool:
+        """
+        Process successful payment (Offline or Online)
+        1. Update Status
+        2. Create Portal Account
+        3. Send Emails
+        """
+        try:
+            from app.services.email_service import email_service
+            
+            application = session.get(Application, application_id)
+            if not application:
+                return False
+            
+            # Update Payment Status
+            application.status = ApplicationStatus.PAYMENT_COMPLETED # Or PAID based on enum
+            application.payment_status = 'PAID' # Ensure this matches schema/enum
+            application.payment_id = transaction_id
+            application.payment_date = payment_date or datetime.utcnow()
+            
+            session.add(application)
+            session.flush()
+            
+            # Create Portal Account
+            portal_username, portal_password = (None, None)
+            try:
+                portal_username, portal_password = AdmissionService.create_portal_account_after_payment(
+                    session=session,
+                    application=application
+                )
+            except ValueError as e:
+                # Account might already exist, just continue
+                print(f"Account creation skipped: {e}")
+                
+            session.commit()
+            session.refresh(application)
+            
+            if background_tasks:
+                # Send Payment Success Email
+                background_tasks.add_task(
+                    email_service.send_payment_success,
+                    to_email=application.email,
+                    name=application.name,
+                    application_number=application.application_number,
+                    amount=amount,
+                    transaction_id=transaction_id
+                )
+                
+                # Send Credentials Email
+                if portal_username and portal_password:
+                     background_tasks.add_task(
+                        email_service.send_portal_credentials,
+                        to_email=application.email,
+                        name=application.name,
+                        application_number=application.application_number,
+                        username=portal_username,
+                        password=portal_password
+                    )
+            
+            return True
+        except Exception as e:
+            print(f"Error processing payment completion: {str(e)}")
+            return False

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request, BackgroundTasks
 from sqlmodel import Session, select, func
 from app.db.session import get_session
 from app.api.deps import get_current_user, get_current_active_superuser
@@ -19,6 +19,7 @@ from app.schemas.admissions import (
 from app.services.activity_logger import log_activity
 from app.services.admission_status import can_transition
 from app.services.email_service import email_service
+from app.services.admission_service import AdmissionService
 from app.middleware.rate_limit import limiter
 from typing import List, Optional
 from datetime import datetime
@@ -232,6 +233,7 @@ async def get_recent_admissions(
         })
     return formatted_results
 
+@router.get("/applications", response_model=List[ApplicationRead])
 @router.get("/", response_model=List[ApplicationRead])
 async def list_applications(
     session: Session = Depends(get_session),
@@ -318,6 +320,7 @@ async def verify_offline_payment(
     id: int,
     data: OfflinePaymentVerify,
     request: Request,
+    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_active_superuser)
 ):
@@ -335,7 +338,17 @@ async def verify_offline_payment(
     application.offline_payment_verified_at = datetime.utcnow()
     
     if data.verified:
-        application.status = ApplicationStatus.PAID
+        # Use shared service to process payment (status update, account creation, emails)
+        # We can use a generated transaction ID for offline payments
+        txnid = f"OFFLINE-{id}-{datetime.now().strftime('%Y%m%d%H%M')}"
+        
+        AdmissionService.process_payment_completion(
+            session=session,
+            application_id=application.id,
+            transaction_id=txnid,
+            amount=application.application_fee,
+            background_tasks=background_tasks
+        )
         
         # Log activity
         log_activity(
@@ -345,7 +358,7 @@ async def verify_offline_payment(
             description=f"Offline payment verified by {current_user.full_name}",
             performed_by=current_user.id,
             ip_address=get_client_ip(request),
-            extra_data={"payment_proof_url": data.payment_proof_url}
+            extra_data={"payment_proof_url": data.payment_proof_url, "txnid": txnid}
         )
     
     session.add(application)

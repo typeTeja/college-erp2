@@ -12,6 +12,12 @@ class EasebuzzInitiateRequest(BaseModel):
     surl: Optional[str] = None # Success URL
     furl: Optional[str] = None # Failure URL
 
+class PaymentInitiateRequest(BaseModel):
+    application_id: int
+    amount: float
+    surl: Optional[str] = None
+    furl: Optional[str] = None
+
 class EasebuzzInitiateResponse(BaseModel):
     status: int
     data: Optional[str] = None # Payment URL (access key usually)

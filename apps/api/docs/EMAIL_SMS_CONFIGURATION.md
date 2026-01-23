@@ -14,6 +14,9 @@ FROM_EMAIL=admissions@yourdomain.com
 FROM_NAME=College ERP - Admissions
 ```
 
+nmzr xomw exwx csmm
+RCMS
+
 ### Setting up Google Workspace App Password:
 
 1. Go to your Google Account settings

@@ -23,16 +23,52 @@ class EmailSettings(BaseSettings):
 
 email_settings = EmailSettings()
 
+from sqlmodel import Session, select
+from app.db.session import engine
+from app.models.settings import SystemSetting
+
 class EmailService:
     """Service for sending emails"""
     
     def __init__(self):
-        self.smtp_host = email_settings.SMTP_HOST
-        self.smtp_port = email_settings.SMTP_PORT
-        self.smtp_user = email_settings.SMTP_USER
-        self.smtp_password = email_settings.SMTP_PASSWORD
-        self.from_email = email_settings.FROM_EMAIL
-        self.from_name = email_settings.FROM_NAME
+        # We no longer load settings at init to support runtime changes
+        pass
+    
+    def _get_settings(self):
+        """Fetch email settings from DB, fallback to env"""
+        try:
+            with Session(engine) as session:
+                settings_map = {
+                    "smtp.host": email_settings.SMTP_HOST,
+                    "smtp.port": email_settings.SMTP_PORT,
+                    "smtp.user": email_settings.SMTP_USER,
+                    "smtp.password": email_settings.SMTP_PASSWORD,
+                    "email.from_email": email_settings.FROM_EMAIL,
+                    "email.from_name": email_settings.FROM_NAME
+                }
+                
+                # Fetch all relevant settings
+                db_settings = session.exec(select(SystemSetting).where(
+                    SystemSetting.key.in_(settings_map.keys())
+                )).all()
+                
+                # Update map with DB values
+                for s in db_settings:
+                    if s.value:
+                        settings_map[s.key] = s.value
+                        
+                return settings_map
+        except Exception as e:
+            print(f"Error fetching email settings from DB: {e}")
+            # Fallback to env default
+            return {
+                "smtp.host": email_settings.SMTP_HOST,
+                "smtp.port": email_settings.SMTP_PORT,
+                "smtp.user": email_settings.SMTP_USER,
+                "smtp.password": email_settings.SMTP_PASSWORD,
+                "email.from_email": email_settings.FROM_EMAIL,
+                "email.from_name": email_settings.FROM_NAME
+            }
     
     def send_email(
         self,
@@ -53,11 +89,18 @@ class EmailService:
         Returns:
             True if sent successfully, False otherwise
         """
+        config = self._get_settings()
+        
+        # Validate critical config
+        if not config["smtp.host"] or not config["smtp.port"]:
+            print("SMTP configuration missing")
+            return False
+            
         try:
             # Create message
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
-            msg['From'] = f"{self.from_name} <{self.from_email}>"
+            msg['From'] = f"{config['email.from_name']} <{config['email.from_email']}>"
             msg['To'] = to_email
             
             # Add text and HTML parts
@@ -69,9 +112,10 @@ class EmailService:
             msg.attach(part2)
             
             # Send email
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+            with smtplib.SMTP(config["smtp.host"], int(config["smtp.port"])) as server:
                 server.starttls()
-                server.login(self.smtp_user, self.smtp_password)
+                if config["smtp.user"] and config["smtp.password"]:
+                    server.login(config["smtp.user"], config["smtp.password"])
                 server.send_message(msg)
             
             return True

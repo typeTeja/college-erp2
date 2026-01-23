@@ -22,6 +22,7 @@ from app.schemas.admissions import (
     OfflineApplicationCreate
 )
 from app.services.admission_service import AdmissionService
+from app.services.email_service import email_service
 from typing import Optional
 
 router = APIRouter()
@@ -65,6 +66,17 @@ async def quick_apply_v2(
                 message = f"Application submitted! Please complete payment of ₹{application.application_fee}. You will receive login credentials after payment."
             else:
                 message = f"Application submitted! Please pay ₹{application.application_fee} at college office. You will receive login credentials after payment verification."
+            
+            # Send Application Confirmation Email
+            if settings.send_credentials_email: # Reusing this setting or we should have a separate one? Assuming yes for now.
+                 background_tasks.add_task(
+                    email_service.send_application_confirmation,
+                    to_email=application.email,
+                    name=application.name,
+                    application_number=application.application_number,
+                    fee_mode=application.fee_mode,
+                    amount=application.application_fee
+                )
         else:
             # No payment required - create account immediately
             portal_username, portal_password = AdmissionService.create_portal_account_after_payment(
@@ -96,6 +108,7 @@ async def quick_apply_v2(
             message = "Application submitted successfully! Login credentials have been sent to your email and phone."
             
             return QuickApplyResponse(
+                id=application.id,
                 application_number=application.application_number,
                 portal_username=portal_username,
                 portal_password=portal_password,
@@ -104,6 +117,7 @@ async def quick_apply_v2(
         
         # Payment required - no credentials yet
         return QuickApplyResponse(
+            id=application.id,
             application_number=application.application_number,
             portal_username=None,
             portal_password=None,

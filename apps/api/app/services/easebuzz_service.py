@@ -7,6 +7,10 @@ from app.config.settings import settings
 # Configure logging
 logger = logging.getLogger(__name__)
 
+from sqlmodel import Session, select
+from app.db.session import engine
+from app.models.settings import SystemSetting
+
 class EasebuzzService:
     """
     Service for Easebuzz Payment Gateway Integration
@@ -18,18 +22,51 @@ class EasebuzzService:
     BASE_URL_PROD = "https://pay.easebuzz.in"
     
     def __init__(self):
-        self.key = settings.EASEBUZZ_MERCHANT_KEY
-        self.salt = settings.EASEBUZZ_SALT
-        self.env = settings.EASEBUZZ_ENV.lower()
-        self.base_url = self.BASE_URL_TEST if self.env == "test" else self.BASE_URL_PROD
+        # We fetch settings dynamically now
+        pass
+
+    def _get_config(self):
+        """Fetch Easebuzz config from DB, fallback to env"""
+        try:
+            with Session(engine) as session:
+                config = {
+                    "key": settings.EASEBUZZ_MERCHANT_KEY,
+                    "salt": settings.EASEBUZZ_SALT,
+                    "env": settings.EASEBUZZ_ENV
+                }
+                
+                db_settings = session.exec(select(SystemSetting).where(
+                    SystemSetting.key.in_(["easebuzz.merchant_key", "easebuzz.salt", "easebuzz.env"])
+                )).all()
+                
+                for s in db_settings:
+                    if s.key == "easebuzz.merchant_key" and s.value:
+                        config["key"] = s.value
+                    elif s.key == "easebuzz.salt" and s.value:
+                        config["salt"] = s.value
+                    elif s.key == "easebuzz.env" and s.value:
+                        config["env"] = s.value
+                
+                return config
+        except Exception as e:
+            logger.error(f"Error fetching Easebuzz settings: {e}")
+            return {
+                "key": settings.EASEBUZZ_MERCHANT_KEY,
+                "salt": settings.EASEBUZZ_SALT,
+                "env": settings.EASEBUZZ_ENV
+            }
 
     def generate_hash(self, data: Dict[str, Any]) -> str:
         """
         Generate hash for payment request
         Sequence: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt
         """
+        config = self._get_config()
+        key = config["key"]
+        salt = config["salt"]
+        
         hash_sequence = [
-            self.key,
+            key,
             str(data.get('txnid', '')),
             str(data.get('amount', '')),
             str(data.get('productinfo', '')),
@@ -46,10 +83,12 @@ class EasebuzzService:
         hash_sequence.extend([''] * 5)
         
         # Add salt at the end
-        hash_sequence.append(self.salt)
+        hash_sequence.append(salt)
         
         hash_string = "|".join(hash_sequence)
-        return hashlib.sha512(hash_string.encode('utf-8')).hexdigest()
+        generated_hash = hashlib.sha512(hash_string.encode('utf-8')).hexdigest()
+        # print(f"DEBUG Hash Sequence: {hash_string}")
+        return generated_hash
 
     def verify_response_hash(self, data: Dict[str, Any]) -> bool:
         """
@@ -61,7 +100,11 @@ class EasebuzzService:
             if not received_hash:
                 return False
                 
-            hash_sequence = [self.salt, str(data.get('status', ''))]
+            config = self._get_config()
+            key = config["key"]
+            salt = config["salt"]
+            
+            hash_sequence = [salt, str(data.get('status', ''))]
             
             # Add empty strings for udf10 to udf6 (reverse order)
             hash_sequence.extend([''] * 5)
@@ -81,7 +124,7 @@ class EasebuzzService:
                 str(data.get('productinfo', '')),
                 str(data.get('amount', '')),
                 str(data.get('txnid', '')),
-                self.key
+                key
             ])
             
             hash_string = "|".join(hash_sequence)
@@ -97,21 +140,29 @@ class EasebuzzService:
         """
         Call Easebuzz Initiate API
         """
-        url = f"{self.base_url}/payment/initiateLink"
+        config = self._get_config()
+        base_url = self.BASE_URL_TEST if config["env"].lower() == "test" else self.BASE_URL_PROD
+        url = f"{base_url}/payment/initiateLink"
         
         # Ensure mandatory fields
+        # Ensure amount is strictly formatted to 2 decimal places
+        amount_str = "{:.2f}".format(float(payment_data['amount']))
+        
+        # Update payment_data for hash generation
+        payment_data['amount'] = amount_str
+        
         hash_value = self.generate_hash(payment_data)
         
         payload = {
-            "key": self.key,
+            "key": config["key"],
             "txnid": payment_data['txnid'],
-            "amount": payment_data['amount'],
+            "amount": amount_str,
             "productinfo": payment_data['productinfo'],
             "firstname": payment_data['firstname'],
             "phone": payment_data['phone'],
             "email": payment_data['email'],
-            "surl": payment_data.get('surl', 'http://localhost:8000/api/v1/payment/response'), # Default to backend for API test
-            "furl": payment_data.get('furl', 'http://localhost:8000/api/v1/payment/response'), # Default to backend for API test
+            "surl": payment_data.get('surl') or 'http://localhost:8000/api/v1/payment/response',
+            "furl": payment_data.get('furl') or 'http://localhost:8000/api/v1/payment/response',
             "hash": hash_value,
             "udf1": payment_data.get('udf1', ''),
             "udf2": payment_data.get('udf2', ''),

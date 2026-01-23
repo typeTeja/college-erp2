@@ -147,7 +147,7 @@ class ApplicationRecentRead(BaseModel):
 
 class OfflinePaymentVerify(BaseModel):
     """Schema for admin to verify offline payment"""
-    payment_proof_url: str
+    payment_proof_url: Optional[str] = None
     verified: bool = True
 
 class PaymentInitiate(BaseModel):
@@ -170,6 +170,7 @@ class QuickApplyCreate(BaseModel):
 
 class QuickApplyResponse(BaseModel):
     """Response after Quick Apply submission"""
+    id: int  # Added ID for payment initiation
     application_number: str
     portal_username: Optional[str] = None
     portal_password: Optional[str] = None  # Only sent once
