@@ -147,6 +147,8 @@ async def initiate_payment(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        traceback.print_exc()  # Print full stack trace to console
         logger.error(f"Payment initiation failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -160,6 +162,9 @@ async def handle_payment_response(
     Handle Redirect Response from Easebuzz (SURL/FURL)
     Receives Form Data
     """
+    from fastapi.responses import RedirectResponse
+    from app.config.settings import settings
+
     try:
         # Parse form data
         form_data = await request.form()
@@ -170,7 +175,10 @@ async def handle_payment_response(
         # Verify Hash
         if not easebuzz_service.verify_response_hash(data):
             logger.error("Hash verification failed for payment response")
-            return {"status": "failed", "message": "Hash verification failed"}
+            return RedirectResponse(
+                url=f"{settings.PORTAL_BASE_URL}/apply/payment/failure?reason=hash_verification_failed",
+                status_code=303
+            )
         
         status = data.get("status")
         txnid = data.get("txnid")
@@ -191,23 +199,28 @@ async def handle_payment_response(
                 background_tasks=background_tasks
             )
             
-            return {
-                "status": "success", 
-                "message": "Payment verified successfully",
-                "txnid": txnid,
-                "amount": amount
-            }
+            # Redirect to Success Page
+            return RedirectResponse(
+                url=f"{settings.PORTAL_BASE_URL}/apply/payment/success",
+                status_code=303
+            )
         else:
-            logger.warning(f"Payment Failed: {txnid} - {data.get('error_Message')}")
-            return {
-                "status": "failed", 
-                "message": "Payment failed",
-                "reason": data.get("error_Message")
-            }
+            reason = data.get("error_Message", "Payment Failed")
+            logger.warning(f"Payment Failed: {txnid} - {reason}")
+            
+            # Redirect to Failure Page
+            return RedirectResponse(
+                url=f"{settings.PORTAL_BASE_URL}/apply/payment/failure?reason={reason}",
+                status_code=303
+            )
 
     except Exception as e:
         logger.error(f"Error handling payment response: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        # Fallback redirect
+        return RedirectResponse(
+            url=f"{settings.PORTAL_BASE_URL}/apply/payment/failure?reason=internal_error",
+            status_code=303
+        )
 
 @router.post("/webhook")
 async def handle_webhook(

@@ -23,21 +23,25 @@ export function proxy(request: NextRequest) {
         "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
         "img-src 'self' data: https:",
         "font-src 'self' data:",
-        "connect-src 'self' https://api.rchmct.org https://minio.rchmct.org",
+        `connect-src 'self' https://api.rchmct.org https://minio.rchmct.org ${process.env.NODE_ENV !== 'production' ? 'http://localhost:8000' : ''}`,
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",
-        "upgrade-insecure-requests", // Auto-upgrade HTTP to HTTPS
-        "block-all-mixed-content",   // Block HTTP requests (Layer 4)
+        ...(process.env.NODE_ENV === 'production' ? [
+            "upgrade-insecure-requests", // Auto-upgrade HTTP to HTTPS
+            "block-all-mixed-content"    // Block HTTP requests (Layer 4)
+        ] : [])
     ].join('; ');
 
     response.headers.set('Content-Security-Policy', csp);
 
-    // HSTS - Force HTTPS for 1 year (Layer 5)
-    response.headers.set(
-        'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains; preload'
-    );
+    // HSTS - Force HTTPS for 1 year (Layer 5) - PROD ONLY
+    if (process.env.NODE_ENV === 'production') {
+        response.headers.set(
+            'Strict-Transport-Security',
+            'max-age=31536000; includeSubDomains; preload'
+        );
+    }
 
     // Prevent clickjacking
     response.headers.set('X-Frame-Options', 'DENY');

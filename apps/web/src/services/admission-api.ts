@@ -221,9 +221,8 @@ export const admissionApi = {
     }> => {
         const response = await api.post(`/payment/initiate`, {
             application_id: id,
-            amount: amount,
-            surl: `${window.location.origin}/apply/payment/success`,
-            furl: `${window.location.origin}/apply/payment/failure`
+            amount: amount
+            // Removed surl/furl to use backend defaults which point to api/v1/payment/response
         });
         return response.data;
     },

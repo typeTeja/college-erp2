@@ -25,6 +25,11 @@ class EasebuzzService:
         # We fetch settings dynamically now
         pass
 
+    @property
+    def base_url(self):
+        config = self._get_config()
+        return self.BASE_URL_TEST if config["env"].lower() == "test" else self.BASE_URL_PROD
+
     def _get_config(self):
         """Fetch Easebuzz config from DB, fallback to env"""
         try:
