@@ -102,9 +102,9 @@ export default function QuickApplyPage() {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="max-w-2xl mx-auto shadow-xl">
                 <CardHeader className="text-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
-                    <CardTitle className="text-3xl font-bold">Quick Apply</CardTitle>
+                    <CardTitle className="text-3xl font-bold">Online Admission Form</CardTitle>
                     <CardDescription className="text-blue-100">
-                        Start your journey with us. Fill in the basics to get started.
+                        Start your journey with us. apply online in just a few simple steps.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="mt-6">
