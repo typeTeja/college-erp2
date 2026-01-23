@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Menu, Bell, Search, User } from 'lucide-react';
+import { Menu, Bell, Search, User, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import Link from 'next/link';
 import { communicationService } from '@/utils/communication-service';
@@ -19,7 +19,7 @@ const roleLabels: Record<string, string> = {
 };
 
 export function TopNav({ onMenuToggle }: TopNavProps) {
-    const { user } = useAuthStore();
+    const { user, logout } = useAuthStore();
     const userRole = user?.roles?.[0];
     const roleLabel = userRole && roleLabels[userRole] ? roleLabels[userRole] : 'User';
 
@@ -73,6 +73,16 @@ export function TopNav({ onMenuToggle }: TopNavProps) {
                             <User size={20} className="text-white" />
                         </div>
                     </div>
+
+                    {/* Logout button */}
+                    <button
+                        onClick={logout}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm"
+                        title="Logout"
+                    >
+                        <LogOut size={16} />
+                        <span className="hidden md:inline">Logout</span>
+                    </button>
                 </div>
             </div>
         </header>
