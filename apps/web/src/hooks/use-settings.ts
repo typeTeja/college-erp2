@@ -3,40 +3,32 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { api } from '@/utils/api';
+
 const settingsApi = {
     updateProfile: async (data: any) => {
-        const response = await fetch('/api/v1/settings/profile', {
-            method: 'PUT',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) throw new Error('Failed to update profile');
-        return response.json();
+        const response = await api.post('/settings/profile', data);
+        return response.data;
     },
     changePassword: async (data: any) => {
-        const response = await fetch('/api/v1/auth/change-password', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        const response = await api.post('/settings/change-password', data);
+        return response.data;
     },
     getSettings: async (type: string) => {
-        // Mock
-        return [];
+        const response = await api.get('/settings', { params: { group: type } });
+        return response.data;
     },
     testConnection: async (gateway: string) => {
-        // Mock
-        return { message: 'Connection successful' };
+        const response = await api.post('/settings/test-connection', null, { params: { gateway } });
+        return response.data;
     },
     updateSetting: async (id: number, data: any) => {
-        // Mock
-        return {};
+        const response = await api.patch(`/settings/${id}`, data);
+        return response.data;
     },
     getAuditLogs: async () => {
-        // Mock
-        return [];
+        const response = await api.get('/settings/audit-logs');
+        return response.data;
     }
 };
 

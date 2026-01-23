@@ -24,10 +24,10 @@ export const admissionSchema = z.object({
     father_phone: z.string().regex(/^\d{10}$/, "Phone must be 10 digits").optional().or(z.literal('')),
     address: z.string().optional(),
     previous_marks_percentage: z.coerce.number().min(0).max(100).optional(),
-    applied_for_scholarship: z.boolean().default(false),
-    hostel_required: z.boolean().default(false),
-    is_full_entry: z.boolean().default(false), // Toggle for UI
-    is_paid: z.boolean().default(false), // Admin checkbox
+    applied_for_scholarship: z.boolean().optional(),
+    hostel_required: z.boolean().optional(),
+    is_full_entry: z.boolean().optional(), // Toggle for UI
+    is_paid: z.boolean().optional(), // Admin checkbox
 });
 
 export type AdmissionFormValues = z.infer<typeof admissionSchema>;

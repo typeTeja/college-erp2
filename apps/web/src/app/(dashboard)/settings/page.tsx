@@ -39,6 +39,8 @@ interface Setting {
     id: number;
     key: string;
     value: string;
+    description?: string;
+    is_secret?: boolean;
 }
 
 interface AuditLog {
@@ -558,12 +560,32 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     const handleUpdate = async (id: number, value: string) => {
         try {
             await updateSetting.mutateAsync({ id, data: { value } })
-            toast.success("Identity key updated")
+            toast.success("Setting updated")
             setEditValues({ ...editValues, [id]: "" }) // Clear edit state
         } catch (error) {
-            toast.error("Failed to update key")
+            toast.error("Failed to update setting")
         }
     }
+
+    const renderSettingRow = (s: Setting) => (
+        <div key={s.id} className="space-y-2">
+            <Label className="text-xs text-slate-500">{s.description || s.key}</Label>
+            <div className="flex gap-2">
+                <Input
+                    type={editValues[s.id] !== undefined ? "text" : (s.is_secret ? "password" : "text")}
+                    value={editValues[s.id] !== undefined ? editValues[s.id] : s.value}
+                    onChange={(e) => setEditValues({ ...editValues, [s.id]: e.target.value })}
+                    className="bg-slate-50"
+                    placeholder={s.is_secret ? "********" : ""}
+                />
+                {editValues[s.id] !== undefined ? (
+                    <Button size="sm" onClick={() => handleUpdate(s.id, editValues[s.id])}>Save</Button>
+                ) : (
+                    <Button variant="outline" size="sm" onClick={() => setEditValues({ ...editValues, [s.id]: s.value })}>Edit</Button>
+                )}
+            </div>
+        </div>
+    )
 
     return (
         <Card className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -587,24 +609,7 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                             </Button>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
-                            {settings?.filter((s: Setting) => s.key.includes('msg91')).map((s: Setting) => (
-                                <div key={s.id} className="space-y-2">
-                                    <Label className="text-xs text-slate-500">{s.key.split('.').pop()?.replace('_', ' ')}</Label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            type={editValues[s.id] !== undefined ? "text" : "password"}
-                                            value={editValues[s.id] !== undefined ? editValues[s.id] : s.value}
-                                            onChange={(e) => setEditValues({ ...editValues, [s.id]: e.target.value })}
-                                            className="bg-slate-50"
-                                        />
-                                        {editValues[s.id] !== undefined ? (
-                                            <Button size="sm" onClick={() => handleUpdate(s.id, editValues[s.id])}>Save</Button>
-                                        ) : (
-                                            <Button variant="outline" size="sm" onClick={() => setEditValues({ ...editValues, [s.id]: s.value })}>Edit</Button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
+                            {settings?.filter((s: Setting) => s.key.startsWith('msg91.')).map(renderSettingRow)}
                         </div>
                     </div>
 
@@ -613,17 +618,15 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                         <div className="flex items-center justify-between">
                             <h4 className="font-semibold flex items-center gap-2">
                                 <span className="p-1 px-2 bg-slate-100 rounded text-xs">Email</span>
-                                Gmail API (Google OAuth)
+                                SMTP Configuration
                             </h4>
                             <Button size="sm" variant="ghost" onClick={() => handleTest('gmail')} className="h-8 text-[10px] font-bold uppercase tracking-wider text-blue-600">
                                 Test Connection
                             </Button>
                         </div>
-                        <p className="text-xs text-slate-500">Connect your Google workspace account to send notifications, fee reminders, and institutional circulars.</p>
-                        <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => toast.info("OAuth redirect coming soon")}>
-                            <Globe size={14} />
-                            Re-authorize with Google
-                        </Button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {settings?.filter((s: Setting) => s.key.startsWith('smtp.') || s.key.startsWith('email.')).map(renderSettingRow)}
+                        </div>
                     </div>
 
                     {/* Payment Gateway */}
@@ -637,15 +640,8 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                                 Test Connection
                             </Button>
                         </div>
-                        <div className="flex gap-4">
-                            <div className="flex-1 space-y-2">
-                                <Label className="text-[10px] font-bold uppercase text-slate-400">Environment</Label>
-                                <Input value="Sandbox (Test)" disabled className="bg-slate-50" />
-                            </div>
-                            <div className="flex-1 space-y-2">
-                                <Label className="text-[10px] font-bold uppercase text-slate-400">Merchant Logo</Label>
-                                <div className="h-10 px-3 flex items-center bg-slate-50 rounded border text-xs text-slate-500 italic">Connected</div>
-                            </div>
+                        <div className="grid grid-cols-1 gap-4">
+                           {settings?.filter((s: Setting) => s.key.startsWith('easebuzz.')).map(renderSettingRow)}
                         </div>
                     </div>
                 </div>

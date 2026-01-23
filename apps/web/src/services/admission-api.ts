@@ -90,13 +90,7 @@ export const admissionApi = {
         return response.data;
     },
 
-    /**
-     * Initiate payment
-     */
-    initiatePayment: async (id: number, amount: number): Promise<any> => {
-        const response = await api.post(`${BASE_URL}/applications/${id}/payment`, { amount });
-        return response.data;
-    },
+
 
     /**
      * Verify payment
@@ -105,6 +99,17 @@ export const admissionApi = {
         const response = await api.post(`${BASE_URL}/applications/${id}/payment/verify`, {
             payment_id: paymentId,
             signature
+        });
+        return response.data;
+    },
+
+    /**
+     * Verify offline payment (Admin)
+     */
+    verifyOfflinePayment: async (id: number, verified: boolean, proofUrl?: string): Promise<any> => {
+        const response = await api.post(`${BASE_URL}/${id}/payment/offline-verify`, {
+            verified,
+            payment_proof_url: proofUrl
         });
         return response.data;
     },
@@ -203,6 +208,23 @@ export const admissionApi = {
         portal_base_url?: string;
     }): Promise<any> => {
         const response = await api.put(`${BASE_URL}/settings`, data);
+        return response.data;
+    },
+
+    /**
+     * Initiate payment for an application
+     */
+    initiatePayment: async (id: number, amount: number): Promise<{
+        status: string;
+        payment_url: string;
+        txnid: string;
+    }> => {
+        const response = await api.post(`/payment/initiate`, {
+            application_id: id,
+            amount: amount,
+            surl: `${window.location.origin}/apply/payment/success`,
+            furl: `${window.location.origin}/apply/payment/failure`
+        });
         return response.data;
     },
 };

@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/hooks/use-toast'
-import { useForm } from 'react-hook-form'
+import { useForm, Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { admissionSchema, AdmissionFormValues } from '@/schemas/admission-schema'
 // Removed missing form components imports
@@ -35,7 +35,7 @@ export default function AddOfflineApplicationDialog({ open, onOpenChange }: AddO
     const [isFullEntry, setIsFullEntry] = useState(false)
 
     const form = useForm<AdmissionFormValues>({
-        resolver: zodResolver(admissionSchema),
+        resolver: zodResolver(admissionSchema) as Resolver<AdmissionFormValues>,
         defaultValues: {
             student_name: "",
             email: "",

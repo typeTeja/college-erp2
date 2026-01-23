@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useAdmissions, useConfirmAdmission } from '@/hooks/use-admissions'
+import admissionApi from '@/services/admission-api'
 import AddOfflineApplicationDialog from '@/components/admissions/AddOfflineApplicationDialog'
 
 export default function AdmissionsDashboard() {
@@ -63,6 +64,26 @@ export default function AdmissionsDashboard() {
             toast({
                 title: "Error",
                 description: "Failed to confirm admission.",
+                variant: "destructive"
+            })
+        }
+    }
+
+    const handleVerifyPayment = async (id: number) => {
+        if (!confirm("Are you sure you want to verify this offline payment? This will create a student account and send credentials.")) return;
+        
+        try {
+            await admissionApi.verifyOfflinePayment(id, true)
+            toast({
+                title: "Payment Verified",
+                description: "Payment marked as paid and credentials sent.",
+            })
+            // Ideally we should refetch data here. Assuming useAdmissions uses react-query and we can invalidate queries or just reload for now.
+            window.location.reload() 
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to verify payment.",
                 variant: "destructive"
             })
         }
@@ -207,6 +228,17 @@ export default function AdmissionsDashboard() {
                                                     disabled={confirmMutation.isPending}
                                                 >
                                                     <Check className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                            {app.status === ApplicationStatus.PENDING_PAYMENT && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-blue-600 h-8 w-8 p-0"
+                                                    title="Verify Payment (Offline)"
+                                                    onClick={() => handleVerifyPayment(app.id)}
+                                                >
+                                                    <CreditCard className="h-4 w-4" />
                                                 </Button>
                                             )}
                                         </TableCell>

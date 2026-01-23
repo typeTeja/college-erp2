@@ -7,6 +7,7 @@ import { getAcademicBatches, getBatchSemesters, getBatchSubjects } from '@/utils
 import { BatchSubject } from '@/types/academic-batch';
 import { toast } from 'sonner';
 import { SemesterSettingsDialog } from './SemesterSettingsDialog';
+import LabAllocationManager from './LabAllocationManager';
 
 interface StructureNode {
     id: string;

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Copy, Eye, EyeOff, CreditCard, Banknote, DollarSign } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import admissionApi from '@/services/admission-api'
 
 interface QuickApplyResponse {
     application_number: string
@@ -15,6 +16,7 @@ interface QuickApplyResponse {
     payment_mode?: string
     fee_amount?: number
     fee_enabled?: boolean
+    id: number
 }
 
 export default function ApplySuccessPage() {
@@ -115,12 +117,37 @@ export default function ApplySuccessPage() {
                                     </div>
                                     <Button
                                         className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3"
-                                        onClick={() => {
-                                            // TODO: Redirect to payment gateway
-                                            toast({
-                                                title: "Payment Gateway",
-                                                description: "Redirecting to payment gateway...",
-                                            })
+                                        onClick={async () => {
+                                            try {
+                                                if (!response.id || !response.fee_amount) {
+                                                    toast({
+                                                        title: "Error",
+                                                        description: "Missing application details for payment.",
+                                                        variant: "destructive"
+                                                    });
+                                                    return;
+                                                }
+
+                                                toast({
+                                                    title: "Initiating Payment",
+                                                    description: "Please wait while we redirect you to the payment gateway...",
+                                                });
+
+                                                const paymentResponse = await admissionApi.initiatePayment(response.id, response.fee_amount);
+                                                
+                                                if (paymentResponse.payment_url) {
+                                                    window.location.href = paymentResponse.payment_url;
+                                                } else {
+                                                    throw new Error("No payment URL received");
+                                                }
+                                            } catch (error) {
+                                                console.error("Payment initiation error:", error);
+                                                toast({
+                                                    title: "Error",
+                                                    description: "Failed to initiate payment. Please try again.",
+                                                    variant: "destructive"
+                                                });
+                                            }
                                         }}
                                     >
                                         Proceed to Payment Gateway

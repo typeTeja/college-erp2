@@ -55,6 +55,18 @@ export default function QuickApplyPage() {
         setIsSubmitting(true)
 
         try {
+            // Call Quick Apply API
+            const response = await admissionApi.quickApplyV2({
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                gender: formData.gender,
+                program_id: parseInt(formData.program_id),
+                state: formData.state,
+                board: formData.board,
+                group_of_study: formData.group_of_study
+            })
+
             // Store credentials and payment info in session storage for success page
             const storageData = {
                 ...response,
