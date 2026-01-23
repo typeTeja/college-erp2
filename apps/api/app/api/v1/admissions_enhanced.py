@@ -238,7 +238,6 @@ async def complete_my_application(
 
 @router.get("/payment-config", response_model=PaymentConfigResponse)
 async def get_payment_config(
-    *,
     session: Session = Depends(get_session)
 ):
     """

@@ -58,6 +58,12 @@ class Settings(BaseSettings):
     S3_ENDPOINT: str = ""
     S3_ACCESS_KEY: str = ""
     S3_SECRET_KEY: str = ""
+    S3_BUCKET: str = "college-erp"
+    
+    # Payment Gateway (Easebuzz)
+    EASEBUZZ_MERCHANT_KEY: str = ""
+    EASEBUZZ_SALT: str = ""
+    EASEBUZZ_ENV: str = "test"  # test or prod
     S3_REGION: str = "us-east-1"
     S3_BUCKET: str = "college-erp-documents"  # Main documents bucket
     S3_BUCKET_IMAGES: str = "college-erp-images"  # Images bucket

@@ -26,13 +26,17 @@ export default function ApplySuccessPage() {
     useEffect(() => {
         // Retrieve response from session storage
         const storedResponse = sessionStorage.getItem('quickApplyResponse')
+        console.log('Success Page: Stored Response:', storedResponse) // Debug log
+
         if (storedResponse) {
             setResponse(JSON.parse(storedResponse))
             // Clear from session storage after reading
-            sessionStorage.removeItem('quickApplyResponse')
+            // sessionStorage.removeItem('quickApplyResponse') // Keep it for now for debugging
         } else {
+            console.log('Success Page: No response found in session storage')
             // Redirect to apply page if no response found
-            router.push('/apply')
+            // router.push('/apply') // Disable redirect for debugging
+            // Show error/loading state instead
         }
     }, [router])
 

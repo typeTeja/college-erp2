@@ -30,6 +30,12 @@ export default function QuickApplyPage() {
         }
     })
 
+    // Fetch payment configuration
+    const { data: paymentConfig } = useQuery({
+        queryKey: ['payment-config'],
+        queryFn: () => admissionApi.getPaymentConfig(),
+    })
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -39,6 +45,7 @@ export default function QuickApplyPage() {
         state: '',
         board: '',
         group_of_study: '',
+        payment_mode: 'ONLINE', // Default to online
     })
 
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -48,18 +55,22 @@ export default function QuickApplyPage() {
         setIsSubmitting(true)
 
         try {
-            const response = await admissionApi.quickApplyV2({
-                ...formData,
-                program_id: parseInt(formData.program_id)
-            })
-
-            // Store credentials in session storage for success page
-            sessionStorage.setItem('quickApplyResponse', JSON.stringify(response))
+            // Store credentials and payment info in session storage for success page
+            const storageData = {
+                ...response,
+                payment_mode: formData.payment_mode,
+                fee_amount: paymentConfig?.fee_amount || 0,
+                fee_enabled: paymentConfig?.fee_enabled || false
+            }
+            console.log('Form Submit: Saving to session storage:', storageData)
+            sessionStorage.setItem('quickApplyResponse', JSON.stringify(storageData))
 
             toast({
                 title: "Application Submitted!",
                 description: response.message,
             })
+
+            console.log('Form Submit: Redirecting to success page')
 
             // Redirect to success page
             router.push('/apply/success')
@@ -184,10 +195,66 @@ export default function QuickApplyPage() {
                             />
                         </div>
 
+                        {/* Payment Section */}
+                        {paymentConfig?.fee_enabled && (
+                            <div className="border-t pt-6 mt-6">
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <h3 className="font-semibold text-blue-900">Application Fee</h3>
+                                    </div>
+                                    <p className="text-2xl font-bold text-blue-600">₹{paymentConfig.fee_amount}</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Payment Mode *</Label>
+                                    <Select
+                                        value={formData.payment_mode}
+                                        onValueChange={(v) => setFormData({ ...formData, payment_mode: v })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {paymentConfig.online_enabled && (
+                                                <SelectItem value="ONLINE">
+                                                    <div className="flex items-center gap-2">
+                                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                                        </svg>
+                                                        <span>Online Payment</span>
+                                                    </div>
+                                                </SelectItem>
+                                            )}
+                                            {paymentConfig.offline_enabled && (
+                                                <SelectItem value="OFFLINE">
+                                                    <div className="flex items-center gap-2">
+                                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                        </svg>
+                                                        <span>Offline Payment (Pay at College)</span>
+                                                    </div>
+                                                </SelectItem>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-xs text-gray-600">
+                                        {formData.payment_mode === 'ONLINE'
+                                            ? "You will be redirected to payment gateway after submission"
+                                            : "You can pay at the college office and upload proof later"}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <p className="text-sm text-blue-800">
                                 <strong>What happens next?</strong><br />
-                                After submission, you'll receive login credentials via email and SMS to access your student portal and complete the remaining application steps.
+                                {paymentConfig?.fee_enabled
+                                    ? `After submission, complete the payment of ₹${paymentConfig.fee_amount}. You'll receive login credentials via email and SMS after payment confirmation.`
+                                    : "After submission, you'll receive login credentials via email and SMS to access your student portal and complete the remaining application steps."}
                             </p>
                         </div>
 
@@ -196,7 +263,7 @@ export default function QuickApplyPage() {
                             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 text-lg"
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? "Submitting..." : "Submit Application"}
+                            {isSubmitting ? "Submitting..." : paymentConfig?.fee_enabled && formData.payment_mode === 'ONLINE' ? "Proceed to Payment" : "Submit Application"}
                         </Button>
                     </form>
                 </CardContent>
