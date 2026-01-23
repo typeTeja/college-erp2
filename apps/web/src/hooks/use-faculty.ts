@@ -3,16 +3,17 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/config/react-query';
+import { api } from '@/utils/api';
 
 // Placeholder - will need actual API service
 const facultyApi = {
     list: async (filters?: any) => {
-        const response = await fetch('/api/v1/faculty');
-        return response.json();
+        const response = await api.get('/faculty');
+        return response.data;
     },
     getProfile: async () => {
-        const response = await fetch('/api/v1/faculty/me');
-        return response.json();
+        const response = await api.get('/faculty/me');
+        return response.data;
     }
 };
 

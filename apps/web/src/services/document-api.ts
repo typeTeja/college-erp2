@@ -3,9 +3,8 @@
  * 
  * Provides methods to interact with document management endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/documents';
 
 export const documentApi = {
     /**
@@ -20,7 +19,7 @@ export const documentApi = {
             formData.append('metadata', JSON.stringify(metadata));
         }
 
-        const response = await axios.post(BASE_URL, formData, {
+        const response = await api.post('/documents', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
@@ -34,7 +33,7 @@ export const documentApi = {
         category_id?: number;
         verification_status?: string;
     }): Promise<any[]> => {
-        const response = await axios.get(BASE_URL, { params: filters });
+        const response = await api.get('/documents', { params: filters });
         return response.data;
     },
 
@@ -42,7 +41,7 @@ export const documentApi = {
      * Get a specific document
      */
     get: async (id: number): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/${id}`);
+        const response = await api.get(`/${id}`);
         return response.data;
     },
 
@@ -50,7 +49,7 @@ export const documentApi = {
      * Verify a document
      */
     verify: async (id: number, verified: boolean, remarks?: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${id}/verify`, {
+        const response = await api.post(`/${id}/verify`, {
             verified,
             remarks
         });
@@ -61,7 +60,7 @@ export const documentApi = {
      * Reject a document
      */
     reject: async (id: number, reason: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${id}/reject`, { reason });
+        const response = await api.post(`/${id}/reject`, { reason });
         return response.data;
     },
 
@@ -69,7 +68,7 @@ export const documentApi = {
      * Download a document
      */
     download: async (id: number): Promise<Blob> => {
-        const response = await axios.get(`${BASE_URL}/${id}/download`, {
+        const response = await api.get(`/${id}/download`, {
             responseType: 'blob'
         });
         return response.data;
@@ -79,7 +78,7 @@ export const documentApi = {
      * Get document categories
      */
     getCategories: async (): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/categories`);
+        const response = await api.get(`/categories`);
         return response.data;
     },
 };

@@ -730,9 +730,9 @@ async def confirm_admission(
         # Generate token
         token = PasswordToken.create_token(user.id, user.email, expires_hours=24)
         
-        # Generate password setup link
-        base_url = str(request.base_url).rstrip('/')
-        password_setup_link = f"{base_url.replace('/api/v1', '')}/auth/setup-password?token={token}"
+        # Generate password setup link using PORTAL_BASE_URL (HTTPS-aware)
+        from app.config.settings import settings
+        password_setup_link = f"{settings.PORTAL_BASE_URL}/auth/setup-password?token={token}"
         
         # Get program name
         program_name = application.program.name if application.program else "N/A"

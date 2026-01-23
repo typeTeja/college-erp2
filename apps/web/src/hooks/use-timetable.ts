@@ -2,32 +2,26 @@
  * Timetable Management Hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/utils/api';
 
 // Placeholder - will need actual API service
 const timetableApi = {
     getSlots: async () => {
-        const response = await fetch('/api/v1/timetable/slots');
-        // Mock response for now if not exists
-        return response.ok ? response.json() : [];
+        const response = await api.get('/timetable/slots');
+        return response.data;
     },
     getSchedule: async (academicYearId: number, semesterId: number, sectionId?: number) => {
-        const params = new URLSearchParams({
-            academic_year_id: academicYearId.toString(),
-            semester_id: semesterId.toString()
-        });
-        if (sectionId) params.append('section_id', sectionId.toString());
-
-        const response = await fetch(`/api/v1/timetable?${params.toString()}`);
-        return response.ok ? response.json() : [];
+        const params = {
+            academic_year_id: academicYearId,
+            semester_id: semesterId,
+            ...(sectionId && { section_id: sectionId })
+        };
+        const response = await api.get('/timetable', { params });
+        return response.data;
     },
     createEntry: async (data: any) => {
-        const response = await fetch('/api/v1/timetable/entries', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) throw new Error('Failed to create timetable entry');
-        return response.json();
+        const response = await api.post('/timetable/entries', data);
+        return response.data;
     }
 };
 

@@ -1,35 +1,76 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { getApiUrl } from '@/config/env';
 
-const productionUrl = process.env.NEXT_PUBLIC_API_URL_PROD || process.env.NEXT_PUBLIC_API_URL || "https://api.rchmct.org";
-const API_URL = process.env.NODE_ENV === "production"
-    ? productionUrl.replace(/^http:/, "https:")
-    : (process.env.NEXT_PUBLIC_API_URL_DEV || "http://localhost:8000");
+/**
+ * Centralized API Client
+ * 
+ * All API calls MUST use this instance to ensure:
+ * - Validated HTTPS URLs in production
+ * - Automatic authentication headers
+ * - Centralized error handling
+ * - Request/response interceptors
+ */
+
+// Get validated URL (will throw if invalid)
+const API_URL = getApiUrl();
+
+// Log in development for debugging (server-side only)
+if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log(`🔧 API Client initialized with base URL: ${API_URL}/api/v1`);
+}
+
 export const api = axios.create({
     baseURL: `${API_URL}/api/v1`,
     headers: {
         'Content-Type': 'application/json',
     },
+    timeout: 30000, // 30 second timeout
 });
 
-// Add token to requests
-api.interceptors.request.use((config) => {
-    const token = Cookies.get('access_token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
-// Handle 401 errors
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            Cookies.remove('access_token');
-            Cookies.remove('refresh_token');
-            window.location.href = '/login';
+// Request Interceptor - Attach token & validate URL
+api.interceptors.request.use(
+    (config) => {
+        // Attach authentication token
+        const token = Cookies.get('access_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // Security check: Block HTTP requests in production (only at request time, not module load)
+        if (process.env.NODE_ENV === 'production') {
+            const fullUrl = config.baseURL + (config.url || '');
+            if (fullUrl.startsWith('http://')) {
+                throw new Error(
+                    `🚨 BLOCKED: Attempted HTTP request in production: ${fullUrl}`
+                );
+            }
+        }
+
+        return config;
+    },
+    (error) => {
         return Promise.reject(error);
     }
 );
+
+// Response Interceptor - Handle errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        // Handle 401 Unauthorized - redirect to login
+        if (error.response?.status === 401) {
+            // Clear token
+            Cookies.remove('access_token');
+
+            // Redirect to login (only in browser)
+            if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+export default api;

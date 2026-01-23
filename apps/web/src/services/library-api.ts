@@ -3,9 +3,8 @@
  * 
  * Provides methods to interact with library endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/library';
 
 export const libraryApi = {
     /**
@@ -16,7 +15,7 @@ export const libraryApi = {
         category?: string;
         available?: boolean;
     }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/books`, { params: filters });
+        const response = await api.get(`/books`, { params: filters });
         return response.data;
     },
 
@@ -28,7 +27,7 @@ export const libraryApi = {
         member_id: number;
         due_date: string;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/issues`, data);
+        const response = await api.post(`/issues`, data);
         return response.data;
     },
 
@@ -36,7 +35,7 @@ export const libraryApi = {
      * Return a book
      */
     returnBook: async (issueId: number): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/issues/${issueId}/return`);
+        const response = await api.post(`/issues/${issueId}/return`);
         return response.data;
     },
 
@@ -44,7 +43,7 @@ export const libraryApi = {
      * Renew a book
      */
     renewBook: async (issueId: number, newDueDate: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/issues/${issueId}/renew`, {
+        const response = await api.post(`/issues/${issueId}/renew`, {
             new_due_date: newDueDate
         });
         return response.data;
@@ -54,7 +53,7 @@ export const libraryApi = {
      * Calculate fine
      */
     calculateFine: async (issueId: number): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/issues/${issueId}/fine`);
+        const response = await api.get(`/issues/${issueId}/fine`);
         return response.data;
     },
 
@@ -62,7 +61,7 @@ export const libraryApi = {
      * Get library members
      */
     listMembers: async (): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/members`);
+        const response = await api.get(`/members`);
         return response.data;
     },
 
@@ -70,7 +69,7 @@ export const libraryApi = {
      * Get member's issued books
      */
     getMemberBooks: async (memberId: number): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/members/${memberId}/books`);
+        const response = await api.get(`/members/${memberId}/books`);
         return response.data;
     },
 };

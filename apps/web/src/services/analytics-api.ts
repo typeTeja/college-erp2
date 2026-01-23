@@ -3,16 +3,15 @@
  * 
  * Provides methods to interact with analytics endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/analytics';
 
 export const analyticsApi = {
     /**
      * Get dashboard summary
      */
     getDashboardSummary: async (): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/dashboard`);
+        const response = await api.get(`/dashboard`);
         return response.data;
     },
 
@@ -23,7 +22,7 @@ export const analyticsApi = {
         from_year?: string;
         to_year?: string;
     }): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/trends/enrollment`, { params: filters });
+        const response = await api.get(`/trends/enrollment`, { params: filters });
         return response.data;
     },
 
@@ -33,7 +32,7 @@ export const analyticsApi = {
     getFeeAnalytics: async (filters?: {
         academic_year?: string;
     }): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/finance/fees`, { params: filters });
+        const response = await api.get(`/finance/fees`, { params: filters });
         return response.data;
     },
 
@@ -44,7 +43,7 @@ export const analyticsApi = {
         program_id?: number;
         semester?: number;
     }): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/academics/performance`, { params: filters });
+        const response = await api.get(`/academics/performance`, { params: filters });
         return response.data;
     },
 
@@ -55,7 +54,7 @@ export const analyticsApi = {
         report_type: string;
         filters: any;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/reports/custom`, data);
+        const response = await api.post(`/reports/custom`, data);
         return response.data;
     },
 
@@ -63,7 +62,7 @@ export const analyticsApi = {
      * Export data
      */
     exportData: async (type: string, filters?: any): Promise<Blob> => {
-        const response = await axios.post(`${BASE_URL}/export/${type}`, filters, {
+        const response = await api.post(`/export/${type}`, filters, {
             responseType: 'blob'
         });
         return response.data;

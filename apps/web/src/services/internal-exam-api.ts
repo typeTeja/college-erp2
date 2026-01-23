@@ -3,9 +3,8 @@
  * 
  * Provides methods to interact with internal exam endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/internal-exams';
 
 // ============================================================================
 // Internal Exam APIs
@@ -16,7 +15,7 @@ export const internalExamApi = {
      * Create a new internal exam
      */
     create: async (data: any): Promise<any> => {
-        const response = await axios.post(BASE_URL, data);
+        const response = await api.post('/internal-exams', data);
         return response.data;
     },
 
@@ -30,7 +29,7 @@ export const internalExamApi = {
         exam_type?: string;
         academic_year?: string;
     }): Promise<any[]> => {
-        const response = await axios.get(BASE_URL, { params: filters });
+        const response = await api.get('/internal-exams', { params: filters });
         return response.data;
     },
 
@@ -38,7 +37,7 @@ export const internalExamApi = {
      * Get a specific exam
      */
     get: async (id: number): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/${id}`);
+        const response = await api.get(`/${id}`);
         return response.data;
     },
 
@@ -46,7 +45,7 @@ export const internalExamApi = {
      * Update an exam
      */
     update: async (id: number, data: any): Promise<any> => {
-        const response = await axios.put(`${BASE_URL}/${id}`, data);
+        const response = await api.put(`/${id}`, data);
         return response.data;
     },
 
@@ -54,14 +53,14 @@ export const internalExamApi = {
      * Delete an exam
      */
     delete: async (id: number): Promise<void> => {
-        await axios.delete(`${BASE_URL}/${id}`);
+        await api.delete(`/${id}`);
     },
 
     /**
      * Enter marks for an exam
      */
     enterMarks: async (examId: number, marks: any[]): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${examId}/marks`, { marks });
+        const response = await api.post(`/${examId}/marks`, { marks });
         return response.data;
     },
 
@@ -69,7 +68,7 @@ export const internalExamApi = {
      * Calculate grades for an exam
      */
     calculateGrades: async (examId: number): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${examId}/calculate-grades`);
+        const response = await api.post(`/${examId}/calculate-grades`);
         return response.data;
     },
 
@@ -77,7 +76,7 @@ export const internalExamApi = {
      * Publish results
      */
     publishResults: async (examId: number): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${examId}/publish`);
+        const response = await api.post(`/${examId}/publish`);
         return response.data;
     },
 
@@ -85,7 +84,7 @@ export const internalExamApi = {
      * Get exam marks
      */
     getMarks: async (examId: number, filters?: { section_id?: number }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/${examId}/marks`, { params: filters });
+        const response = await api.get(`/${examId}/marks`, { params: filters });
         return response.data;
     },
 
@@ -93,7 +92,7 @@ export const internalExamApi = {
      * Get student result
      */
     getStudentResult: async (examId: number, studentId: number): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/${examId}/students/${studentId}/result`);
+        const response = await api.get(`/${examId}/students/${studentId}/result`);
         return response.data;
     },
 };

@@ -75,9 +75,9 @@ async def request_password_reset(
     # Generate token
     token = PasswordToken.create_token(user.id, user.email, expires_hours=2)
     
-    # Generate reset link
-    base_url = str(request.base_url).rstrip('/')
-    reset_link = f"{base_url}/auth/reset-password?token={token}"
+    # Generate reset link using PORTAL_BASE_URL (HTTPS-aware)
+    from app.config.settings import settings
+    reset_link = f"{settings.PORTAL_BASE_URL}/auth/reset-password?token={token}"
     
     # Send email (TODO: Create password reset email template)
     try:

@@ -3,16 +3,15 @@
  * 
  * Provides methods to interact with university exam endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/university-exams';
 
 export const universityExamApi = {
     /**
      * Register student for university exam
      */
     register: async (data: any): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/registrations`, data);
+        const response = await api.post(`/registrations`, data);
         return response.data;
     },
 
@@ -24,7 +23,7 @@ export const universityExamApi = {
         exam_id?: number;
         semester?: number;
     }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/registrations`, { params: filters });
+        const response = await api.get(`/registrations`, { params: filters });
         return response.data;
     },
 
@@ -32,7 +31,7 @@ export const universityExamApi = {
      * Get all university exams
      */
     list: async (filters?: { academic_year?: string; semester?: number }): Promise<any[]> => {
-        const response = await axios.get(BASE_URL, { params: filters });
+        const response = await api.get('/university-exams', { params: filters });
         return response.data;
     },
 
@@ -40,7 +39,7 @@ export const universityExamApi = {
      * Enter exam results
      */
     enterResults: async (examId: number, results: any[]): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${examId}/results`, { results });
+        const response = await api.post(`/${examId}/results`, { results });
         return response.data;
     },
 
@@ -48,7 +47,7 @@ export const universityExamApi = {
      * Get student results
      */
     getStudentResults: async (studentId: number, semester?: number): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/students/${studentId}/results`, {
+        const response = await api.get(`/students/${studentId}/results`, {
             params: { semester }
         });
         return response.data;
@@ -58,7 +57,7 @@ export const universityExamApi = {
      * Generate transcript
      */
     generateTranscript: async (studentId: number): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/students/${studentId}/transcript`);
+        const response = await api.post(`/students/${studentId}/transcript`);
         return response.data;
     },
 
@@ -66,7 +65,7 @@ export const universityExamApi = {
      * Download transcript
      */
     downloadTranscript: async (studentId: number): Promise<Blob> => {
-        const response = await axios.get(`${BASE_URL}/students/${studentId}/transcript/download`, {
+        const response = await api.get(`/students/${studentId}/transcript/download`, {
             responseType: 'blob'
         });
         return response.data;

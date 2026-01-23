@@ -2,44 +2,28 @@
  * Staff Management Hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/utils/api';
 
-// Placeholder - will need actual API service or reuse existing one appropriately
-// Assuming we need a specific staff service
 const staffApi = {
     list: async () => {
-        // In a real app, this would be a fetch call to /api/v1/staff
-        // For now, we simulate or assume the endpoint exists
-        const response = await fetch('/api/v1/staff');
-        if (!response.ok) throw new Error('Failed to fetch staff');
-        return response.json();
+        const response = await api.get('/staff');
+        return response.data;
     },
     getShifts: async () => {
-        const response = await fetch('/api/v1/staff/shifts');
-        if (!response.ok) throw new Error('Failed to fetch shifts');
-        return response.json();
+        const response = await api.get('/staff/shifts');
+        return response.data;
     },
     create: async (data: any) => {
-        const response = await fetch('/api/v1/staff', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) throw new Error('Failed to create staff');
-        return response.json();
+        const response = await api.post('/staff', data);
+        return response.data;
     },
     update: async (id: number, data: any) => {
-        const response = await fetch(`/api/v1/staff/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) throw new Error('Failed to update staff');
-        return response.json();
+        const response = await api.put(`/staff/${id}`, data);
+        return response.data;
     },
     delete: async (id: number) => {
-        const response = await fetch(`/api/v1/staff/${id}`, { method: 'DELETE' });
-        if (!response.ok) throw new Error('Failed to delete staff');
-        return response.json();
+        const response = await api.delete(`/staff/${id}`);
+        return response.data;
     }
 };
 

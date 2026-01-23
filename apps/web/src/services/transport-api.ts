@@ -3,16 +3,15 @@
  * 
  * Provides methods to interact with transport endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/transport';
 
 export const transportApi = {
     /**
      * Get all vehicles
      */
     listVehicles: async (): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/vehicles`);
+        const response = await api.get(`/vehicles`);
         return response.data;
     },
 
@@ -20,7 +19,7 @@ export const transportApi = {
      * Get all routes
      */
     listRoutes: async (): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/routes`);
+        const response = await api.get(`/routes`);
         return response.data;
     },
 
@@ -33,7 +32,7 @@ export const transportApi = {
         pickup_point: string;
         from_date: string;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/allocations`, data);
+        const response = await api.post(`/allocations`, data);
         return response.data;
     },
 
@@ -41,7 +40,7 @@ export const transportApi = {
      * Track vehicle
      */
     trackVehicle: async (vehicleId: number): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/vehicles/${vehicleId}/track`);
+        const response = await api.get(`/vehicles/${vehicleId}/track`);
         return response.data;
     },
 
@@ -49,7 +48,7 @@ export const transportApi = {
      * Get transport statistics
      */
     getStatistics: async (): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/statistics`);
+        const response = await api.get(`/statistics`);
         return response.data;
     },
 };

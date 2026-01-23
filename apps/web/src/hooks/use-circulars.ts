@@ -2,11 +2,12 @@
  * Communication/Circulars Hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/utils/api';
 
 const circularsApi = {
     list: async () => {
-        const response = await fetch('/api/v1/circulars');
-        return response.json();
+        const response = await api.get('/circulars');
+        return response.data;
     },
 };
 

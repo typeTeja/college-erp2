@@ -20,6 +20,15 @@ def on_startup():
     with Session(engine) as session:
         seed_permissions(session)
 
+# CRITICAL: Add ProxyHeadersMiddleware FIRST (before CORS)
+# This ensures FastAPI correctly detects HTTPS behind reverse proxy (Nginx)
+if settings.ENVIRONMENT == "production":
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+    app.add_middleware(
+        ProxyHeadersMiddleware,
+        trusted_hosts=["*"]  # Or specify your load balancer IPs
+    )
+
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
@@ -36,3 +45,10 @@ app.include_router(roles_router, prefix=f"{settings.API_V1_STR}/roles", tags=["r
 @app.get("/")
 def root():
     return {"message": "Welcome to College ERP API", "docs": "/docs"}
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "environment": settings.ENVIRONMENT
+    }

@@ -3,9 +3,8 @@
  * 
  * Provides methods to interact with payment gateway endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/payments';
 
 export const paymentApi = {
     /**
@@ -17,7 +16,7 @@ export const paymentApi = {
         purpose: string;
         description?: string;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/initiate`, data);
+        const response = await api.post(`/initiate`, data);
         return response.data;
     },
 
@@ -25,7 +24,7 @@ export const paymentApi = {
      * Verify payment
      */
     verify: async (paymentId: string, signature: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/verify`, {
+        const response = await api.post(`/verify`, {
             payment_id: paymentId,
             signature
         });
@@ -36,7 +35,7 @@ export const paymentApi = {
      * Get payment status
      */
     getStatus: async (paymentId: string): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/${paymentId}/status`);
+        const response = await api.get(`/${paymentId}/status`);
         return response.data;
     },
 
@@ -48,7 +47,7 @@ export const paymentApi = {
         from_date?: string;
         to_date?: string;
     }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/history/${studentId}`, { params: filters });
+        const response = await api.get(`/history/${studentId}`, { params: filters });
         return response.data;
     },
 
@@ -56,7 +55,7 @@ export const paymentApi = {
      * Generate payment receipt
      */
     generateReceipt: async (paymentId: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/${paymentId}/receipt`);
+        const response = await api.post(`/${paymentId}/receipt`);
         return response.data;
     },
 
@@ -64,7 +63,7 @@ export const paymentApi = {
      * Download payment receipt
      */
     downloadReceipt: async (paymentId: string): Promise<Blob> => {
-        const response = await axios.get(`${BASE_URL}/${paymentId}/receipt/download`, {
+        const response = await api.get(`/${paymentId}/receipt/download`, {
             responseType: 'blob'
         });
         return response.data;

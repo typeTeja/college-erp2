@@ -3,16 +3,14 @@
  * 
  * Provides methods to interact with HR endpoints
  */
-import axios from 'axios';
-
-const BASE_URL = '/api/v1/hr';
+import { api } from '@/utils/api';
 
 export const hrApi = {
     /**
      * Get all employees
      */
     listEmployees: async (filters?: { department?: string }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/employees`, { params: filters });
+        const response = await api.get('/hr/employees', { params: filters });
         return response.data;
     },
 
@@ -24,7 +22,7 @@ export const hrApi = {
         date: string;
         status: string;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/attendance`, data);
+        const response = await api.post('/hr/attendance', data);
         return response.data;
     },
 
@@ -38,7 +36,7 @@ export const hrApi = {
         to_date: string;
         reason: string;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/leave`, data);
+        const response = await api.post('/hr/leave', data);
         return response.data;
     },
 
@@ -46,7 +44,7 @@ export const hrApi = {
      * Approve leave
      */
     approveLeave: async (leaveId: number): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/leave/${leaveId}/approve`);
+        const response = await api.post(`/hr/leave/${leaveId}/approve`);
         return response.data;
     },
 
@@ -58,7 +56,7 @@ export const hrApi = {
         month: number;
         year: number;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/salary`, data);
+        const response = await api.post('/hr/salary', data);
         return response.data;
     },
 
@@ -66,7 +64,7 @@ export const hrApi = {
      * Get HR statistics
      */
     getStatistics: async (): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/statistics`);
+        const response = await api.get('/hr/statistics');
         return response.data;
     },
 };

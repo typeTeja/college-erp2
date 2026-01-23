@@ -3,16 +3,15 @@
  * 
  * Provides methods to interact with placement endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/placement';
 
 export const placementApi = {
     /**
      * Get all companies
      */
     listCompanies: async (): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/companies`);
+        const response = await api.get(`/companies`);
         return response.data;
     },
 
@@ -20,7 +19,7 @@ export const placementApi = {
      * Get all placement drives
      */
     listDrives: async (filters?: { status?: string }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/drives`, { params: filters });
+        const response = await api.get(`/drives`, { params: filters });
         return response.data;
     },
 
@@ -31,7 +30,7 @@ export const placementApi = {
         drive_id: number;
         student_id: number;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/applications`, data);
+        const response = await api.post(`/applications`, data);
         return response.data;
     },
 
@@ -39,7 +38,7 @@ export const placementApi = {
      * Get training programs
      */
     listTrainingPrograms: async (): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/training`);
+        const response = await api.get(`/training`);
         return response.data;
     },
 
@@ -47,7 +46,7 @@ export const placementApi = {
      * Get internships
      */
     listInternships: async (filters?: { status?: string }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/internships`, { params: filters });
+        const response = await api.get(`/internships`, { params: filters });
         return response.data;
     },
 
@@ -55,7 +54,7 @@ export const placementApi = {
      * Get placement statistics
      */
     getStatistics: async (): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/statistics`);
+        const response = await api.get(`/statistics`);
         return response.data;
     },
 };

@@ -2,11 +2,12 @@
  * Inventory Management Hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/utils/api';
 
 const inventoryApi = {
     list: async (filters?: any) => {
-        const response = await fetch('/api/v1/inventory');
-        return response.json();
+        const response = await api.get('/inventory');
+        return response.data;
     },
 };
 

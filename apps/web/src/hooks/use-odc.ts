@@ -2,24 +2,25 @@
  * ODC (Outdoor Catering) Management Hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/utils/api';
 
 // Placeholder - will need actual API service
 const odcApi = {
     getHotels: async () => {
-        const response = await fetch('/api/v1/odc/hotels');
-        return response.ok ? response.json() : [];
+        const response = await api.get('/odc/hotels');
+        return response.data;
     },
     getRequests: async () => {
-        const response = await fetch('/api/v1/odc/requests');
-        return response.ok ? response.json() : [];
+        const response = await api.get('/odc/requests');
+        return response.data;
     },
     getPendingPayouts: async () => {
-        const response = await fetch('/api/v1/odc/payouts/pending');
-        return response.ok ? response.json() : [];
+        const response = await api.get('/odc/payouts/pending');
+        return response.data;
     },
     getBilling: async () => {
-        const response = await fetch('/api/v1/odc/billing');
-        return response.ok ? response.json() : [];
+        const response = await api.get('/odc/billing');
+        return response.data;
     }
 };
 

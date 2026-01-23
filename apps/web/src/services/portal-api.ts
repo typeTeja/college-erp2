@@ -3,16 +3,14 @@
  * 
  * Provides methods to interact with student portal endpoints
  */
-import axios from 'axios';
-
-const BASE_URL = '/api/v1/portal';
+import { api } from '@/utils/api';
 
 export const portalApi = {
     /**
      * Get student dashboard data
      */
     getDashboard: async (): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/dashboard`);
+        const response = await api.get('/portal/dashboard');
         return response.data;
     },
 
@@ -20,7 +18,7 @@ export const portalApi = {
      * Get student profile
      */
     getProfile: async (): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/profile`);
+        const response = await api.get('/portal/profile');
         return response.data;
     },
 
@@ -28,7 +26,7 @@ export const portalApi = {
      * Update student profile
      */
     updateProfile: async (data: any): Promise<any> => {
-        const response = await axios.put(`${BASE_URL}/profile`, data);
+        const response = await api.put('/portal/profile', data);
         return response.data;
     },
 
@@ -36,7 +34,7 @@ export const portalApi = {
      * Get notifications
      */
     getNotifications: async (filters?: { unread?: boolean }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/notifications`, { params: filters });
+        const response = await api.get('/portal/notifications', { params: filters });
         return response.data;
     },
 
@@ -44,7 +42,7 @@ export const portalApi = {
      * Mark notification as read
      */
     markNotificationRead: async (id: number): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/notifications/${id}/read`);
+        const response = await api.post(`/portal/notifications/${id}/read`);
         return response.data;
     },
 
@@ -52,7 +50,7 @@ export const portalApi = {
      * Mark all notifications as read
      */
     markAllNotificationsRead: async (): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/notifications/read-all`);
+        const response = await api.post('/portal/notifications/read-all');
         return response.data;
     },
 
@@ -60,7 +58,7 @@ export const portalApi = {
      * Get student activity log
      */
     getActivity: async (filters?: { limit?: number }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/activity`, { params: filters });
+        const response = await api.get('/portal/activity', { params: filters });
         return response.data;
     },
 
@@ -68,7 +66,7 @@ export const portalApi = {
      * Change password
      */
     changePassword: async (currentPassword: string, newPassword: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/change-password`, {
+        const response = await api.post('/portal/change-password', {
             current_password: currentPassword,
             new_password: newPassword
         });

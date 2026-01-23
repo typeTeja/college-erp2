@@ -2,27 +2,24 @@
  * Academic Management Hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/utils/api';
 
 const acaApi = {
     getLessonPlans: async (subjectId: number) => {
-        const response = await fetch(`/api/v1/academics/lesson-plans?subject_id=${subjectId}`);
-        return response.ok ? response.json() : [];
+        const response = await api.get('/academics/lesson-plans', { params: { subject_id: subjectId } });
+        return response.data;
     },
     getQuestions: async (subjectId: number) => {
-        const response = await fetch(`/api/v1/academics/questions?subject_id=${subjectId}`);
-        return response.ok ? response.json() : { questions: [] };
+        const response = await api.get('/academics/questions', { params: { subject_id: subjectId } });
+        return response.data;
     },
     markTopicCompleted: async (id: number) => {
-        const response = await fetch(`/api/v1/academics/topics/${id}/complete`, { method: 'POST' });
-        return response.json();
+        const response = await api.post(`/academics/topics/${id}/complete`);
+        return response.data;
     },
     createQuestion: async (data: any) => {
-        const response = await fetch('/api/v1/academics/questions', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        return response.json();
+        const response = await api.post('/academics/questions', data);
+        return response.data;
     }
 };
 

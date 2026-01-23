@@ -338,9 +338,15 @@ class EmailService:
         application_number: str,
         username: str,
         password: str,
-        portal_url: str = "https://portal.college.edu"
+        portal_url: str = None  # ✅ Optional, use settings
     ) -> bool:
         """Send student portal login credentials email"""
+        
+        # Use settings if not provided
+        if portal_url is None:
+            from app.config.settings import settings
+            portal_url = settings.PORTAL_BASE_URL
+        
         subject = f"Your Student Portal Login Credentials - {application_number}"
         
         html_content = f"""

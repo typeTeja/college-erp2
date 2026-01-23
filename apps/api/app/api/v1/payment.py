@@ -53,8 +53,9 @@ async def initiate_payment(
     # Application fee amount (TODO: Make this configurable)
     amount = 500.0  # ₹500
     
-    # Generate webhook URL
-    webhook_url = f"{request.base_url}api/v1/admissions/payment/webhook"
+    # Generate webhook URL using BACKEND_BASE_URL (HTTPS-aware)
+    from app.config.settings import settings
+    webhook_url = f"{settings.BACKEND_BASE_URL}/api/v1/admissions/payment/webhook"
     
     # Initiate payment
     payment_data = easebuzz_service.initiate_payment(

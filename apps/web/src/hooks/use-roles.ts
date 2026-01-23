@@ -2,15 +2,16 @@
  * Role Management Hooks
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/utils/api';
 
 const rolesApi = {
     list: async () => {
-        const response = await fetch('/api/v1/roles');
-        return response.json();
+        const response = await api.get('/roles');
+        return response.data;
     },
     getPermissions: async () => {
-        const response = await fetch('/api/v1/permissions');
-        return response.json();
+        const response = await api.get('/permissions');
+        return response.data;
     },
 };
 

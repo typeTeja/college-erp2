@@ -3,16 +3,15 @@
  * 
  * Provides methods to interact with hostel endpoints
  */
-import axios from 'axios';
+import { api } from '@/utils/api';
 
-const BASE_URL = '/api/v1/hostel';
 
 export const hostelApi = {
     /**
      * Get all hostels
      */
     listHostels: async (): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/hostels`);
+        const response = await api.get(`/hostels`);
         return response.data;
     },
 
@@ -24,7 +23,7 @@ export const hostelApi = {
         available?: boolean;
         room_type?: string;
     }): Promise<any[]> => {
-        const response = await axios.get(`${BASE_URL}/rooms`, { params: filters });
+        const response = await api.get(`/rooms`, { params: filters });
         return response.data;
     },
 
@@ -37,7 +36,7 @@ export const hostelApi = {
         from_date: string;
         to_date?: string;
     }): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/allocations`, data);
+        const response = await api.post(`/allocations`, data);
         return response.data;
     },
 
@@ -45,7 +44,7 @@ export const hostelApi = {
      * Vacate room
      */
     vacateRoom: async (allocationId: number, vacateDate: string): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/allocations/${allocationId}/vacate`, {
+        const response = await api.post(`/allocations/${allocationId}/vacate`, {
             vacate_date: vacateDate
         });
         return response.data;
@@ -55,7 +54,7 @@ export const hostelApi = {
      * Log visitor
      */
     logVisitor: async (data: any): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/visitors`, data);
+        const response = await api.post(`/visitors`, data);
         return response.data;
     },
 
@@ -63,7 +62,7 @@ export const hostelApi = {
      * Create maintenance request
      */
     createMaintenanceRequest: async (data: any): Promise<any> => {
-        const response = await axios.post(`${BASE_URL}/maintenance`, data);
+        const response = await api.post(`/maintenance`, data);
         return response.data;
     },
 
@@ -71,7 +70,7 @@ export const hostelApi = {
      * Get hostel statistics
      */
     getStatistics: async (hostelId?: number): Promise<any> => {
-        const response = await axios.get(`${BASE_URL}/statistics`, {
+        const response = await api.get(`/statistics`, {
             params: { hostel_id: hostelId }
         });
         return response.data;

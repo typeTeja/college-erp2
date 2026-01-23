@@ -3,8 +3,11 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
+        "validate:env": "node scripts/validate-env.js",
         "dev": "next dev",
+        "prebuild": "npm run validate:env",
         "build": "next build",
+        "prestart": "npm run validate:env",
         "start": "next start",
         "lint": "next lint",
         "test": "vitest"
