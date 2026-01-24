@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Copy, Eye, EyeOff, CreditCard, Banknote, DollarSign } from 'lucide-react'
+import { CheckCircle, Copy, Eye, EyeOff, CreditCard, Banknote, DollarSign, Download, Lock } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import admissionApi from '@/services/admission-api'
 
@@ -19,28 +19,41 @@ interface QuickApplyResponse {
     id: number
 }
 
-export default function ApplySuccessPage() {
+function ApplySuccessContent() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { toast } = useToast()
     const [response, setResponse] = useState<QuickApplyResponse | null>(null)
     const [showPassword, setShowPassword] = useState(false)
+    const [isPaid, setIsPaid] = useState(false)
+    const [downloadingReceipt, setDownloadingReceipt] = useState(false)
 
     useEffect(() => {
         // Retrieve response from session storage
         const storedResponse = sessionStorage.getItem('quickApplyResponse')
-        console.log('Success Page: Stored Response:', storedResponse) // Debug log
+        const status = searchParams.get('status')
+        const txnid = searchParams.get('txnid')
 
         if (storedResponse) {
-            setResponse(JSON.parse(storedResponse))
-            // Clear from session storage after reading
-            // sessionStorage.removeItem('quickApplyResponse') // Keep it for now for debugging
+            const parsedData = JSON.parse(storedResponse)
+            setResponse(parsedData)
+            
+            // Check if payment was just completed or previously marked as not required
+            if (status === 'success' || !parsedData.fee_enabled) {
+                setIsPaid(true)
+                if (status === 'success') {
+                    toast({
+                        title: "Payment Successful",
+                        description: `Transaction ID: ${txnid}`,
+                    })
+                }
+            }
         } else {
-            console.log('Success Page: No response found in session storage')
-            // Redirect to apply page if no response found
-            // router.push('/apply') // Disable redirect for debugging
-            // Show error/loading state instead
+            // If no session data but we have success params, we might want to recover.
+            // But for now, let's just stick to session storage dependency as per original design.
+             console.log('Success Page: No response found in session storage')
         }
-    }, [router])
+    }, [router, searchParams, toast])
 
     const copyToClipboard = (text: string, label: string) => {
         navigator.clipboard.writeText(text)
@@ -48,6 +61,29 @@ export default function ApplySuccessPage() {
             title: "Copied!",
             description: `${label} copied to clipboard`,
         })
+    }
+
+    const handleDownloadReceipt = async () => {
+        if (!response?.application_number) return
+        
+        setDownloadingReceipt(true)
+        try {
+            const data = await admissionApi.downloadReceiptPublic(response.application_number)
+            if (data.url) {
+                window.open(data.url, '_blank')
+            } else {
+                throw new Error("Receipt URL not found")
+            }
+        } catch (error) {
+            console.error("Receipt download error:", error)
+            toast({
+                title: "Error",
+                description: "Failed to download receipt. Please try logging into the portal.",
+                variant: "destructive"
+            })
+        } finally {
+            setDownloadingReceipt(false)
+        }
     }
 
     if (!response) {
@@ -62,7 +98,14 @@ export default function ApplySuccessPage() {
     }
 
     const hasCredentials = response.portal_username && response.portal_password
-    const requiresPayment = response.fee_enabled && !hasCredentials
+    // Logic: Requires payment if fee enabled AND not paid yet
+    const requiresPayment = response.fee_enabled && !isPaid && !hasCredentials
+    // Logic: Show credentials if available OR if paid (they should have received them)
+    // Actually, credential display here relies on `response` object. 
+    // If backend creates credentials async, they might NOT be in `response` (which came from session storage BEFORE payment).
+    // But the message says "You will receive credentials via email". 
+    // So we can't show them here if they weren't generated before.
+    // We can only show "Check your email".
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -71,9 +114,13 @@ export default function ApplySuccessPage() {
                     <div className="flex justify-center mb-4">
                         <CheckCircle className="h-16 w-16" />
                     </div>
-                    <CardTitle className="text-3xl font-bold">Application Submitted Successfully!</CardTitle>
+                    <CardTitle className="text-3xl font-bold">
+                        {isPaid ? "Payment Successful!" : "Application Submitted Successfully!"}
+                    </CardTitle>
                     <CardDescription className="text-green-100 text-lg mt-2">
-                        {response.message}
+                        {isPaid 
+                            ? "Your application fee has been received. Please check your email for login credentials."
+                            : response.message}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="mt-6 space-y-6">
@@ -93,6 +140,24 @@ export default function ApplySuccessPage() {
                             </Button>
                         </div>
                     </div>
+                    
+                    {/* Download Receipt Section */}
+                    {isPaid && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+                            <div>
+                                <h3 className="font-semibold text-green-900">Payment Receipt</h3>
+                                <p className="text-sm text-green-700">Download your transaction receipt</p>
+                            </div>
+                            <Button 
+                                onClick={handleDownloadReceipt}
+                                disabled={downloadingReceipt}
+                                className="bg-green-600 hover:bg-green-700"
+                            >
+                                <Download className="h-4 w-4 mr-2" />
+                                {downloadingReceipt ? "Downloading..." : "Download PDF"}
+                            </Button>
+                        </div>
+                    )}
 
                     {/* Payment Instructions (if payment required) */}
                     {requiresPayment && (
@@ -179,7 +244,7 @@ export default function ApplySuccessPage() {
                         </div>
                     )}
 
-                    {/* Portal Credentials (if no payment required) */}
+                    {/* Portal Credentials (if available from session) */}
                     {hasCredentials && (
                         <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-purple-900 mb-4">
@@ -241,6 +306,22 @@ export default function ApplySuccessPage() {
                             </div>
                         </div>
                     )}
+                    
+                    {/* If paid but no credentials in session (e.g. came back from payment gateway) */}
+                    {isPaid && !hasCredentials && (
+                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                            <div className="flex items-start gap-3">
+                                <Lock className="h-6 w-6 text-yellow-600 mt-1" />
+                                <div>
+                                    <h3 className="font-semibold text-yellow-900">Portal Access</h3>
+                                    <p className="text-sm text-yellow-800 mt-1">
+                                        Your login credentials have been generated and sent to your registered email address and mobile number.
+                                        Please check your inbox (and spam folder) to access your student portal.
+                                    </p>
+                                </div>
+                            </div>
+                         </div>
+                    )}
 
                     {/* Next Steps */}
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
@@ -258,7 +339,7 @@ export default function ApplySuccessPage() {
                             ) : (
                                 <>
                                     <li>Check your email and SMS for login credentials</li>
-                                    <li>Login to the student portal using the credentials above</li>
+                                    <li>Login to the student portal using the credentials</li>
                                     <li>Complete the remaining application form</li>
                                     <li>Upload required documents</li>
                                 </>
@@ -268,7 +349,7 @@ export default function ApplySuccessPage() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4">
-                        {hasCredentials ? (
+                        {hasCredentials || isPaid ? (
                             <Button
                                 className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3"
                                 onClick={() => router.push('/login')}
@@ -293,5 +374,17 @@ export default function ApplySuccessPage() {
                 </CardContent>
             </Card>
         </div>
+    )
+}
+
+export default function ApplySuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                <div className="text-center">Loading...</div>
+            </div>
+        }>
+            <ApplySuccessContent />
+        </Suspense>
     )
 }

@@ -28,6 +28,7 @@ export const admissionApi = {
         program_id?: number;
         academic_year?: string;
         search?: string;
+        show_deleted?: boolean;
     }): Promise<any[]> => {
         const response = await api.get(`${BASE_URL}/applications`, { params: filters });
         return response.data;
@@ -46,6 +47,30 @@ export const admissionApi = {
      */
     update: async (id: number, data: any): Promise<any> => {
         const response = await api.put(`${BASE_URL}/applications/${id}`, data);
+        return response.data;
+    },
+
+    /**
+     * Soft delete an application
+     */
+    delete: async (id: number, reason: string): Promise<any> => {
+        const response = await api.delete(`${BASE_URL}/v2/applications/${id}`, { params: { reason } });
+        return response.data;
+    },
+
+    /**
+     * Restore a deleted application
+     */
+    restore: async (id: number): Promise<any> => {
+        const response = await api.post(`${BASE_URL}/v2/applications/${id}/restore`);
+        return response.data;
+    },
+
+    /**
+     * Bulk cleanup of test data
+     */
+    cleanupTestData: async (): Promise<any> => {
+        const response = await api.post(`${BASE_URL}/v2/applications/cleanup/test-data`);
         return response.data;
     },
 
@@ -106,10 +131,12 @@ export const admissionApi = {
     /**
      * Verify offline payment (Admin)
      */
-    verifyOfflinePayment: async (id: number, verified: boolean, proofUrl?: string): Promise<any> => {
+    verifyOfflinePayment: async (id: number, verified: boolean, proofUrl?: string, mode: 'CASH' | 'ONLINE' = 'CASH', transactionId?: string): Promise<any> => {
         const response = await api.post(`${BASE_URL}/${id}/payment/offline-verify`, {
             verified,
-            payment_proof_url: proofUrl
+            payment_proof_url: proofUrl,
+            mode,
+            transaction_id: transactionId
         });
         return response.data;
     },
@@ -224,6 +251,14 @@ export const admissionApi = {
             amount: amount
             // Removed surl/furl to use backend defaults which point to api/v1/payment/response
         });
+        return response.data;
+    },
+
+    /**
+     * Download receipt (Public)
+     */
+    downloadReceiptPublic: async (applicationNumber: string): Promise<{ url: string }> => {
+        const response = await api.get(`${BASE_URL}/v2/public/receipt/${applicationNumber}`);
         return response.data;
     },
 };

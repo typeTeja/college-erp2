@@ -171,6 +171,38 @@ class StorageService:
                 status_code=500,
                 detail=f"Failed to upload file: {str(e)}"
             )
+
+    def upload_bytes(
+        self,
+        file_content: bytes,
+        filename: str,
+        content_type: str,
+        prefix: str,
+        bucket: Optional[str] = None
+    ) -> str:
+        """
+        Upload bytes directly to S3
+        """
+        if bucket is None:
+            bucket = self.bucket_documents
+            
+        s3_key = self._generate_unique_key(prefix, filename)
+        
+        try:
+            self.s3_client.put_object(
+                Bucket=bucket,
+                Key=s3_key,
+                Body=file_content,
+                ContentType=content_type,
+                Metadata={
+                    'original_filename': filename,
+                    'uploaded_at': datetime.utcnow().isoformat()
+                }
+            )
+            return s3_key
+        except ClientError as e:
+            print(f"S3 Upload Error: {str(e)}")
+            raise e
     
     def generate_presigned_upload_url(
         self,

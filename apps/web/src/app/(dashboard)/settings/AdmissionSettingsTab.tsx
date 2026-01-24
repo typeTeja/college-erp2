@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { admissionApi } from '@/services/admission-api'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
-import { Save, Loader2, DollarSign, CreditCard, Mail, MessageSquare, UserPlus } from 'lucide-react'
+import { Save, Loader2, DollarSign, CreditCard, Mail, MessageSquare, UserPlus, Trash2, AlertTriangle } from 'lucide-react'
 
 export function AdmissionSettingsTab() {
     const { toast } = useToast()
@@ -33,7 +33,7 @@ export function AdmissionSettingsTab() {
     })
 
     // Update form data when settings load
-    useState(() => {
+    useEffect(() => {
         if (settings) {
             setFormData({
                 application_fee_enabled: settings.application_fee_enabled,
@@ -46,7 +46,7 @@ export function AdmissionSettingsTab() {
                 portal_base_url: settings.portal_base_url,
             })
         }
-    })
+    }, [settings])
 
     // Update settings mutation
     const updateMutation = useMutation({
@@ -66,6 +66,28 @@ export function AdmissionSettingsTab() {
             })
         }
     })
+
+    const cleanupMutation = useMutation({
+        mutationFn: () => admissionApi.cleanupTestData(),
+        onSuccess: (data) => {
+            toast({
+                title: "Cleanup Completed",
+                description: `Deleted ${data.deleted_count} test applications.`,
+            })
+        },
+        onError: (error: any) => {
+            toast({
+                title: "Error",
+                description: "Failed to run cleanup.",
+                variant: "destructive"
+            })
+        }
+    })
+
+    const handleCleanupTestData = () => {
+        if (!confirm("Are you sure you want to delete all test data? This cannot be undone.")) return;
+        cleanupMutation.mutate();
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -287,6 +309,37 @@ export function AdmissionSettingsTab() {
                             <p className="text-xs text-gray-500">
                                 This URL will be included in notification emails
                             </p>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Data Cleanup (Admin Only) */}
+                <Card className="border-red-200">
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Trash2 className="h-5 w-5 text-red-600" />
+                            <CardTitle className="text-red-600">Data Cleanup</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Destructive actions for maintaining the system
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-100">
+                            <div className="space-y-0.5">
+                                <Label className="text-red-900 font-medium">Cleanup Test Data</Label>
+                                <p className="text-sm text-red-700">
+                                    Soft-delete unpaid applications with "test" in name or email.
+                                </p>
+                            </div>
+                            <Button 
+                                type="button" 
+                                variant="destructive" 
+                                onClick={handleCleanupTestData}
+                                disabled={cleanupMutation.isPending}
+                            >
+                                {cleanupMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Run Cleanup"}
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>

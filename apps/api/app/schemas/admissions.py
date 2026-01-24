@@ -120,6 +120,10 @@ class ApplicationRead(ApplicationBase):
     payments: List[ApplicationPaymentRead] = []
     entrance_exam_score: Optional[EntranceExamScoreRead] = None
     documents: List[DocumentRead] = []
+    
+    # Soft Delete
+    is_deleted: bool
+    deleted_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -149,6 +153,8 @@ class OfflinePaymentVerify(BaseModel):
     """Schema for admin to verify offline payment"""
     payment_proof_url: Optional[str] = None
     verified: bool = True
+    mode: str = "CASH" # CASH, ONLINE
+    transaction_id: Optional[str] = None
 
 class PaymentInitiate(BaseModel):
     """Schema for initiating online payment"""

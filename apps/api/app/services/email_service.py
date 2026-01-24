@@ -131,8 +131,26 @@ class EmailService:
         fee_mode: str,
         amount: float
     ) -> bool:
-        """Send application confirmation email"""
+        """Send application confirmation email with payment link"""
+        
+        from app.config.settings import settings
+        
         subject = f"Application Received - {application_number}"
+        
+        # Generate payment link for online mode
+        payment_button = ""
+        if fee_mode == 'ONLINE':
+            payment_link = f"{settings.PORTAL_BASE_URL}/api/v1/payment/public/initiate/{application_number}"
+            payment_button = f"""
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{payment_link}" style="display: inline-block; background-color: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
+                    💳 Pay Now - ₹{amount:.2f}
+                </a>
+            </div>
+            <p style="text-align: center; font-size: 12px; color: #666;">
+                Click the button above to complete your payment securely
+            </p>
+            """
         
         html_content = f"""
         <html>
@@ -151,11 +169,17 @@ class EmailService:
                         Application Fee: <strong>₹{amount:.2f}</strong>
                     </div>
                     
-                    {'<p><strong>Next Steps:</strong><br>Please proceed with the online payment to continue your application process.</p>' if fee_mode == 'ONLINE' else '<p><strong>Next Steps:</strong><br>Please visit the college office to pay the application fee and upload the payment proof.</p>'}
+                    {payment_button if fee_mode == 'ONLINE' else '<p><strong>Next Steps:</strong><br>Please visit the college office to pay the application fee and upload the payment proof.</p>'}
                     
-                    <p>You can track your application status by logging in to the portal.</p>
+                    <div style="background-color: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2563eb;">
+                        <p style="margin: 0; font-size: 14px;">
+                            <strong>📧 After Payment:</strong> You will receive your student portal login credentials via email and SMS once payment is confirmed.
+                        </p>
+                    </div>
                     
-                    <p>If you have any questions, please contact our admissions office.</p>
+                    <p style="font-size: 13px; color: #666;">
+                        If you have any questions, please contact our admissions office.
+                    </p>
                     
                     <p>Best regards,<br>
                     Admissions Team</p>
@@ -176,9 +200,9 @@ class EmailService:
         Payment Mode: {fee_mode}
         Application Fee: ₹{amount:.2f}
         
-        {'Next Steps: Please proceed with the online payment to continue your application process.' if fee_mode == 'ONLINE' else 'Next Steps: Please visit the college office to pay the application fee and upload the payment proof.'}
+        {'Next Steps: Click the payment link in the email to complete your payment securely.' if fee_mode == 'ONLINE' else 'Next Steps: Please visit the college office to pay the application fee and upload the payment proof.'}
         
-        You can track your application status by logging in to the portal.
+        After Payment: You will receive your student portal login credentials via email and SMS once payment is confirmed.
         
         If you have any questions, please contact our admissions office.
         
@@ -194,11 +218,27 @@ class EmailService:
         name: str,
         application_number: str,
         amount: float,
-        transaction_id: str
+        transaction_id: str,
+        receipt_url: str = None,
+        portal_url: str = None
     ) -> bool:
         """Send payment success confirmation email"""
+        
+        if portal_url is None:
+            from app.config.settings import settings
+            portal_url = f"{settings.PORTAL_BASE_URL}/login"
+
         subject = f"Payment Successful - {application_number}"
         
+        # Generate receipt link button if URL is provided
+        receipt_section = ""
+        if receipt_url:
+             receipt_section = f"""
+             <div style="text-align: center; margin: 20px 0;">
+                <a href="{receipt_url}" style="display: inline-block; background-color: #4b5563; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 14px;">Download Receipt</a>
+             </div>
+             """
+
         html_content = f"""
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -216,10 +256,16 @@ class EmailService:
                         Transaction ID: <strong>{transaction_id}</strong><br>
                         Date: <strong>{datetime.now().strftime('%d %B %Y, %I:%M %p')}</strong>
                     </div>
+
+                    {receipt_section}
                     
                     <p><strong>Next Steps:</strong><br>
                     Please complete the full application form by logging in to the portal. You will need to provide additional details and upload required documents.</p>
                     
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{portal_url}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Login to Portal</a>
+                    </div>
+
                     <p>Best regards,<br>
                     Admissions Team</p>
                 </div>
@@ -427,6 +473,53 @@ class EmailService:
         """
         
         return self.send_email(to_email, subject, html_content, text_content)
+
+    def send_existing_user_linked(
+        self,
+        to_email: str,
+        name: str,
+        application_number: str,
+        portal_url: str = None
+    ) -> bool:
+        """Send notification to existing user about new application linkage"""
+        
+        if portal_url is None:
+            from app.config.settings import settings
+            portal_url = settings.PORTAL_BASE_URL
+            
+        subject = f"Application Linked to Account - {application_number}"
+        
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #2563eb;">New Application Linked</h2>
+                    
+                    <p>Dear {name},</p>
+                    
+                    <p>Your new application <strong>{application_number}</strong> has been successfully linked to your existing student portal account.</p>
+                    
+                    <div style="background-color: #eff6ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2563eb;">
+                        <strong>Action Required:</strong><br>
+                        You can now login to the portal using your <strong>existing credentials</strong> to view and complete this application.
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{portal_url}/login" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Login to Portal</a>
+                    </div>
+                    
+                    <p style="font-size: 13px; color: #666;">
+                        If you have forgotten your password, please use the "Forgot Password" option on the login page.
+                    </p>
+                    
+                    <p>Best regards,<br>
+                    Admissions Team</p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        return self.send_email(to_email, subject, html_content)
 
 # Singleton instance
 email_service = EmailService()

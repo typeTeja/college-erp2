@@ -70,6 +70,9 @@ class ActivityType(str, Enum):
     STATUS_CHANGED = "STATUS_CHANGED"
     ADMISSION_CONFIRMED = "ADMISSION_CONFIRMED"
     ADMISSION_REJECTED = "ADMISSION_REJECTED"
+    APPLICATION_DELETED = "APPLICATION_DELETED"
+    APPLICATION_RESTORED = "APPLICATION_RESTORED"
+    TEST_DATA_CLEANUP = "TEST_DATA_CLEANUP"
 
 class Application(SQLModel, table=True):
     """Student admission application model"""
@@ -163,6 +166,12 @@ class Application(SQLModel, table=True):
     status: ApplicationStatus = Field(default=ApplicationStatus.QUICK_APPLY_SUBMITTED, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Soft Delete
+    is_deleted: bool = Field(default=False, index=True)
+    deleted_at: Optional[datetime] = None
+    deleted_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    delete_reason: Optional[str] = None
     
     # Links
     student_id: Optional[int] = Field(default=None, foreign_key="student.id", index=True)

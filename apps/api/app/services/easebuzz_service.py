@@ -184,4 +184,48 @@ class EasebuzzService:
         
         return {"status": 0, "error": f"HTTP Error: {response.status_code}", "raw": response.text}
 
+    def process_payment_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Process response from Easebuzz (Webhook or Redirect)
+        """
+        # Verify hash
+        if not self.verify_response_hash(data):
+            # In some cases (e.g. user cancelled), hash might not be present or valid in same way check docs
+            # But usually it should be.
+            # For now, if status is userCancelled, we might accept it 
+            if data.get('status') == "userCancelled":
+                 return {
+                    "status": "FAILED",
+                    "transaction_id": data.get('txnid'),
+                    "easebuzz_id": data.get('easebuzz_ID'),
+                    "amount": data.get('amount'),
+                    "error_message": "User Cancelled",
+                    "raw": data
+                }
+            
+            logger.error(f"Hash verification failed for txnid: {data.get('txnid')}")
+            raise ValueError("Invalid Payment Signature/Hash")
+
+        status = data.get('status')
+        
+        result = {
+            "transaction_id": data.get('txnid'),
+            "easebuzz_id": data.get('easebuzz_ID'),
+            "amount": data.get('amount'),
+            "payment_method": data.get('mode'),
+            "raw": data
+        }
+        
+        if status == "success":
+            result["status"] = "SUCCESS"
+            result["paid_at"] = data.get('addedon') # Format: 2021-06-21 14:12:20
+        else:
+            result["status"] = "FAILED"
+            result["error_message"] = data.get('error_Message')
+            
+        return result
+
+    # Alias for webhook (same logic)
+    process_webhook = process_payment_response
+
 easebuzz_service = EasebuzzService()

@@ -23,17 +23,40 @@ import {
     FileText,
     Eye,
     Check,
-    AlertCircle
+    AlertCircle,
+    CheckCircle2, // New import
+    XCircle, // New import
+    Clock // New import
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Trash2, RotateCcw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useAdmissions, useConfirmAdmission } from '@/hooks/use-admissions'
+import { useAdmissions, useConfirmAdmission, useDeleteApplication, useRestoreApplication } from '@/hooks/use-admissions'
 import admissionApi from '@/services/admission-api'
 import AddOfflineApplicationDialog from '@/components/admissions/AddOfflineApplicationDialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Input } from "@/components/ui/input"
 
 export default function AdmissionsDashboard() {
     const { toast } = useToast()
     const [filterStatus, setFilterStatus] = useState<ApplicationStatus | undefined>()
+    const [showDeleted, setShowDeleted] = useState(false)
     const [dialogOpen, setDialogOpen] = useState(false)
+
+    // Verification Dialog State
+    const [verifyDialogOpen, setVerifyDialogOpen] = useState(false)
+    const [verifyingId, setVerifyingId] = useState<number | null>(null)
+    const [verifyMode, setVerifyMode] = useState<'CASH' | 'ONLINE'>('CASH')
+    const [verifyTxnId, setVerifyTxnId] = useState('')
 
     // Form setup for inline adding (optional, or pass to dialog)
     // For now, we are keeping the existing structure but preparing for the dialog integration
@@ -41,9 +64,12 @@ export default function AdmissionsDashboard() {
 
     const { data: applications, isLoading, error } = useAdmissions({
         status: filterStatus,
+        show_deleted: showDeleted
     })
 
     const confirmMutation = useConfirmAdmission()
+    const deleteMutation = useDeleteApplication()
+    const restoreMutation = useRestoreApplication()
 
     const stats = {
         total: applications?.length || 0,
@@ -69,16 +95,61 @@ export default function AdmissionsDashboard() {
         }
     }
 
-    const handleVerifyPayment = async (id: number) => {
-        if (!confirm("Are you sure you want to verify this offline payment? This will create a student account and send credentials.")) return;
+    const handleDelete = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this application?")) return;
+        try {
+            await deleteMutation.mutateAsync({ id, reason: "Admin UI Deletion" })
+            toast({
+                title: "Application Deleted",
+                description: "Application moved to trash.",
+            })
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to delete application.",
+                variant: "destructive"
+            })
+        }
+    }
+
+    const handleRestore = async (id: number) => {
+        try {
+            await restoreMutation.mutateAsync(id)
+            toast({
+                title: "Application Restored",
+                description: "Application restored from trash.",
+            })
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to restore application.",
+                variant: "destructive"
+            })
+        }
+    }
+
+    const handleVerifyClick = (id: number) => {
+        setVerifyingId(id)
+        setVerifyMode('CASH')
+        setVerifyTxnId('')
+        setVerifyDialogOpen(true)
+    }
+
+    const handleConfirmVerify = async () => {
+        if (!verifyingId) return;
+        if (verifyMode === 'ONLINE' && !verifyTxnId) {
+             toast({ title: "Error", description: "Transaction ID is required for online payment.", variant: "destructive" })
+             return;
+        }
         
         try {
-            await admissionApi.verifyOfflinePayment(id, true)
+            // @ts-ignore - signature update might take time to propagate in TS server
+            await admissionApi.verifyOfflinePayment(verifyingId, true, undefined, verifyMode, verifyTxnId)
             toast({
                 title: "Payment Verified",
                 description: "Payment marked as paid and credentials sent.",
             })
-            // Ideally we should refetch data here. Assuming useAdmissions uses react-query and we can invalidate queries or just reload for now.
+            setVerifyDialogOpen(false)
             window.location.reload() 
         } catch (error) {
             toast({
@@ -103,13 +174,58 @@ export default function AdmissionsDashboard() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">Admissions Dashboard</h1>
-                <div className="space-x-2">
+                <div className="space-x-2 flex items-center">
+                    <div className="flex items-center space-x-2 mr-4">
+                        <Switch id="show-trash" checked={showDeleted} onCheckedChange={setShowDeleted} />
+                        <Label htmlFor="show-trash">Show Trash</Label>
+                    </div>
                     <Button variant="outline" size="sm">Export Data</Button>
                     <Button size="sm" onClick={() => setDialogOpen(true)}>Add Offline Application</Button>
                 </div>
             </div>
 
             <AddOfflineApplicationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+            <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Verify Offline Payment</DialogTitle>
+                        <DialogDescription>
+                            Confirm receipt of payment. This will activate the student account.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Payment Mode</Label>
+                            <RadioGroup value={verifyMode} onValueChange={(v: any) => setVerifyMode(v)}>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="CASH" id="mode-cash" />
+                                    <Label htmlFor="mode-cash">Cash</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="ONLINE" id="mode-online" />
+                                    <Label htmlFor="mode-online">Online Transfer (UPI/NEFT)</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                        {verifyMode === 'ONLINE' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="txn-id">Transaction ID / Reference No</Label>
+                                <Input 
+                                    id="txn-id" 
+                                    value={verifyTxnId} 
+                                    onChange={(e) => setVerifyTxnId(e.target.value)} 
+                                    placeholder="e.g. UTR123456789"
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setVerifyDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleConfirmVerify}>Verify Payment</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Summary Stats */}
             {isLoading ? (
@@ -176,7 +292,7 @@ export default function AdmissionsDashboard() {
             {/* Applications Table */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Recent Applications</CardTitle>
+                    <CardTitle>{showDeleted ? "Deleted Applications (Trash)" : "Recent Applications"}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -213,33 +329,61 @@ export default function AdmissionsDashboard() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right space-x-2">
-                                            <Link href={`/admissions/${app.id}`}>
-                                                <Button variant="outline" size="sm" title="View Details" className="h-8 w-8 p-0">
-                                                    <Eye className="h-4 w-4" />
-                                                </Button>
-                                            </Link>
-                                            {app.status === ApplicationStatus.FORM_COMPLETED && (
+                                            {showDeleted ? (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     className="text-green-600 h-8 w-8 p-0"
-                                                    title="Confirm Admission"
-                                                    onClick={() => handleConfirm(app.id)}
-                                                    disabled={confirmMutation.isPending}
+                                                    title="Restore"
+                                                    onClick={() => handleRestore(app.id)}
                                                 >
-                                                    <Check className="h-4 w-4" />
+                                                    <RotateCcw className="h-4 w-4" />
                                                 </Button>
-                                            )}
-                                            {app.status === ApplicationStatus.PENDING_PAYMENT && (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="text-blue-600 h-8 w-8 p-0"
-                                                    title="Verify Payment (Offline)"
-                                                    onClick={() => handleVerifyPayment(app.id)}
-                                                >
-                                                    <CreditCard className="h-4 w-4" />
-                                                </Button>
+                                            ) : (
+                                                <>
+                                                    <Link href={`/admissions/${app.id}`}>
+                                                        <Button variant="outline" size="sm" title="View Details" className="h-8 w-8 p-0">
+                                                            <Eye className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    {app.status === ApplicationStatus.FORM_COMPLETED && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="text-green-600 h-8 w-8 p-0"
+                                                            title="Confirm Admission"
+                                                            onClick={() => handleConfirm(app.id)}
+                                                            disabled={confirmMutation.isPending}
+                                                        >
+                                                            <Check className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                    {/* Verify Payment Button - Only for Offline Pending */}
+                                                    {app.status === ApplicationStatus.PENDING_PAYMENT && app.fee_mode === 'OFFLINE' && !app.offline_payment_verified && (
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm" 
+                                                            className="text-green-600 border-green-200 hover:bg-green-50"
+                                                            title="Verify Payment (Offline)"
+                                                            onClick={() => handleVerifyClick(app.id)}
+                                                        >
+                                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                                            Verify Payment
+                                                        </Button>
+                                                    )}
+                                                    {/* Soft Delete for non-admitted/paid apps */}
+                                                    {app.status !== ApplicationStatus.PAID && app.status !== ApplicationStatus.ADMITTED && (
+                                                         <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="text-red-600 h-8 w-8 p-0"
+                                                            title="Delete"
+                                                            onClick={() => handleDelete(app.id)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                </>
                                             )}
                                         </TableCell>
                                     </TableRow>

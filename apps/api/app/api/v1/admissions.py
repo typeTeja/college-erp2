@@ -84,7 +84,7 @@ async def quick_apply(
             name=application.name,
             application_number=application.application_number,
             fee_mode=data.fee_mode.value,
-            amount=500.0  # TODO: Make configurable
+            amount=application.application_fee
         )
     except Exception as e:
         print(f"Failed to send confirmation email: {str(e)}")
@@ -238,10 +238,28 @@ async def get_recent_admissions(
 async def list_applications(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_active_superuser),
-    status: Optional[ApplicationStatus] = None
+    status: Optional[ApplicationStatus] = None,
+    show_deleted: bool = False
 ):
     """Admin endpoint to see all applications with optional status filter"""
     statement = select(Application)
+    
+    if not show_deleted:
+        statement = statement.where(Application.is_deleted == False)
+    else:
+        # If showing deleted, we might want to ONLY show deleted, or ALL? 
+        # Usually 'trash' view shows only deleted. 
+        # But 'history' might return all. 
+        # Let's interpret show_deleted=True as "Show ONLY deleted" for a trash view, 
+        # or maybe "Include deleted". 
+        # Given the UI pattern "Trash Can", let's make it show ONLY deleted if filter is explicit?
+        # Or better: default behavior is hide deleted. 
+        # If I want to see deleted, I probably want to see the Trash.
+        # Let's add a separate query param 'trash_only' or just logic:
+        # If show_deleted is True, we show deleted items. 
+        # Let's just strict filter:
+        statement = statement.where(Application.is_deleted == True)
+        
     if status:
         statement = statement.where(Application.status == status)
     
@@ -338,16 +356,27 @@ async def verify_offline_payment(
     application.offline_payment_verified_at = datetime.utcnow()
     
     if data.verified:
-        # Use shared service to process payment (status update, account creation, emails)
-        # We can use a generated transaction ID for offline payments
-        txnid = f"OFFLINE-{id}-{datetime.now().strftime('%Y%m%d%H%M')}"
+        # Validate Transaction ID for Online Mode
+        txnid = data.transaction_id
+        payment_method = "CASH"
         
+        if data.mode == "ONLINE":
+            if not txnid:
+                raise HTTPException(status_code=400, detail="Transaction ID is required for Online payment verification")
+            payment_method = "OFFLINE_ONLINE" # or just transfer?
+        else:
+            # Generate ID for Cash
+            txnid = f"CASH-{id}-{datetime.now().strftime('%Y%m%d%H%M')}"
+            payment_method = "CASH"
+
+        # Use shared service to process payment (status update, account creation, emails)
         AdmissionService.process_payment_completion(
             session=session,
             application_id=application.id,
             transaction_id=txnid,
             amount=application.application_fee,
-            background_tasks=background_tasks
+            background_tasks=background_tasks,
+            payment_method=payment_method
         )
         
         # Log activity

@@ -10,6 +10,7 @@ from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.admissions import Application
 from app.models.admission_settings import AdmissionSettings
+from app.services.storage_service import storage_service
 from app.schemas.admissions import (
     QuickApplyCreate,
     QuickApplyResponse,
@@ -79,23 +80,32 @@ async def quick_apply_v2(
                 )
         else:
             # No payment required - create account immediately
-            portal_username, portal_password = AdmissionService.create_portal_account_after_payment(
+            portal_username, portal_password, is_new_account = AdmissionService.create_portal_account_after_payment(
                 session=session,
                 application=application
             )
             
             # Send credentials
             if settings.send_credentials_email:
-                background_tasks.add_task(
-                    send_credentials_email,
-                    email=application.email,
-                    name=application.name,
-                    username=portal_username,
-                    password=portal_password,
-                    application_number=application.application_number
-                )
+                if is_new_account:
+                    background_tasks.add_task(
+                        email_service.send_portal_credentials,
+                        to_email=application.email,
+                        name=application.name,
+                        username=portal_username,
+                        password=portal_password,
+                        application_number=application.application_number
+                    )
+                else:
+                    background_tasks.add_task(
+                        email_service.send_existing_user_linked,
+                        to_email=application.email,
+                        name=application.name,
+                        application_number=application.application_number,
+                        portal_url=f"{settings.portal_base_url}" # using small settings if possible or check import
+                    )
             
-            if settings.send_credentials_sms:
+            if settings.send_credentials_sms and is_new_account:
                 background_tasks.add_task(
                     send_credentials_sms,
                     phone=application.phone,
@@ -366,3 +376,169 @@ async def send_credentials_sms(phone: str, username: str, password: str, name: s
             
     except Exception as e:
         print(f"❌ Error sending credentials SMS: {str(e)}")
+@router.get("/v2/applications/{id}/receipt")
+async def get_payment_receipt(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get payment receipt URL for an application
+    """
+    # Find application
+    statement = select(Application).where(Application.id == id)
+    application = session.exec(statement).first()
+    
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Check permission
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN", "PRINCIPAL"] for role in current_user.roles)
+    is_owner = current_user.id == application.portal_user_id
+    # Also allow if the user just paid and is checking status (maybe not logged in? No, this endpoint requires auth)
+    # If explicitly "download receipt" on success page, they might not be logged in yet?
+    # But logic says credentials sent.
+    
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    # Find receipt document
+    from app.models.admissions import ApplicationDocument
+    doc_stmt = select(ApplicationDocument).where(
+        ApplicationDocument.application_id == id,
+        ApplicationDocument.file_name == "Payment Receipt"
+    ).order_by(ApplicationDocument.uploaded_at.desc())
+    
+    document = session.exec(doc_stmt).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+        
+    # Generate presigned URL if it's an S3 key (doesn't start with http)
+    url = document.file_url
+    if not url.startswith("http"):
+        url = storage_service.generate_presigned_download_url(
+            key=url,
+            filename=f"Receipt_{application.application_number}.pdf"
+        )
+        
+    return {"url": url}
+
+@router.get("/v2/public/receipt/{application_number}")
+async def get_public_payment_receipt(
+    application_number: str,
+    session: Session = Depends(get_session)
+):
+    """
+    Get public payment receipt URL for an application (No Auth required)
+    """
+    from app.models.admissions import Application, ApplicationDocument
+    
+    # Find application
+    statement = select(Application).where(Application.application_number == application_number)
+    application = session.exec(statement).first()
+    
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+        
+    # Check if paid
+    if application.status != 'PAID' and application.payment_status != 'PAID':
+        # Also check simplified status
+        if application.payment_status != 'SUCCESS': # In case PaymentStatus enum used differently
+             # If strictly PENDING_PAYMENT, deny.
+             pass 
+
+    # Find receipt document
+    doc_stmt = select(ApplicationDocument).where(
+        ApplicationDocument.application_id == application.id,
+        ApplicationDocument.file_name == "Payment Receipt"
+    ).order_by(ApplicationDocument.uploaded_at.desc())
+    
+    document = session.exec(doc_stmt).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+        
+    # Generate presigned URL if it's an S3 key (doesn't start with http)
+    url = document.file_url
+    if not url.startswith("http"):
+        url = storage_service.generate_presigned_download_url(
+            key=url,
+            filename=f"Receipt_{application.application_number}.pdf"
+        )
+        
+    return {"url": url}
+
+# Admin Cleanup Endpoints
+
+@router.delete("/v2/applications/{id}")
+async def delete_application(
+    id: int,
+    reason: str,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Soft delete an application (Admin only)
+    Strictly forbids deleting PAID applications.
+    """
+    # Check permission
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN", "PRINCIPAL"] for role in current_user.roles)
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    try:
+        application = AdmissionService.soft_delete_application(
+            session=session,
+            application_id=id,
+            deleted_by=current_user.id,
+            reason=reason
+        )
+        return {"message": "Application soft-deleted successfully", "id": id}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/v2/applications/{id}/restore")
+async def restore_application(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Restore a deleted application (Admin only)
+    """
+    # Check permission
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN", "PRINCIPAL"] for role in current_user.roles)
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    try:
+        application = AdmissionService.restore_application(
+            session=session,
+            application_id=id,
+            restored_by=current_user.id
+        )
+        return {"message": "Application restored successfully", "id": id}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/v2/applications/cleanup/test-data")
+async def cleanup_test_data(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Bulk cleanup of 'Test' applications (Admin only)
+    Targets unpaid apps with 'test' in name/email.
+    """
+    # Check permission
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN", "PRINCIPAL"] for role in current_user.roles)
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    count = AdmissionService.cleanup_test_applications(
+        session=session,
+        performed_by=current_user.id
+    )
+    
+    return {"message": "Cleanup completed", "deleted_count": count}

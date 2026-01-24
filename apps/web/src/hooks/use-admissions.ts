@@ -10,6 +10,7 @@ export function useAdmissions(filters?: {
     program_id?: number;
     academic_year?: string;
     search?: string;
+    show_deleted?: boolean;
 }) {
     return useQuery({
         queryKey: queryKeys.admissions.list(filters),
@@ -90,3 +91,27 @@ export function useConfirmAdmission() {
         },
     });
 }
+
+export function useDeleteApplication() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+            admissionApi.delete(id, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.admissions.lists() });
+        },
+    });
+}
+
+export function useRestoreApplication() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: number) => admissionApi.restore(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.admissions.lists() });
+        },
+    });
+}
+
