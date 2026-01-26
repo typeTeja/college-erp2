@@ -97,8 +97,59 @@ export function StudentDashboard() {
                 <p className="text-slate-600">Welcome back, {user?.full_name}</p>
             </div>
 
-            {/* Application Info Card */}
-            {application && (
+            {/* ACADEMIC DASHBOARD (Post-Admission View) */}
+            {isAdmitted && (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* KPI 1: Attendance */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-slate-500">Attendance</CardTitle>
+                                <Calendar className="h-4 w-4 text-blue-600" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">85%</div>
+                                <p className="text-xs text-slate-500">Current Semester</p>
+                            </CardContent>
+                        </Card>
+
+                        {/* KPI 2: Fee Status */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-slate-500">Academic Fees</CardTitle>
+                                <div className="h-4 w-4 text-green-600 font-bold">₹</div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-green-600">Paid</div>
+                                <p className="text-xs text-slate-500">Semester 1 Cleared</p>
+                            </CardContent>
+                        </Card>
+
+                        {/* KPI 3: Next Class */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-slate-500">Next Class</CardTitle>
+                                <Clock className="h-4 w-4 text-orange-600" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-xl font-bold truncate">Mathematics 101</div>
+                                <p className="text-xs text-slate-500">10:00 AM - Room 4B</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Quick Action / Notice */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                        <h3 className="text-lg font-semibold text-blue-900">🎉 Admission Confirmed!</h3>
+                        <p className="text-blue-700 mt-2">
+                            Congratulations! Your admission is fully confirmed. You can now access your class schedule, library, and exam results from the sidebar.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* ADMISSION DASHBOARD (Pre-Admission View) */}
+            {!isAdmitted && application && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Card 1: Application Info */}
                     <Card>
@@ -149,7 +200,7 @@ export function StudentDashboard() {
 
             {/* Application Completion Alert */}
             {/* Show alert if: Not Paid OR (Paid but Form Not Completed) */}
-            {(!isPaid || (isPaid && !isFormCompleted)) && (
+            {!isAdmitted && application && (!isPaid || (isPaid && !isFormCompleted)) && (
                 <Card className="border-orange-200 bg-orange-50">
                     <CardHeader className="pb-3">
                         <div className="flex items-start gap-3">
@@ -178,6 +229,7 @@ export function StudentDashboard() {
             )}
 
             {/* Application Timeline */}
+            {!isAdmitted && (
             <Card>
                 <CardHeader>
                     <CardTitle>Admission Progress</CardTitle>
@@ -212,6 +264,7 @@ export function StudentDashboard() {
                     </div>
                 </CardContent>
             </Card>
+            )}
 
             {/* Show message if waiting for verification */}
             {application?.status === 'FORM_COMPLETED' && (
