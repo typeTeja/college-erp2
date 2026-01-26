@@ -38,7 +38,7 @@ export const admissionApi = {
      * Get a specific application
      */
     get: async (id: number): Promise<any> => {
-        const response = await api.get(`${BASE_URL}/applications/${id}`);
+        const response = await api.get(`${BASE_URL}/${id}`);
         return response.data;
     },
 
@@ -46,7 +46,7 @@ export const admissionApi = {
      * Update an application
      */
     update: async (id: number, data: any): Promise<any> => {
-        const response = await api.put(`${BASE_URL}/applications/${id}`, data);
+        const response = await api.put(`${BASE_URL}/${id}`, data);
         return response.data;
     },
 

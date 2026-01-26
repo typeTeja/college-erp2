@@ -215,7 +215,7 @@ async def get_my_application(
     Used by student portal to display application status and allow completion
     """
     # Find application by portal_user_id
-    statement = select(Application).where(Application.portal_user_id == current_user.id)
+    statement = select(Application).where(Application.portal_user_id == current_user.id).order_by(Application.created_at.desc())
     application = session.exec(statement).first()
     
     if not application:

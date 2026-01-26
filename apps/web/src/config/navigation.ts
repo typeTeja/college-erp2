@@ -253,5 +253,132 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
     ADMIN: {
         groups: [], // Copy from SUPER_ADMIN or customize
         mobileBottomNav: []
+    },
+
+    STUDENT: {
+        groups: [
+            {
+                id: 'dashboard',
+                label: 'Dashboard',
+                icon: LayoutDashboard,
+                order: 1,
+                defaultExpanded: false,
+                items: [
+                    {
+                        id: 'dashboard',
+                        label: 'Dashboard',
+                        path: '/',
+                        icon: LayoutDashboard,
+                        shortcut: 'g d'
+                    }
+                ]
+            },
+            {
+                id: 'academics',
+                label: 'Academics',
+                icon: GraduationCap,
+                order: 2,
+                items: [
+                    {
+                        id: 'attendance',
+                        label: 'My Attendance',
+                        path: '/attendance',
+                        icon: Calendar
+                    },
+                    {
+                        id: 'timetable',
+                        label: 'My Timetable',
+                        path: '/timetable',
+                        icon: Clock
+                    },
+                    {
+                        id: 'exams',
+                        label: 'Exams & Results',
+                        path: '/exams',
+                        icon: FileText
+                    },
+                    {
+                        id: 'assignments',
+                        label: 'Assignments',
+                        path: '/assignments',
+                        icon: ClipboardList
+                    }
+                ]
+            },
+            {
+                id: 'finance',
+                label: 'Finance',
+                icon: DollarSign,
+                order: 3,
+                items: [
+                    {
+                        id: 'fees',
+                        label: 'Fee Status',
+                        path: '/fees',
+                        icon: DollarSign
+                    }
+                ]
+            },
+            {
+                id: 'campus',
+                label: 'Campus',
+                icon: Building2,
+                order: 4,
+                items: [
+                    {
+                        id: 'library',
+                        label: 'Library Books',
+                        path: '/library',
+                        icon: Library
+                    },
+                    {
+                        id: 'gate-pass',
+                        label: 'Gate Pass',
+                        path: '/gatepass',
+                        icon: FileCheck
+                    },
+                    {
+                        id: 'odc',
+                        label: 'ODC Request',
+                        path: '/odc/student',
+                        icon: ClipboardList
+                    }
+                ]
+            },
+            {
+                id: 'communication',
+                label: 'Communication',
+                icon: Megaphone,
+                order: 5,
+                items: [
+                    {
+                        id: 'circulars',
+                        label: 'Circulars',
+                        path: '/circulars',
+                        icon: Megaphone
+                    }
+                ]
+            },
+            {
+                id: 'settings',
+                label: 'Settings',
+                icon: Settings,
+                order: 6,
+                items: [
+                    {
+                        id: 'settings',
+                        label: 'Profile Settings',
+                        path: '/settings',
+                        icon: Settings
+                    }
+                ]
+            }
+        ],
+        mobileBottomNav: [
+            { id: 'dashboard', label: 'Home', path: '/', icon: LayoutDashboard },
+            { id: 'attendance', label: 'Attendance', path: '/attendance', icon: Calendar },
+            { id: 'fees', label: 'Fees', path: '/fees', icon: DollarSign },
+            { id: 'more', label: 'More', path: '/menu', icon: Menu }
+        ]
     }
 };

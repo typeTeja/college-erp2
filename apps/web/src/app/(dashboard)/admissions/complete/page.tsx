@@ -43,7 +43,7 @@ export default function CompleteApplicationPage() {
                 description: "Your application has been submitted successfully.",
             })
             queryClient.invalidateQueries({ queryKey: ['my-application'] })
-            router.push('/dashboard')
+            router.push('/')
         },
         onError: (error: any) => {
             toast({
@@ -89,7 +89,8 @@ export default function CompleteApplicationPage() {
     }
 
     // Check if already completed
-    if (application.status === 'FORM_COMPLETED' || application.status === 'PENDING_PAYMENT') {
+    // Check if already completed
+    if (application.status === 'FORM_COMPLETED' || application.status === 'under_review' || application.status === 'APPROVED' || application.status === 'ADMITTED') {
         return (
             <Card className="max-w-2xl mx-auto mt-8">
                 <CardHeader className="text-center">
@@ -100,7 +101,7 @@ export default function CompleteApplicationPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                    <Link href="/dashboard">
+                    <Link href="/">
                         <Button>Back to Dashboard</Button>
                     </Link>
                 </CardContent>
@@ -110,7 +111,7 @@ export default function CompleteApplicationPage() {
 
     return (
         <div className="max-w-4xl mx-auto py-8 px-4">
-            <Link href="/dashboard">
+            <Link href="/">
                 <Button variant="ghost" className="mb-6">
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Dashboard
@@ -247,7 +248,7 @@ export default function CompleteApplicationPage() {
 
                         {/* Submit Button */}
                         <div className="flex gap-4">
-                            <Link href="/dashboard" className="flex-1">
+                            <Link href="/" className="flex-1">
                                 <Button type="button" variant="outline" className="w-full">
                                     Save as Draft
                                 </Button>

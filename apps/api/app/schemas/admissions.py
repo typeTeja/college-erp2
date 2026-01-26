@@ -101,6 +101,7 @@ class ApplicationRead(ApplicationBase):
     application_number: str
     status: ApplicationStatus
     fee_mode: FeeMode
+    payment_status: Optional[str] = "pending"
     payment_proof_url: Optional[str] = None
     offline_payment_verified: bool
     offline_payment_verified_by: Optional[int] = None

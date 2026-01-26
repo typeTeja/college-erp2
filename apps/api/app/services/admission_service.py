@@ -190,11 +190,8 @@ class AdmissionService:
         # Get admission settings to determine next status
         admission_settings = AdmissionService.get_admission_settings(session)
         
-        if admission_settings.application_fee_enabled:
-            application.status = ApplicationStatus.PENDING_PAYMENT
-        else:
-            # Skip payment if fee is disabled
-            application.status = ApplicationStatus.FORM_COMPLETED
+        # Always mark as FORM_COMPLETED as payment is a pre-requisite or handled separately
+        application.status = ApplicationStatus.FORM_COMPLETED
         
         # Log activity
         activity_log = ApplicationActivityLog(
