@@ -30,8 +30,8 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
         joining_year: currentYear,
         sections_per_semester: 1,
         section_capacity: 60,
-        labs_per_section: 0,
-        lab_capacity: 20,
+        labs_per_semester: 0,
+        lab_capacity: 40,
     });
 
     // Ensure labs_per_section is never null/undefined/NaN
@@ -50,18 +50,29 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
         if (!selectedProgram) return null;
 
         const years = selectedProgram.duration_years;
-        // Always use semester system (2 semesters per year)
-        const semesters = years * 2;
-        const sections = semesters * (formData.sections_per_semester || 0);
-        const labs = sections * ensureLabsValue(formData.labs_per_section);
-        const totalSectionCapacity = sections * (formData.section_capacity || 0);
-        const totalLabCapacity = labs * (formData.lab_capacity || 0);
+        const semesters = years * 2; // Always 2 semesters per year
+        const sectionsPerSemester = formData.sections_per_semester || 0;
+        const totalSections = semesters * sectionsPerSemester;
+        const labsPerSemester = ensureLabsValue(formData.labs_per_semester);
+        const totalLabs = semesters * labsPerSemester;
+
+        // Batch intake (per year/semester)
+        const batchIntakeCapacity = sectionsPerSemester * (formData.section_capacity || 0);
+        const labIntakeCapacity = labsPerSemester * (formData.lab_capacity || 0);
+
+        // Cumulative totals (across all semesters)
+        const totalSectionCapacity = totalSections * (formData.section_capacity || 0);
+        const totalLabCapacity = totalLabs * (formData.lab_capacity || 0);
 
         return {
             years,
             semesters,
-            sections,
-            labs,
+            sectionsPerSemester,
+            totalSections,
+            labsPerSemester,
+            totalLabs,
+            batchIntakeCapacity,
+            labIntakeCapacity,
             totalSectionCapacity,
             totalLabCapacity,
         };
@@ -105,10 +116,10 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
 
         setLoading(true);
         try {
-            // Ensure labs_per_section is a number, not null/undefined
+            // Ensure labs_per_semester is a number, not null/undefined
             const payload = {
                 ...formData,
-                labs_per_section: ensureLabsValue(formData.labs_per_section),
+                labs_per_semester: ensureLabsValue(formData.labs_per_semester),
             } as BulkBatchSetupRequest;
 
             const result = await bulkSetupService.createBulkBatch(payload);
@@ -123,7 +134,7 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                 </div>
             );
 
-            router.push(`/academics/batches/${result.batch_id}`);
+            router.push('/settings?tab=academic-structure');
         } catch (error: any) {
             toast.error(error.response?.data?.detail || 'Failed to create batch');
         } finally {
@@ -314,19 +325,19 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="labs_per_section">Lab Groups per Section</Label>
+                                    <Label htmlFor="labs_per_semester">Lab Groups per Semester</Label>
                                     <Input
-                                        id="labs_per_section"
+                                        id="labs_per_semester"
                                         type="number"
                                         min={0}
-                                        max={5}
-                                        value={formData.labs_per_section === 0 ? 0 : (formData.labs_per_section || '')}
+                                        max={20}
+                                        value={formData.labs_per_semester === 0 ? 0 : (formData.labs_per_semester || '')}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value);
-                                            setFormData({ ...formData, labs_per_section: isNaN(val) ? 0 : val });
+                                            setFormData({ ...formData, labs_per_semester: isNaN(val) ? 0 : val });
                                         }}
                                     />
-                                    <p className="text-sm text-gray-500 mt-1">0 for no labs</p>
+                                    <p className="text-sm text-gray-500 mt-1">Total lab groups for the semester (0 for no labs)</p>
                                 </div>
 
                                 <div>
@@ -341,42 +352,80 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                             const val = parseInt(e.target.value);
                                             setFormData({ ...formData, lab_capacity: isNaN(val) ? 0 : val });
                                         }}
-                                        disabled={!formData.labs_per_section}
+                                        disabled={!formData.labs_per_semester}
                                     />
                                     <p className="text-sm text-gray-500 mt-1">Max students per lab</p>
                                 </div>
                             </div>
 
                             {stats && (
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                    <h4 className="font-semibold text-green-900 mb-3">What Will Be Created</h4>
-                                    <div className="grid grid-cols-2 gap-3 text-sm">
-                                        <div className="flex justify-between">
-                                            <span className="text-green-800">Program Years:</span>
-                                            <span className="font-semibold text-green-900">{stats.years}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-green-800">Semesters:</span>
-                                            <span className="font-semibold text-green-900">{stats.semesters}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-green-800">Sections:</span>
-                                            <span className="font-semibold text-green-900">{stats.sections}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-green-800">Lab Groups:</span>
-                                            <span className="font-semibold text-green-900">{stats.labs}</span>
-                                        </div>
-                                        <div className="flex justify-between col-span-2 pt-2 border-t border-green-300">
-                                            <span className="text-green-800">Total Section Capacity:</span>
-                                            <span className="font-semibold text-green-900">{stats.totalSectionCapacity} students</span>
-                                        </div>
-                                        {stats.labs > 0 && (
-                                            <div className="flex justify-between col-span-2">
-                                                <span className="text-green-800">Total Lab Capacity:</span>
-                                                <span className="font-semibold text-green-900">{stats.totalLabCapacity} students</span>
+                                <div className="space-y-4">
+                                    {/* Structure Summary */}
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                        <h4 className="font-semibold text-green-900 mb-3">📊 Structure Summary</h4>
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-green-800">Program Years:</span>
+                                                <span className="font-semibold text-green-900">{stats.years}</span>
                                             </div>
-                                        )}
+                                            <div className="flex justify-between">
+                                                <span className="text-green-800">Semesters:</span>
+                                                <span className="font-semibold text-green-900">{stats.semesters}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-green-800">Total Sections:</span>
+                                                <span className="font-semibold text-green-900">{stats.totalSections}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-green-800">Total Lab Groups:</span>
+                                                <span className="font-semibold text-green-900">{stats.totalLabs}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Per Semester Breakdown */}
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <h4 className="font-semibold text-blue-900 mb-3">📚 Per Semester</h4>
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-blue-800">Sections/Semester:</span>
+                                                <span className="font-semibold text-blue-900">{stats.sectionsPerSemester}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-blue-800">Intake Capacity:</span>
+                                                <span className="font-semibold text-blue-900">{stats.batchIntakeCapacity} students</span>
+                                            </div>
+                                            {stats.totalLabs > 0 && (
+                                                <>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-blue-800">Labs/Semester:</span>
+                                                        <span className="font-semibold text-blue-900">{stats.labsPerSemester}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-blue-800">Lab Capacity:</span>
+                                                        <span className="font-semibold text-blue-900">{stats.labIntakeCapacity} students</span>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Cumulative Totals */}
+                                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                        <h4 className="font-semibold text-purple-900 mb-2">🎯 Cumulative Totals</h4>
+                                        <p className="text-xs text-purple-700 mb-3">Total capacity across all {stats.semesters} semesters</p>
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-purple-800">Section Slots:</span>
+                                                <span className="font-semibold text-purple-900">{stats.totalSectionCapacity} students</span>
+                                            </div>
+                                            {stats.totalLabs > 0 && (
+                                                <div className="flex justify-between">
+                                                    <span className="text-purple-800">Lab Slots:</span>
+                                                    <span className="font-semibold text-purple-900">{stats.totalLabCapacity} students</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -411,10 +460,10 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                         <p className="text-gray-900">{formData.section_capacity} students</p>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-1">Labs/Section</h4>
-                                        <p className="text-gray-900">{formData.labs_per_section || 'None'}</p>
+                                        <h4 className="font-semibold text-gray-700 mb-1">Labs/Semester</h4>
+                                        <p className="text-gray-900">{formData.labs_per_semester || 'None'}</p>
                                     </div>
-                                    {formData.labs_per_section! > 0 && (
+                                    {formData.labs_per_semester! > 0 && (
                                         <div>
                                             <h4 className="font-semibold text-gray-700 mb-1">Lab Capacity</h4>
                                             <p className="text-gray-900">{formData.lab_capacity} students</p>
@@ -432,11 +481,14 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                     <p className="text-blue-800 text-sm">
                                         This will create <span className="font-bold">{stats.years} years</span>,{' '}
                                         <span className="font-bold">{stats.semesters} semesters</span>,{' '}
-                                        <span className="font-bold">{stats.sections} sections</span>, and{' '}
-                                        <span className="font-bold">{stats.labs} lab groups</span> in a single operation.
+                                        <span className="font-bold">{stats.totalSections} sections</span>, and{' '}
+                                        <span className="font-bold">{stats.totalLabs} lab groups</span> in a single operation.
                                     </p>
                                     <p className="text-blue-700 text-sm mt-2 font-medium">
-                                        Total: {stats.years + stats.semesters + stats.sections + stats.labs} records will be created!
+                                        Batch Intake: <span className="font-bold">{stats.batchIntakeCapacity} students/semester</span>
+                                    </p>
+                                    <p className="text-blue-600 text-xs mt-1">
+                                        Total: {stats.years + stats.semesters + stats.totalSections + stats.totalLabs} records will be created!
                                     </p>
                                 </div>
                             )}

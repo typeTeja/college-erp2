@@ -4,7 +4,7 @@ export interface BulkBatchSetupRequest {
     regulation_id: number;
     sections_per_semester: number;
     section_capacity: number;
-    labs_per_section: number;
+    labs_per_semester: number;  // Changed from labs_per_section
     lab_capacity: number;
     batch_name_override?: string;
 }

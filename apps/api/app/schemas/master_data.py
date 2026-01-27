@@ -67,7 +67,7 @@ class AcademicBatchRead(AcademicBatchBase):
 class SectionBase(BaseModel):
     name: str
     code: str
-    semester_id: int
+    batch_semester_id: int
     batch_id: Optional[int] = None
     max_strength: int = 40
     is_active: bool = True
@@ -92,8 +92,8 @@ class SectionRead(SectionBase):
 class PracticalBatchBase(BaseModel):
     name: str
     code: str
-    section_id: int
-    max_strength: int = 20
+    batch_semester_id: int
+    max_strength: int = 40
     is_active: bool = True
 
 class PracticalBatchCreate(PracticalBatchBase):

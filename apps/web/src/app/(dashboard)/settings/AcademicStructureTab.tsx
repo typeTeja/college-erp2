@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronDown, Layers, Users, Beaker, BookOpen, UserPlus, Settings2 } from 'lucide-react';
+import { ChevronRight, ChevronDown, Layers, Users, Beaker, BookOpen, UserPlus, Settings2, GraduationCap } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getAcademicBatches, getBatchSemesters, getBatchSubjects } from '@/utils/master-data-service';
+import { getAcademicBatches, getProgramYears, getBatchSemesters, getBatchSubjects } from '@/utils/master-data-service';
 import { BatchSubject } from '@/types/academic-batch';
 import { toast } from 'sonner';
 import { SemesterSettingsDialog } from './SemesterSettingsDialog';
@@ -12,7 +12,7 @@ import LabAllocationManager from './LabAllocationManager';
 interface StructureNode {
     id: string;
     label: string;
-    type: 'BATCH' | 'SEMESTER' | 'SECTION' | 'LAB';
+    type: 'BATCH' | 'YEAR' | 'SEMESTER' | 'SECTION' | 'LAB';
     children?: StructureNode[];
     details?: string;
     meta?: any;
@@ -50,56 +50,90 @@ export function AcademicStructureTab() {
     const loadStructure = async (batchId: string) => {
         if (!batchId) return;
         try {
-            const semesters = await getBatchSemesters(parseInt(batchId));
+            // Fetch program years and semesters
+            const [programYears, allSemesters] = await Promise.all([
+                getProgramYears(parseInt(batchId)),
+                getBatchSemesters(parseInt(batchId))
+            ]);
 
-            const nodes: StructureNode[] = semesters.map((sem: any) => ({
-                id: `sem-${sem.id}`,
-                label: sem.semester_name,
-                type: 'SEMESTER',
-                details: sem.start_date ? `${sem.start_date} - ${sem.end_date}` : 'Set dates',
-                isActive: sem.is_active,
-                meta: sem, // Store full semester object for editing
-                children: [
-                    {
-                        id: `sem-${sem.id}-sections`,
-                        label: 'Theory Sections',
-                        type: 'SECTION',
-                        children: (sem.sections || []).map((sec: any) => ({
-                            id: `sec-${sec.id}`,
-                            label: `${sec.name} (${sec.code})`,
-                            type: 'SECTION',
-                            details: `Capacity: ${sec.max_strength}`
-                        }))
-                    },
-                    {
-                        id: `sem-${sem.id}-labs`,
-                        label: 'Practical Lab Batches',
-                        type: 'LAB',
-                        children: (sem.practical_batches || []).map((lab: any) => ({
-                            id: `lab-${lab.id}`,
-                            label: `${lab.name} (${lab.code})`,
-                            type: 'LAB',
-                            details: `Capacity: ${lab.max_strength}`,
-                            meta: {
-                                ...lab,
-                                batch_id: parseInt(batchId),
-                                batch_semester_id: sem.id,
-                                semester_no: sem.semester_no
+            // Group semesters by program_year_id
+            const semestersByYear = allSemesters.reduce((acc: any, sem: any) => {
+                if (!acc[sem.program_year_id]) {
+                    acc[sem.program_year_id] = [];
+                }
+                acc[sem.program_year_id].push(sem);
+                return acc;
+            }, {});
+
+            // Build year nodes with nested semesters
+            const nodes: StructureNode[] = programYears.map((year: any) => {
+                const yearSemesters = semestersByYear[year.id] || [];
+
+                return {
+                    id: `year-${year.id}`,
+                    label: year.year_name,
+                    type: 'YEAR',
+                    details: `${yearSemesters.length} semester${yearSemesters.length !== 1 ? 's' : ''}`,
+                    meta: year,
+                    children: yearSemesters.map((sem: any) => ({
+                        id: `sem-${sem.id}`,
+                        label: sem.semester_name,
+                        type: 'SEMESTER',
+                        details: sem.start_date ? `${sem.start_date} - ${sem.end_date}` : 'Set dates',
+                        isActive: sem.is_active,
+                        meta: sem,
+                        children: [
+                            {
+                                id: `sem-${sem.id}-sections`,
+                                label: 'Theory Sections',
+                                type: 'SECTION',
+                                children: (sem.sections || []).map((sec: any) => ({
+                                    id: `sec-${sec.id}`,
+                                    label: `${sec.name} (${sec.code})`,
+                                    type: 'SECTION',
+                                    details: `${sec.current_strength}/${sec.max_strength} students`
+                                }))
+                            },
+                            {
+                                id: `sem-${sem.id}-labs`,
+                                label: 'Practical Lab Batches',
+                                type: 'LAB',
+                                children: (sem.practical_batches || []).map((lab: any) => ({
+                                    id: `lab-${lab.id}`,
+                                    label: `${lab.name} (${lab.code})`,
+                                    type: 'LAB',
+                                    details: `${lab.current_strength}/${lab.max_strength} students`,
+                                    meta: {
+                                        ...lab,
+                                        batch_id: parseInt(batchId),
+                                        batch_semester_id: sem.id,
+                                        semester_no: sem.semester_no
+                                    }
+                                }))
                             }
-                        }))
-                    }
-                ]
-            }));
+                        ]
+                    }))
+                };
+            });
 
             setStructure(nodes);
-            // Auto expand root nodes
+            // Auto expand root nodes (years) and their semester children
             const newExpanded = { ...expanded };
-            nodes.forEach(n => newExpanded[n.id] = true);
+            nodes.forEach(yearNode => {
+                newExpanded[yearNode.id] = true; // Expand years
+                yearNode.children?.forEach(semesterNode => {
+                    newExpanded[semesterNode.id] = true; // Expand semesters
+                    semesterNode.children?.forEach(containerNode => {
+                        // Auto-expand "Theory Sections" and "Practical Lab Batches" containers
+                        newExpanded[containerNode.id] = true;
+                    });
+                });
+            });
             setExpanded(newExpanded);
 
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to load structure");
+        } catch (e: any) {
+            console.error('Failed to load structure:', e);
+            toast.error(e?.message || "Failed to load structure. Please try again.");
         }
     };
 
@@ -134,6 +168,7 @@ export function AcademicStructureTab() {
                                     expanded[node.id] ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />
                                 ) : <span className="w-4" />}
 
+                                {node.type === 'YEAR' && <GraduationCap className="h-4 w-4 text-purple-600" />}
                                 {node.type === 'SEMESTER' && <Layers className="h-4 w-4 text-indigo-600" />}
                                 {node.type === 'SECTION' && <Users className="h-4 w-4 text-blue-600" />}
                                 {node.type === 'LAB' && <Beaker className="h-4 w-4 text-emerald-600" />}

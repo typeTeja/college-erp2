@@ -18,6 +18,7 @@ import {
     AcademicYearTab,
     AcademicBatchTab,
     ProgramsTab,
+    DepartmentsTab,
     FeeHeadTab,
     BoardTab,
     ReservationCategoryTab,
@@ -120,6 +121,12 @@ export default function SettingsPage() {
                                 <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                     Academic Setup
                                 </div>
+                                <SettingNavItem
+                                    icon={<Building size={18} />}
+                                    label="Departments"
+                                    active={activeTab === 'departments'}
+                                    onClick={() => setActiveTab('departments')}
+                                />
                                 <SettingNavItem
                                     icon={<BookOpen size={18} />}
                                     label="Programs/Courses"
@@ -247,6 +254,7 @@ export default function SettingsPage() {
                     {activeTab === 'security' && <SecurityTab />}
                     {activeTab === 'notifications' && <NotificationsTab user={user} setUser={setUser} />}
                     {activeTab === 'institute' && <InstituteTab isAdmin={isAdmin} />}
+                    {activeTab === 'departments' && <DepartmentsTab />}
                     {activeTab === 'programs' && <ProgramsTab />}
                     {activeTab === 'academic-years' && <AcademicYearTab />}
                     {activeTab === 'regulations' && <RegulationsTab />}
@@ -641,7 +649,7 @@ function IntegrationsTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                             </Button>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
-                           {settings?.filter((s: Setting) => s.key.startsWith('easebuzz.')).map(renderSettingRow)}
+                            {settings?.filter((s: Setting) => s.key.startsWith('easebuzz.')).map(renderSettingRow)}
                         </div>
                     </div>
                 </div>

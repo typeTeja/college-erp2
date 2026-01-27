@@ -210,8 +210,10 @@ class AcademicDashboardService:
                     )
                 )
                 
+                # Students progress through semesters, so year capacity is the max semester capacity
+                # not the sum (same students move from Sem 1 to Sem 2)
                 year_total_students += semester_total_students
-                year_total_capacity += semester_total_capacity
+                year_total_capacity = max(year_total_capacity, semester_total_capacity)
             
             dashboard_years.append(
                 DashboardYear(
@@ -224,6 +226,7 @@ class AcademicDashboardService:
                 )
             )
             
+            # Batch capacity is the sum of year capacities (different cohorts per year)
             batch_total_students += year_total_students
             batch_total_capacity += year_total_capacity
         

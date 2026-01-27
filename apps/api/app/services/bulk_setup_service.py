@@ -241,7 +241,7 @@ class BulkBatchSetupService:
         # in the new model we just create Total Labs = Sections * Labs_Per_Section attached to the semester.
         # Naming: B1, B2, B3... or L1, L2, L3...
         
-        total_labs_needed = request.sections_per_semester * request.labs_per_section
+        total_labs_needed = request.labs_per_semester
         
         practical_batches = []
         if total_labs_needed > 0:

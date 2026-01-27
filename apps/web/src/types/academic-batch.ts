@@ -1,4 +1,11 @@
 
+export interface ProgramYear {
+    id: number;
+    batch_id: number;
+    year_no: number; // 1, 2, 3, 4
+    year_name: string; // "1st Year", "2nd Year", etc.
+}
+
 export interface BatchSemester {
     id: number;
     batch_id: number;

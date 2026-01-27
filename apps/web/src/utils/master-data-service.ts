@@ -708,7 +708,7 @@ export const deleteSMSTemplate = async (id: number): Promise<void> => {
 // Batch Semesters (New Academic Foundation)
 // ============================================================================
 
-import { BatchSemester, BatchSubject } from '../types/academic-batch';
+import { BatchSemester, BatchSubject, ProgramYear } from '../types/academic-batch';
 
 export const getBatchSemesters = async (batchId: number): Promise<BatchSemester[]> => {
     // Updated endpoint: /batches/{id}/semesters
@@ -720,6 +720,15 @@ export const getBatchSemesters = async (batchId: number): Promise<BatchSemester[
 
 export const updateBatchSemester = async (batchId: number, semesterId: number, data: Partial<BatchSemester>): Promise<BatchSemester> => {
     const response = await api.patch(`/batches/${batchId}/semesters/${semesterId}`, data);
+    return response.data;
+};
+
+// ============================================================================
+// Program Years (Year-level hierarchy)
+// ============================================================================
+
+export const getProgramYears = async (batchId: number): Promise<ProgramYear[]> => {
+    const response = await api.get(`/batches/${batchId}/program-years`);
     return response.data;
 };
 
