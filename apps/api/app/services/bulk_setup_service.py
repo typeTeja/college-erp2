@@ -6,9 +6,19 @@ from typing import Dict, Any, List
 from sqlmodel import Session, select
 from fastapi import HTTPException, status, Request
 
+from datetime import datetime
 from app.models.program import Program
-from app.models.academic.batch import AcademicBatch, ProgramYear, BatchSemester
-from app.models.academic.regulation import Regulation, RegulationSemester
+from app.models.academic.batch import (
+    AcademicBatch, 
+    ProgramYear, 
+    BatchSemester,
+    BatchSubject
+)
+from app.models.academic.regulation import (
+    Regulation, 
+    RegulationSemester,
+    RegulationSubject
+)
 from app.models.master_data import Section, PracticalBatch
 from app.models.user import User
 from app.schemas.bulk_setup import BulkBatchSetupRequest, BulkBatchSetupResponse
@@ -143,33 +153,48 @@ class BulkBatchSetupService:
             .order_by(RegulationSemester.semester_no)
         ).all()
         
-        if not regulation_semesters:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Regulation {regulation.regulation_code} has no semesters defined"
-            )
-        
         batch_semesters = []
-        for reg_sem in regulation_semesters:
-            # Find corresponding program year
-            program_year = next(
-                (py for py in program_years if py.year_no == reg_sem.program_year),
-                None
-            )
-            if not program_year:
-                continue
-            
-            batch_semester = BatchSemester(
-                batch_id=batch.id,
-                program_year_id=program_year.id,
-                year_no=reg_sem.program_year,
-                semester_no=reg_sem.semester_no,
-                semester_name=reg_sem.semester_name,
-                total_credits=reg_sem.total_credits,
-                min_credits_to_pass=reg_sem.min_credits_to_pass
-            )
-            session.add(batch_semester)
-            batch_semesters.append(batch_semester)
+        
+        if not regulation_semesters:
+            # FALLBACK: Create default semesters (2 per year) if not defined in regulation
+            for year_no in range(1, program.duration_years + 1):
+                program_year = next((py for py in program_years if py.year_no == year_no), None)
+                if not program_year: continue
+                
+                for sem_in_year in range(1, 3):
+                    semester_no = (year_no - 1) * 2 + sem_in_year
+                    batch_semester = BatchSemester(
+                        batch_id=batch.id,
+                        program_year_id=program_year.id,
+                        year_no=year_no,
+                        semester_no=semester_no,
+                        semester_name=f"Semester {semester_no}",
+                        total_credits=0,
+                        min_credits_to_pass=0
+                    )
+                    session.add(batch_semester)
+                    batch_semesters.append(batch_semester)
+        else:
+            for reg_sem in regulation_semesters:
+                # Find corresponding program year
+                program_year = next(
+                    (py for py in program_years if py.year_no == reg_sem.program_year),
+                    None
+                )
+                if not program_year:
+                    continue
+                
+                batch_semester = BatchSemester(
+                    batch_id=batch.id,
+                    program_year_id=program_year.id,
+                    year_no=reg_sem.program_year,
+                    semester_no=reg_sem.semester_no,
+                    semester_name=reg_sem.semester_name,
+                    total_credits=reg_sem.total_credits,
+                    min_credits_to_pass=reg_sem.min_credits_to_pass
+                )
+                session.add(batch_semester)
+                batch_semesters.append(batch_semester)
         
         session.flush()  # Get batch_semester IDs
         
@@ -279,6 +304,44 @@ class BulkBatchSetupService:
                     user=user,
                 request=http_request
             )
+        
+        # Step 9: Freeze regulation subjects to batch
+        reg_subjects = session.exec(
+            select(RegulationSubject)
+            .where(RegulationSubject.regulation_id == regulation.id)
+            .where(RegulationSubject.is_active == True)
+        ).all()
+        
+        for reg_subject in reg_subjects:
+            batch_subject = BatchSubject(
+                batch_id=batch.id,
+                subject_code=reg_subject.subject_code,
+                subject_name=reg_subject.subject_name,
+                short_name=reg_subject.short_name,
+                subject_type=reg_subject.subject_type,
+                program_year=reg_subject.program_year,
+                semester_no=reg_subject.semester_no,
+                internal_max=reg_subject.internal_max,
+                external_max=reg_subject.external_max,
+                total_max=reg_subject.total_max,
+                passing_percentage=reg_subject.passing_percentage,
+                evaluation_type=reg_subject.evaluation_type,
+                has_exam=reg_subject.has_exam,
+                has_assignments=reg_subject.has_assignments,
+                hours_per_session=reg_subject.hours_per_session,
+                credits=reg_subject.credits,
+                is_active=reg_subject.is_active,
+                is_elective=reg_subject.is_elective
+            )
+            session.add(batch_subject)
+        
+        # Step 10: Lock regulation
+        if not regulation.is_locked:
+            regulation.is_locked = True
+            regulation.locked_at = datetime.utcnow()
+            regulation.locked_by = user_id
+            regulation.version += 1
+            session.add(regulation)
         
         # Commit all changes
         session.commit()
