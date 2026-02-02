@@ -11,11 +11,11 @@ from sqlmodel import Session
 from app.api.deps import get_session, get_current_user
 from app.domains.system.services import SystemService
 from app.domains.system.schemas import (
-    SystemSettingCreate,
-    SystemSettingUpdate,
-    SystemSettingResponse,
-    InstituteInfoUpdate,
-    InstituteInfoResponse,
+    UserCreate, UserUpdate, UserResponse,
+    RoleCreate, RoleUpdate, RoleRead,
+    PermissionCreate, PermissionRead,
+    SystemSettingCreate, SystemSettingUpdate, SystemSettingRead,
+    AuditLogRead
 )
 from app.domains.system.models import (
     SystemSetting,
