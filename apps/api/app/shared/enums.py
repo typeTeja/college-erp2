@@ -124,11 +124,9 @@ class SessionStatus(str, Enum):
 
 
 class ExamType(str, Enum):
-    MID_TERM = "MID_TERM"
-    FINAL = "FINAL"
     INTERNAL = "INTERNAL"
-    PRACTICAL = "PRACTICAL"
-    BOTH = "BOTH"  # For subjects with both theory and practical
+    EXTERNAL = "EXTERNAL"
+    BOTH = "BOTH"
 
 
 class ExamStatus(str, Enum):
