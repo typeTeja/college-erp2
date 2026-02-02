@@ -1,5 +1,6 @@
 """Activity Logger Service - Logs admission application activities"""
 
+from typing import Optional
 from sqlmodel import Session
 from app.domains.admission.models import ApplicationActivityLog
 from app.shared.enums import ActivityType
