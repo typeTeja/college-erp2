@@ -1,7 +1,8 @@
-"""Activity logging service for tracking application changes"""
-from typing import Optional
+"""Activity Logger Service - Logs admission application activities"""
+
 from sqlmodel import Session
-from app.models.admissions import ApplicationActivityLog, ActivityType
+from app.domains.admission.models import ApplicationActivityLog
+from app.shared.enums import ActivityType
 from datetime import datetime
 import json
 
