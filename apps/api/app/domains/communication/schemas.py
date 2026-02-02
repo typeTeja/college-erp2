@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
-from ..models.communication import CircularTarget, NotificationType, NotificationChannel
+from .models import CircularTarget, NotificationType, NotificationChannel
 from app.shared.enums import CircularTarget, NotificationChannel, NotificationType
 
 
