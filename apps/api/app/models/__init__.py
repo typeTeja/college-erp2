@@ -147,7 +147,6 @@ __all__ = [
     "Notification",
     "NotificationLog",
     "SystemSetting",
-    "SettingsAuditLog",
     "AuditLog",
     "InstituteInfo",
     "AttendanceSession",
