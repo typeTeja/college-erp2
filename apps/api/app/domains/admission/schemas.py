@@ -1,9 +1,8 @@
 from typing import List, Optional, Any, Dict
 from datetime import datetime, date
 from pydantic import BaseModel, EmailStr
-from .models import (
-from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus
 
+from app.shared.enums import (
     ApplicationStatus, 
     ApplicationPaymentStatus,
     FeeMode,

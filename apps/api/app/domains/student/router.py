@@ -12,11 +12,11 @@ from typing import List, Optional
 from app.api.deps import get_session, get_current_user
 from app.domains.student.services import StudentService
 from app.domains.student.schemas import (
-    StudentCreate, StudentUpdate, StudentRead,
-    ParentCreate, ParentUpdate, ParentRead,
+    StudentCreate, StudentRead,
+    ParentCreate, ParentRead,
     EnrollmentCreate, EnrollmentRead
 )
-from app.models import User
+from app.models import User  # Import from central models
 from app.domains.student.exceptions import (
     StudentNotFoundError, ParentNotFoundError, EnrollmentNotFoundError
 )
