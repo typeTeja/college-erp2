@@ -7,7 +7,7 @@ from app.shared.enums import PaymentMode, PaymentStatus
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.models import Student
     from .fee import StudentFee
 
 
