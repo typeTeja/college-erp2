@@ -80,4 +80,4 @@ class Faculty(SQLModel, table=True):
     max_weekly_hours: int = Field(default=20)  # Workload limit
     
     # Relationships
-    subjects: List["Subject"] = Relationship(back_populates="faculty")
+    # subjects: List["Subject"] = Relationship(back_populates="faculty")  # TODO: Fix Subject relationship
