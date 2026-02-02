@@ -8,9 +8,7 @@ from sqlmodel import Session, select
 from app.core import security
 from app.config.settings import settings
 from app.db.session import get_session
-from app.models.user import User
-from app.models.role import Role
-from app.models.student import Student
+from app.models import User, Role, Student
 from app.schemas.auth import TokenPayload
 
 # OAuth2 scheme for Swagger UI auth

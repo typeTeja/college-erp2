@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from datetime import date
 
 from app.api.deps import get_session, get_current_active_superuser, get_current_user
-from app.models.user import User
+from app.models import User
 from ..models.resource import Book, LibraryMember, DigitalResource, BookStatus, MemberType
 from ..models.circulation import BookIssue, IssueStatus
 from ..services.circulation import library_circulation_service

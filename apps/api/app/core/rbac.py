@@ -1,8 +1,8 @@
 from typing import List, Set
 from fastapi import Request
 from sqlmodel import select, Session
-from app.models.permission import Permission, RolePermission
-from app.models.role import Role
+from app.models import Permission, RolePermission
+from app.models import Role
 
 # Standard Permission Seeds
 CORE_PERMISSIONS = {

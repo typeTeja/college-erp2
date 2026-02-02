@@ -9,9 +9,9 @@ from app.api import deps
 from app.core import security
 from app.config.settings import settings
 from app.db.session import get_session
-from app.models.user import User
-from app.models.role import Role
-# from app.models.user_role import UserRole
+from app.models import User
+from app.models import Role
+# from app.models import UserRole
 from app.schemas.auth import Token, UserCreate, LoginRequest, UserResponse as UserRead
 
 router = APIRouter()

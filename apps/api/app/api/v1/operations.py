@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select, Session
 from app.api.deps import get_session, get_current_user
-from app.models.user import User
+from app.models import User
 from app.models.staff import Staff
 from app.models.operations import MaintenanceTicket, Shift, TicketStatus
 from app.schemas.operations import (

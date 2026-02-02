@@ -9,7 +9,7 @@ from typing import List, Optional, Dict, Any
 router = APIRouter()
 
 from app.api.deps import get_current_active_superuser, get_current_user
-from app.models.user import User
+from app.models import User
 from app.shared.enums import ProgramStatus, ProgramType
 
 

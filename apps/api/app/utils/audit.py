@@ -7,7 +7,7 @@ from sqlmodel import Session
 from fastapi import Request
 
 from app.models.audit_log import AuditLog
-from app.models.user import User
+from app.models import User
 
 def log_audit(
     session: Session,

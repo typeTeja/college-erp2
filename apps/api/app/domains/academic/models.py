@@ -561,7 +561,7 @@ if TYPE_CHECKING:
     from app.models.student import Student
     from .setup import Section, PracticalBatch
     from .batch import AcademicBatch
-    from app.models.user import User
+    from app.models import User
 
 
 class StudentSectionAssignment(SQLModel, table=True):
@@ -1142,7 +1142,7 @@ from app.shared.enums import ExamType
 if TYPE_CHECKING:
     from app.models.student import Student
     from .batch import AcademicBatch, BatchSemester, BatchSubject
-    from app.models.user import User
+    from app.models import User
 
 
 class ExamType(str, Enum):
@@ -1340,7 +1340,7 @@ from sqlalchemy import Text, JSON
 if TYPE_CHECKING:
     from app.models.student import Student
     from .batch import BatchSemester, BatchSubject
-    from app.models.user import User
+    from app.models import User
 
 
 class ExamResultStatus(str, Enum):
@@ -1573,7 +1573,7 @@ from sqlalchemy import Text
 
 if TYPE_CHECKING:
     from app.models.student import Student
-    from app.models.user import User
+    from app.models import User
 
 
 class HallTicketStatus(str, Enum):

@@ -9,7 +9,7 @@ from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus
 if TYPE_CHECKING:
     from app.models.program import Program
     from app.models.student import Student
-    from app.models.user import User
+    from app.models import User
     from app.domains.finance.models import ScholarshipSlab
     from ....schemas.json_fields import EntranceTestSubject, SubjectMarksEntry
 

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File,
 from sqlmodel import Session, select, func
 from app.db.session import get_session
 from app.api.deps import get_current_user
-from app.models.user import User
+from app.models import User
 from ..models import (
     Application, ApplicationStatus, ApplicationPayment, ApplicationPaymentStatus,
     ApplicationDocument, DocumentType, DocumentStatus, ApplicationActivityLog,

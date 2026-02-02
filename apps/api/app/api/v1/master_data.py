@@ -10,7 +10,7 @@ from app.utils.audit import log_create, log_update, log_delete
 from app.utils.academic_validation import validate_batch_deletion, validate_capacity_change
 
 from app.api import deps
-from app.models.user import User
+from app.models import User
 from app.models.master_data import (
     AcademicYear, Section, PracticalBatch, SubjectConfig,
     FeeHead, InstallmentPlan, ScholarshipSlab,

@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from pydantic import BaseModel
 
 from app.api.deps import get_session, get_current_active_superuser
-from app.models.user import User
+from app.models import User
 from ..models.logistics import Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog
 from ..services.logistics import transport_logistics_service
 

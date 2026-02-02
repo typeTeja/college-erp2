@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from datetime import date
 
 from app.api.deps import get_session, get_current_active_superuser
-from app.models.user import User
+from app.models import User
 from app.services.analytics_service import AnalyticsService
 
 router = APIRouter(prefix="/analytics", tags=["Analytics & Reporting"])

@@ -2,7 +2,7 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlmodel import Session, select, func
 from app.api.deps import get_current_user, get_session
-from app.models.user import User
+from app.models import User
 from app.models.student import Student
 from app.schemas.student import StudentResponse, StudentCreate
 

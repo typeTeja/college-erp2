@@ -7,7 +7,7 @@ from app.models.fee import FeePayment
 from app.models import AttendanceRecord
 from app.models.inventory import Asset
 from app.models.lesson import SyllabusTopic
-from app.models.user import User
+from app.models import User
 from datetime import datetime, timedelta
 
 router = APIRouter()

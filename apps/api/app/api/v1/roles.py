@@ -2,9 +2,9 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from app.api.deps import get_current_user, get_session, get_current_active_superuser
-from app.models.user import User
-from app.models.role import Role
-from app.models.permission import Permission, RolePermission, PermissionAuditLog
+from app.models import User
+from app.models import Role
+from app.models import Permission, RolePermission, PermissionAuditLog
 from app.schemas.role import RoleRead, RoleCreate, RoleUpdate, PermissionAuditLogRead
 from app.schemas.permission import PermissionRead, PermissionGroup
 

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session, select, func
 from app.db.session import get_session
 from app.api.deps import get_current_user
-from app.models.user import User
+from app.models import User
 from typing import Dict, Any
 
 router = APIRouter()

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request, Backgrou
 from sqlmodel import Session, select
 from app.db.session import get_session
 from app.api.deps import get_current_active_superuser
-from app.models.user import User
+from app.models import User
 from ..models import (
     Application, ApplicationStatus, AdmissionSettings, ActivityType
 )

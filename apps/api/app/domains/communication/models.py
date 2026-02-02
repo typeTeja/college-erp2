@@ -6,7 +6,7 @@ from app.shared.enums import CircularTarget, NotificationChannel, NotificationTy
 
 
 if TYPE_CHECKING:
-    from app.models.user import User
+    from app.models import User
 
 
 class Circular(SQLModel, table=True):

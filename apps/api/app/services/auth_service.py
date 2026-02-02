@@ -1,9 +1,9 @@
 from typing import Optional
 from datetime import datetime, timedelta
 from sqlmodel import Session, select, or_
-from app.models.user import User
-from app.models.role import Role
-from app.models.user_role import UserRole
+from app.models import User
+from app.models import Role
+from app.models import UserRole
 from app.core.security import get_password_hash, verify_password, create_access_token, create_refresh_token
 from app.schemas.auth import UserCreate, UserUpdate, LoginRequest
 import secrets

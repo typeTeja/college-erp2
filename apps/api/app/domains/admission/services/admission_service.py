@@ -15,8 +15,8 @@ from ..models import (
     DocumentType, DocumentStatus, ApplicationActivityLog, 
     ActivityType, AdmissionSettings, FeeMode
 )
-from app.models.user import User
-from app.models.role import Role
+from app.models import User
+from app.models import Role
 from app.config.settings import settings
 from app.services.pdf_service import pdf_service
 from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus, StudentStatus
@@ -141,7 +141,7 @@ class AdmissionService:
             session.add(portal_user)
             session.flush()
             
-            from app.models.user_role import UserRole
+            from app.models import UserRole
             user_role = UserRole(user_id=portal_user.id, role_id=applicant_role.id)
             session.add(user_role)
             is_new_account = True

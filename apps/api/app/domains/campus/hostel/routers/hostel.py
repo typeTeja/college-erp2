@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from pydantic import BaseModel
 
 from app.api.deps import get_session, get_current_active_superuser, get_current_user
-from app.models.user import User
+from app.models import User
 from ..models.infrastructure import HostelBlock, HostelRoom, BedAllocation, HostelType, RoomType
 from ..models.operations import GatePass, HostelComplaint, GatePassStatus, ComplaintStatus
 from ..services.residency import hostel_residency_service

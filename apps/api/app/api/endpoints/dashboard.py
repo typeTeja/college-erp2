@@ -4,8 +4,8 @@ from sqlmodel import Session, select, func
 
 from app.api import deps
 from app.db.session import get_session
-from app.models.user import User
-from app.models.role import Role
+from app.models import User
+from app.models import Role
 
 router = APIRouter()
 

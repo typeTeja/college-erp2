@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session, select
 from pydantic import BaseModel, EmailStr
 from app.db.session import get_session
-from app.models.user import User
+from app.models import User
 from app.services.password_service import (
     PasswordToken, hash_password, verify_password, generate_password_setup_link
 )

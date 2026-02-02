@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session, select
 
 from app.api.deps import get_session, get_current_active_superuser
-from app.models.user import User
+from app.models import User
 from ..models.fee import (
     FeeStructure, StudentFee, StudentFeeInstallment,
     FeePayment, FeeConcession, FeeFine

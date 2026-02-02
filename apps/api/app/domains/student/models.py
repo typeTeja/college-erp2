@@ -206,7 +206,7 @@ from app.schemas.json_fields import ChecklistItem
 
 if TYPE_CHECKING:
     from .student import Student
-    from app.models.user import User
+    from app.models import User
 
 
 class VerificationStatus(str, Enum):
@@ -367,7 +367,7 @@ from app.shared.enums import ApplicationStatus, BillingStatus, GenderPreference,
 
 
 if TYPE_CHECKING:
-    from app.models.user import User
+    from app.models import User
     from .student import Student
 
 
@@ -512,7 +512,7 @@ from sqlalchemy import Text, JSON
 
 if TYPE_CHECKING:
     from .student import Student
-    from app.models.user import User
+    from app.models import User
 
 
 class ActivityType(str, Enum):

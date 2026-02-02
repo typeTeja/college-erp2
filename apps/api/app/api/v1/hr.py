@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from datetime import date
 
 from app.api.deps import get_session, get_current_active_superuser
-from app.models.user import User
+from app.models import User
 from app.services.hr_service import HRService
 
 router = APIRouter(prefix="/hr", tags=["HR & Payroll"])
