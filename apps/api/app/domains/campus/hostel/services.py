@@ -3,8 +3,7 @@ from datetime import datetime
 from sqlmodel import Session, select
 from fastapi import HTTPException
 
-from ..models.infrastructure import HostelBlock, HostelRoom, BedAllocation, RoomType
-from ..models.operations import HostelComplaint, ComplaintStatus
+from .models import HostelBlock, HostelRoom, BedAllocation, HostelComplaint
 from app.domains.student.models.student import Student
 from app.shared.enums import ComplaintStatus, RoomType
 
