@@ -13,11 +13,87 @@ from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
 from .master_data import Board, PreviousQualification, StudyGroup, ReservationCategory, LeadSource
 from .placement.company import PlacementCompany
 from .settings.notifications import EmailTemplate, SMSTemplate
-# HR Domain
-from app.domains.hr.models import Staff, Faculty, Designation
-# Student Domain
+"""
+Central Models Import
+
+This file serves as a central import point for all models.
+All models are now organized in domain-specific modules under app/domains/.
+
+Legacy model files have been deleted and replaced with domain-specific models.
+"""
+
+# Auth Domain Models (moved from system)
+from app.domains.auth.models import (
+    AuthUser as User,  # Alias for backward compatibility
+    Role,
+    Permission,
+    UserRole,
+    RolePermission,
+)
+
+# System Domain Models
+from app.domains.system.models import (
+    SystemSetting,
+    InstituteInfo,
+    AuditLog,
+    PermissionAuditLog,
+    FileMetadata,
+    ImportLog,
+)
+
+# HR Domain Models
+from app.domains.hr.models import (
+    Designation,
+    Staff,
+    Faculty,
+)
+
+# Academic Domain Models
+from app.domains.academic.models import (
+    Department,
+    Program,
+    Subject,
+    AcademicYear,
+    AcademicBatch,
+    Section,
+    PracticalBatch,
+    SubjectConfig,
+    Regulation,
+    Semester,
+    Shift,
+    Exam,
+    ExamSchedule,
+    ExamResult,
+    Question,
+    Timetable,
+    TimeSlot,
+    Classroom,
+    TimetableTemplate,
+    ClassSchedule,
+    ClassAdjustment,
+    AttendanceSession,
+    AttendanceRecord,
+    InternalExam,
+    InternalExamSchedule,
+    InternalExamResult,
+    EntranceExam,
+    EntranceExamSchedule,
+    EntranceExamResult,
+    HallTicket,
+)
+
+# Student Domain Models
 from app.domains.student.models import (
-    Student, Parent, Enrollment,
+    Student,
+    Parent,
+    Enrollment,
+    StudentPracticalBatchAllocation,
+    Board,
+    PreviousQualification,
+    StudyGroup,
+    ReservationCategory,
+)
+from app.domains.student.models import (
     ODCHotel, ODCRequest, StudentODCApplication, ODCBilling, ODCPayout,
     DocumentCategory, StudentDocument, DocumentVerification
 )
@@ -80,82 +156,73 @@ from app.domains.auth.models import (
 from app.domains.system.models import (
     SystemSetting,
     InstituteInfo,
-    AuditLog,
-    PermissionAuditLog,
-    FileMetadata,
-    ImportLog,
-)
 
+# Export all models
 __all__ = [
+    # Auth
     "User",
     "Role",
+    "Permission",
     "UserRole",
+    "RolePermission",
+    # System
+    "SystemSetting",
+    "InstituteInfo",
+    "AuditLog",
+    "PermissionAuditLog",
+    "FileMetadata",
+    "ImportLog",
+    # HR
+    "Designation",
+    "Staff",
+    "Faculty",
+    # Academic
     "Department",
     "Program",
     "Subject",
-    "Student",
-    "Parent",
-    "Faculty",
-    "Staff",
-    "Shift",
-    "MaintenanceTicket",
-    "Exam",
-    "ExamSchedule",
-    "ExamResult",
-    "Enrollment",
-    "ODCHotel",
-    "ODCRequest",
-    "StudentODCApplication",
-    "TimeSlot",
-    "Classroom",
-    "TimetableTemplate",
-    "ClassSchedule",
-    "ClassAdjustment",
-    "FeeStructure",
-    "FeeComponent",
-    "FeeInstallment",
-    "StudentFee",
-    "FeePayment",
-    "FeeConcession",
-    "FeeFine",
-    "Application",
-    "ApplicationPayment",
-    "ApplicationDocument",
-    "ApplicationActivityLog",
-    "AdmissionSettings",
-    "Book",
-    "BookIssue",
-    "LibraryFine",
-    "HostelBlock",
-    "HostelRoom",
-    "BedAllocation",
-    "GatePass",
-    "HostelComplaint",
-    "Permission",
-    "RolePermission",
-    "PermissionAuditLog",
-    "LessonPlan",
-    "SyllabusTopic",
-    "QuestionBank",
-    "Question",
-    "Asset",
-    "AssetAllocation",
-    "AssetMaintenance",
-    "AssetAudit",
-    "UniformAllocation",
-    "Circular",
-    "Notification",
-    "NotificationLog",
-    "SystemSetting",
-    "AuditLog",
-    "InstituteInfo",
-    "AttendanceSession",
-    "AttendanceRecord",
     "AcademicYear",
     "AcademicBatch",
     "Section",
     "PracticalBatch",
     "SubjectConfig",
+    "Regulation",
+    "Semester",
+    "Shift",
+    "Exam",
+    "ExamSchedule",
+    "ExamResult",
+    "Question",
+    "Timetable",
+    "TimeSlot",
+    "Classroom",
+    "TimetableTemplate",
+    "ClassSchedule",
+    "ClassAdjustment",
+    "AttendanceSession",
+    "AttendanceRecord",
+    "InternalExam",
+    "InternalExamSchedule",
+    "InternalExamResult",
+    "EntranceExam",
+    "EntranceExamSchedule",
+    "EntranceExamResult",
+    "HallTicket",
+    # Student
+    "Student",
+    "Parent",
+    "Enrollment",
+    "StudentPracticalBatchAllocation",
+    "Board",
+    "PreviousQualification",
+    "StudyGroup",
+    "ReservationCategory",
+    # Admission
+    "Application",
+    "ApplicationDocument",
+    "LeadSource",
+    # Finance
+    "FeeConfiguration",
+    "FeePayment",
     "FeeHead",
     "InstallmentPlan",
     "ScholarshipSlab",
@@ -163,21 +230,30 @@ __all__ = [
     "OnlinePayment",
     "PaymentReceipt",
     "StudentFeeInstallment",
-    "Board",
-    "PreviousQualification",
-    "StudyGroup",
-    "ReservationCategory",
-    "StudentPracticalBatchAllocation",
-    "LeadSource",
-    "Designation",
+    # Communication
+    "Circular",
+    "Notification",
+    "NotificationLog",
+    # Campus
+    "HostelBlock",
+    "HostelRoom",
+    "BedAllocation",
+    "GatePass",
+    "HostelComplaint",
+    "Book",
+    "LibraryMember",
+    "DigitalResource",
+    "BookIssue",
+    "LibraryFine",
+    "Asset",
+    "AssetAllocation",
+    "AssetMaintenance",
+    "AssetAudit",
+    "UniformAllocation",
+    "Vehicle",
+    "TransportRoute",
+    "TransportAllocation",
+    "VehicleGPSLog",
     "MasterClassroom",
-    "PlacementCompany",
-    "EmailTemplate",
-    "SMSTemplate",
-    "FileMetadata",
-    "ImportLog",
-    "EntranceTestConfig",
-    "EntranceExamResult",
-    "TentativeAdmission",
-    "ScholarshipCalculation"
+    "MaintenanceTicket",
 ]
