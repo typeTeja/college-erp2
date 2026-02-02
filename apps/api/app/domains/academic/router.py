@@ -12,15 +12,13 @@ from typing import List, Optional
 from app.api.deps import get_session, get_current_user
 from app.domains.academic.services import AcademicService
 from app.domains.academic.schemas import (
-    AcademicYearCreate, AcademicYearRead,
-    BatchCreate, BatchRead,
-    RegulationCreate, RegulationRead,
-    SectionCreate, SectionRead
+    AcademicYearCreate, AcademicYearUpdate, AcademicYearRead,
+    SectionCreate, SectionUpdate, SectionRead,
+    ExamCreate, ExamUpdate, ExamRead
 )
-from app.models import User
+from app.models import User  # Import from central models
 from app.domains.academic.exceptions import (
-    AcademicYearNotFoundError, BatchNotFoundError,
-    RegulationNotFoundError, SectionNotFoundError
+    AcademicYearNotFoundError, SectionNotFoundError, ExamNotFoundError
 )
 
 

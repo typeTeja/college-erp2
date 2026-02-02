@@ -12,8 +12,8 @@ from typing import List, Optional
 from app.api.deps import get_session, get_current_user
 from app.domains.student.services import StudentService
 from app.domains.student.schemas import (
-    StudentCreate, StudentRead,
-    ParentCreate, ParentRead,
+    StudentCreate, StudentUpdate, StudentRead,
+    ParentCreate, ParentUpdate, ParentRead,
     EnrollmentCreate, EnrollmentRead
 )
 from app.models import User
