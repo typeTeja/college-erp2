@@ -18,7 +18,7 @@ from app.domains.hr.schemas import (
     StaffCreate, StaffUpdate, StaffRead,
     FacultyCreate, FacultyUpdate, FacultyRead
 )
-from app.domains.system.models import User
+from app.models import User
 from app.domains.hr.exceptions import (
     DesignationNotFoundError, StaffNotFoundError, FacultyNotFoundError,
     DuplicateEmailError, DuplicateMobileError
