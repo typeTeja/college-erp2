@@ -4,6 +4,8 @@ from sqlmodel import Session, select, func
 from fastapi import HTTPException
 
 from ..models.asset import Asset, AssetAllocation, AssetAudit, UniformAllocation, AllocationStatus
+from app.shared.enums import AllocationStatus
+
 
 class InventoryService:
     """Service for managing Physical Assets and Stock (Identity Owner)"""

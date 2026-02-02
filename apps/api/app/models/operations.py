@@ -2,18 +2,8 @@ from typing import Optional, List
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import time, datetime
 from enum import Enum
+from app.shared.enums import TicketPriority, TicketStatus
 
-class TicketStatus(str, Enum):
-    OPEN = "OPEN"
-    IN_PROGRESS = "IN_PROGRESS"
-    RESOLVED = "RESOLVED"
-    CLOSED = "CLOSED"
-
-class TicketPriority(str, Enum):
-    LOW = "LOW"
-    MEDIUM = "MEDIUM"
-    HIGH = "HIGH"
-    CRITICAL = "CRITICAL"
 
 # --- Shift Models ---
 class ShiftBase(SQLModel):

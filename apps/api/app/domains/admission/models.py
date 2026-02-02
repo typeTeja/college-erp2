@@ -3,6 +3,8 @@ from datetime import datetime, date
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON, Text
+from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus
+
 
 if TYPE_CHECKING:
     from app.models.program import Program
@@ -33,10 +35,6 @@ class ApplicationStatus(str, Enum):
     REJECTED = "REJECTED"
     WITHDRAWN = "WITHDRAWN"
 
-class ApplicationPaymentStatus(str, Enum):
-    PENDING = "PENDING"
-    SUCCESS = "SUCCESS"
-    FAILED = "FAILED"
 
 class FeeMode(str, Enum):
     """Payment mode for application fee"""

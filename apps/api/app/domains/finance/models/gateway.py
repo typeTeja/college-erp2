@@ -3,27 +3,12 @@ from datetime import datetime
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import Text, JSON
+from app.shared.enums import PaymentMode, PaymentStatus
+
 
 if TYPE_CHECKING:
     from app.domains.student.models.student import Student
     from .fee import StudentFee
-
-
-class PaymentStatus(str, Enum):
-    INITIATED = "INITIATED"
-    PENDING = "PENDING"
-    SUCCESS = "SUCCESS"
-    FAILED = "FAILED"
-    CANCELLED = "CANCELLED"
-    REFUNDED = "REFUNDED"
-
-
-class PaymentMode(str, Enum):
-    UPI = "UPI"
-    CARD = "CARD"
-    NET_BANKING = "NET_BANKING"
-    WALLET = "WALLET"
-    EMI = "EMI"
 
 
 class PaymentGatewayConfig(SQLModel, table=True):

@@ -4,29 +4,13 @@ from enum import Enum
 from decimal import Decimal
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import DECIMAL
+from app.shared.enums import FeeCategory, PaymentMode, PaymentStatus
+
 
 if TYPE_CHECKING:
     from app.domains.student.models.student import Student
     from app.models.program import Program
 
-class FeeCategory(str, Enum):
-    GENERAL = "GENERAL"
-    MANAGEMENT = "MANAGEMENT"
-    NRI = "NRI"
-    SCHOLARSHIP = "SCHOLARSHIP"
-
-class PaymentMode(str, Enum):
-    ONLINE = "ONLINE"
-    CASH = "CASH"
-    CHEQUE = "CHEQUE"
-    DD = "DD"
-    UPI = "UPI"
-
-class PaymentStatus(str, Enum):
-    PENDING = "PENDING"
-    SUCCESS = "SUCCESS"
-    FAILED = "FAILED"
-    REFUNDED = "REFUNDED"
 
 class FeeStructure(SQLModel, table=True):
     __tablename__ = "fee_structure"

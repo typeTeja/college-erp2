@@ -3,6 +3,8 @@ from typing import Optional, List
 
 # Program Schemas
 from app.models.program import ProgramType, ProgramStatus
+from app.shared.enums import ProgramStatus, ProgramType
+
 
 class ProgramBase(BaseModel):
     """Base program schema"""

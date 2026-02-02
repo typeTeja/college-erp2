@@ -2,13 +2,8 @@ from typing import Optional, Any
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Column, JSON
 from enum import Enum
+from app.shared.enums import AuditLogAction, SettingGroup
 
-class SettingGroup(str, Enum):
-    PERSONAL = "PERSONAL"
-    INSTITUTE = "INSTITUTE"
-    ACADEMIC = "ACADEMIC"
-    INTEGRATION = "INTEGRATION"
-    SECURITY = "SECURITY"
 
 class SystemSetting(SQLModel, table=True):
     """General key-value store for all ERP configurations - System Domain"""
@@ -24,14 +19,6 @@ class SystemSetting(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     updated_by: Optional[int] = Field(default=None, foreign_key="user.id")
 
-class AuditLogAction(str, Enum):
-    LOGIN = "LOGIN"
-    CREATE = "CREATE"
-    UPDATE = "UPDATE"
-    DELETE = "DELETE"
-    PERMISSION_CHANGE = "PERMISSION_CHANGE"
-    SETTING_CHANGE = "SETTING_CHANGE"
-    SECURITY_ALERT = "SECURITY_ALERT"
 
 class AuditLog(SQLModel, table=True):
     """System-wide audit trail - System Domain"""

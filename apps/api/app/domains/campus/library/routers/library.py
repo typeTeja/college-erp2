@@ -9,6 +9,8 @@ from app.models.user import User
 from ..models.resource import Book, LibraryMember, DigitalResource, BookStatus, MemberType
 from ..models.circulation import BookIssue, IssueStatus
 from ..services.circulation import library_circulation_service
+from app.shared.enums import IssueStatus, MemberType
+
 
 router = APIRouter(prefix="/library", tags=["Library Circulation"])
 

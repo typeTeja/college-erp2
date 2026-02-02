@@ -4,12 +4,12 @@ from decimal import Decimal
 from enum import Enum as PyEnum
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import DECIMAL
+from app.shared.enums import AcademicYearStatus, ExamType, SubjectType
+
 
 if TYPE_CHECKING:
     from app.domains.admission.models import EntranceExamResult
     from .batch import BatchSemester
-
-from app.models.enums import AcademicYearStatus, SubjectType, ExamType
 
 
 class AcademicYear(SQLModel, table=True):
@@ -76,8 +76,6 @@ class PracticalBatch(SQLModel, table=True):
     
     # Relationships
     batch_semester: Optional["BatchSemester"] = Relationship(back_populates="practical_batches")
-
-
 
 
 class SubjectConfig(SQLModel, table=True):

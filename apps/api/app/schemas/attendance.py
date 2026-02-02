@@ -4,7 +4,8 @@ from pydantic import BaseModel
 from .student import StudentResponse as StudentRead  # Aliased to match usage
 from .subject import SubjectRead
 from .faculty import FacultyRead
-from app.domains.academic.models import AttendanceStatus, SessionStatus
+from app.shared.enums import AttendanceStatus, SessionStatus
+
 
 # Shared properties
 class AttendanceSessionBase(BaseModel):

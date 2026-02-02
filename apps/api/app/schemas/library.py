@@ -2,6 +2,8 @@ from typing import Optional, List
 from pydantic import BaseModel
 from datetime import date, datetime
 from app.models.library import BookStatus
+from app.shared.enums import BookStatus
+
 
 # --- Book Schemas ---
 class BookBase(BaseModel):

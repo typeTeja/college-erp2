@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, List, Optional
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, Text
 from datetime import datetime
+from app.shared.enums import ProgramStatus, ProgramType
+
 
 if TYPE_CHECKING:
     # LegacyProgramYear removed
@@ -12,17 +14,6 @@ if TYPE_CHECKING:
     from .academic.regulation import Regulation
     from .academic.batch import AcademicBatch
 
-class ProgramType(str, PyEnum):
-    UG = "UG"
-    PG = "PG"
-    DIPLOMA = "DIPLOMA"
-    CERTIFICATE = "CERTIFICATE"
-    PHD = "PHD"
-
-class ProgramStatus(str, PyEnum):
-    DRAFT = "DRAFT"
-    ACTIVE = "ACTIVE"
-    ARCHIVED = "ARCHIVED"
 
 class Program(SQLModel, table=True):
     """Degree program model (e.g., B.Tech CS, MBA, M.Sc)"""

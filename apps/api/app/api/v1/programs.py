@@ -10,6 +10,8 @@ router = APIRouter()
 
 from app.api.deps import get_current_active_superuser, get_current_user
 from app.models.user import User
+from app.shared.enums import ProgramStatus, ProgramType
+
 
 @router.post("/", response_model=ProgramRead)
 def create_program(

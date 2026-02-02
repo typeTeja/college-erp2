@@ -2,15 +2,12 @@ from typing import Optional, TYPE_CHECKING
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import date, datetime
 from enum import Enum
+from app.shared.enums import IssueStatus
+
 
 if TYPE_CHECKING:
     from .resource import Book, LibraryMember
 
-class IssueStatus(str, Enum):
-    ISSUED = "ISSUED"
-    RETURNED = "RETURNED"
-    OVERDUE = "OVERDUE"
-    LOST = "LOST"
 
 class BookIssue(SQLModel, table=True):
     """Loan Record - Tracking intellectual resource usage"""

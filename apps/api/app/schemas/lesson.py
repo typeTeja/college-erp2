@@ -2,6 +2,8 @@ from typing import List, Optional
 from datetime import datetime, date
 from pydantic import BaseModel
 from app.models.lesson import TopicStatus, QuestionType, DifficultyLevel
+from app.shared.enums import DifficultyLevel, QuestionType, TopicStatus
+
 
 # Syllabus Topic Schemas
 class SyllabusTopicBase(BaseModel):

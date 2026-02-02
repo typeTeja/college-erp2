@@ -2,20 +2,12 @@ from typing import Optional, List, TYPE_CHECKING
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import date, datetime
 from enum import Enum
+from app.shared.enums import BookStatus, MemberType
+
 
 if TYPE_CHECKING:
     from app.domains.student.models.student import Student
 
-class BookStatus(str, Enum):
-    AVAILABLE = "AVAILABLE"
-    ISSUED = "ISSUED"
-    LOST = "LOST"
-    DAMAGED = "DAMAGED"
-
-class MemberType(str, Enum):
-    STUDENT = "STUDENT"
-    FACULTY = "FACULTY"
-    STAFF = "STAFF"
 
 class Book(SQLModel, table=True):
     """Intellectual Resource - Library Collection Item"""

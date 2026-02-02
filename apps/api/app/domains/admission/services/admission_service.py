@@ -19,6 +19,8 @@ from app.models.user import User
 from app.models.role import Role
 from app.config.settings import settings
 from app.services.pdf_service import pdf_service
+from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus, StudentStatus
+
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

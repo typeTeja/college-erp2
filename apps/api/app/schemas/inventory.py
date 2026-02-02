@@ -3,6 +3,8 @@ from datetime import datetime, date
 from decimal import Decimal
 from pydantic import BaseModel
 from app.models.inventory import AssetCategory, AllocationStatus, UniformSize
+from app.shared.enums import AllocationStatus, AssetCategory, UniformSize
+
 
 # Asset Schemas
 class AssetBase(BaseModel):

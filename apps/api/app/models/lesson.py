@@ -2,24 +2,13 @@ from typing import TYPE_CHECKING, List, Optional
 from datetime import datetime, date
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
+from app.shared.enums import DifficultyLevel, QuestionType, TopicStatus
+
 
 if TYPE_CHECKING:
     from .subject import Subject
     from .faculty import Faculty
 
-class TopicStatus(str, Enum):
-    PENDING = "PENDING"
-    COMPLETED = "COMPLETED"
-
-class QuestionType(str, Enum):
-    MCQ = "MCQ"
-    THEORETICAL = "THEORETICAL"
-    PRACTICAL = "PRACTICAL"
-
-class DifficultyLevel(str, Enum):
-    EASY = "EASY"
-    MEDIUM = "MEDIUM"
-    HARD = "HARD"
 
 class LessonPlan(SQLModel, table=True):
     """Overall lesson plan for a subject and faculty"""

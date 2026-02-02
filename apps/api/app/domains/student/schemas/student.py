@@ -1,7 +1,8 @@
 from typing import List, Optional
 from datetime import datetime, date
 from pydantic import BaseModel, Field
-from app.models.enums import Gender, BloodGroup, ScholarshipCategory, StudentStatus
+from app.shared.enums import BloodGroup, Gender, StudentStatus
+
 
 class StudentBase(BaseModel):
     name: str

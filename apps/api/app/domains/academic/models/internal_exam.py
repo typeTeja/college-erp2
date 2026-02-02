@@ -8,6 +8,8 @@ from datetime import datetime, date, time
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import Text
+from app.shared.enums import ExamType
+
 
 if TYPE_CHECKING:
     from app.models.student import Student

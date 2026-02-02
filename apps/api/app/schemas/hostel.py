@@ -2,6 +2,8 @@ from typing import Optional, List
 from pydantic import BaseModel
 from datetime import datetime
 from app.models.hostel import HostelType, RoomType, GatePassType, GatePassStatus, ComplaintStatus
+from app.shared.enums import ComplaintStatus, GatePassStatus, GatePassType, HostelType, RoomType
+
 
 # --- Block Schemas ---
 class HostelBlockBase(BaseModel):

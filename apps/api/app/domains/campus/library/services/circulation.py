@@ -5,6 +5,8 @@ from fastapi import HTTPException
 
 from ..models.resource import Book, LibraryMember, BookStatus, MemberType
 from ..models.circulation import BookIssue, IssueStatus, LibraryFine
+from app.shared.enums import BookStatus, IssueStatus, MemberType
+
 
 class LibraryCirculationService:
     """Service for library circulation operations (Circulation Owner)"""

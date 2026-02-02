@@ -2,32 +2,14 @@ from enum import Enum
 from typing import Optional, List, TYPE_CHECKING
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import date, time
+from app.shared.enums import AdjustmentStatus, DayOfWeek, SlotType
+
 
 if TYPE_CHECKING:
     from ...models.faculty import Faculty
     from ...models.subject import Subject
     from .batch import BatchSemester
 
-class DayOfWeek(str, Enum):
-    MONDAY = "MONDAY"
-    TUESDAY = "TUESDAY"
-    WEDNESDAY = "WEDNESDAY"
-    THURSDAY = "THURSDAY"
-    FRIDAY = "FRIDAY"
-    SATURDAY = "SATURDAY"
-    SUNDAY = "SUNDAY"
-
-class SlotType(str, Enum):
-    THEORY = "THEORY"
-    PRACTICAL = "PRACTICAL"
-    BREAK = "BREAK"
-    ASSEMBLY = "ASSEMBLY"
-
-class AdjustmentStatus(str, Enum):
-    REQUESTED = "REQUESTED"
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
-    COMPLETED = "COMPLETED"
 
 # --- Master Data ---
 

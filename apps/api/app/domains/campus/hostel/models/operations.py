@@ -2,29 +2,13 @@ from typing import Optional, TYPE_CHECKING
 from enum import Enum
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Column, JSON, Text
+from app.shared.enums import ComplaintStatus, GatePassStatus, GatePassType
+
 
 if TYPE_CHECKING:
     from app.domains.student.models.student import Student
     from .infrastructure import HostelRoom
 
-class GatePassType(str, Enum):
-    LOCAL = "LOCAL"
-    HOME = "HOME"
-    EMERGENCY = "EMERGENCY"
-
-class GatePassStatus(str, Enum):
-    PENDING = "PENDING"
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
-    OUT = "OUT"
-    RETURNED = "RETURNED"
-    EXPIRED = "EXPIRED"
-
-class ComplaintStatus(str, Enum):
-    OPEN = "OPEN"
-    IN_PROGRESS = "IN_PROGRESS"
-    RESOLVED = "RESOLVED"
-    CLOSED = "CLOSED"
 
 class GatePass(SQLModel, table=True):
     """Gate Pass - Student mobility permission"""

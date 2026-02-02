@@ -1,0 +1,311 @@
+file_path,layer,domain,action,size,imports,notes
+main.py,mixed,unknown,REVIEW,1642,9,Domain assignment unclear; Requires manual review
+routers.py,mixed,unknown,DELETE,175,2,Domain assignment unclear
+middleware/rate_limit.py,core,core,KEEP,687,5,
+domains/campus/router.py,domain,campus,KEEP,656,5,
+domains/campus/transport/routers/transport.py,domain,campus,MERGE,4713,8,May conflict with existing domain file
+domains/campus/transport/models/logistics.py,domain,campus,MERGE,2485,4,May conflict with existing domain file
+domains/campus/transport/models/__init__.py,domain,campus,KEEP,170,1,
+domains/campus/transport/services/logistics.py,domain,campus,MERGE,3638,6,May conflict with existing domain file
+domains/campus/transport/services/__init__.py,domain,campus,KEEP,94,1,
+domains/campus/hostel/routers/hostel.py,domain,campus,MERGE,5421,9,May conflict with existing domain file
+domains/campus/hostel/models/infrastructure.py,domain,campus,MERGE,2213,6,May conflict with existing domain file
+domains/campus/hostel/models/__init__.py,domain,campus,KEEP,364,2,
+domains/campus/hostel/models/operations.py,domain,campus,MERGE,2001,6,May conflict with existing domain file
+domains/campus/hostel/services/residency.py,domain,campus,MERGE,5388,7,May conflict with existing domain file
+domains/campus/hostel/services/__init__.py,domain,campus,KEEP,88,1,
+domains/campus/library/routers/library.py,domain,campus,MERGE,4788,10,May conflict with existing domain file
+domains/campus/library/models/resource.py,domain,campus,MERGE,2444,6,May conflict with existing domain file
+domains/campus/library/models/__init__.py,domain,campus,KEEP,281,2,
+domains/campus/library/models/circulation.py,domain,campus,MERGE,1435,5,May conflict with existing domain file
+domains/campus/library/services/__init__.py,domain,campus,KEEP,96,1,
+domains/campus/library/services/circulation.py,domain,campus,MERGE,6511,6,May conflict with existing domain file
+domains/campus/models/__init__.py,domain,campus,KEEP,165,5,
+domains/campus/inventory/routers/inventory.py,domain,campus,MERGE,4021,9,May conflict with existing domain file
+domains/campus/inventory/models/asset.py,domain,campus,MERGE,4567,8,May conflict with existing domain file
+domains/campus/inventory/models/__init__.py,domain,campus,KEEP,252,1,
+domains/campus/inventory/services/asset.py,domain,campus,MERGE,4372,5,May conflict with existing domain file
+domains/campus/inventory/services/__init__.py,domain,campus,KEEP,70,1,
+domains/campus/orchestration/student_exit.py,domain,campus,KEEP,2621,10,
+domains/campus/infrastructure/models/maintenance.py,domain,campus,MERGE,1069,5,May conflict with existing domain file
+domains/campus/infrastructure/models/__init__.py,domain,campus,KEEP,141,2,
+domains/campus/infrastructure/models/facility.py,domain,campus,MERGE,1188,5,May conflict with existing domain file
+domains/campus/infrastructure/services/__init__.py,domain,campus,KEEP,83,1,
+domains/campus/infrastructure/services/facility.py,domain,campus,MERGE,2348,6,May conflict with existing domain file
+domains/admission/service.py,domain,admission,KEEP,103,1,
+domains/admission/status_service.py,domain,admission,KEEP,1985,2,
+domains/admission/models.py,domain,admission,KEEP,18957,10,Large file (>10KB)
+domains/admission/__init__.py,domain,admission,KEEP,83,0,
+domains/admission/schemas.py,domain,admission,KEEP,10557,4,Large file (>10KB)
+domains/admission/router.py,domain,admission,KEEP,57,1,
+domains/admission/routers/__init__.py,domain,admission,KEEP,427,4,
+domains/admission/routers/application.py,domain,admission,MERGE,6735,15,May conflict with existing domain file
+domains/admission/routers/admin.py,domain,admission,MERGE,4017,11,May conflict with existing domain file
+domains/admission/routers/enhanced.py,domain,admission,MERGE,1539,7,May conflict with existing domain file
+domains/admission/services/__init__.py,domain,admission,KEEP,209,3,
+domains/admission/services/merit_service.py,domain,admission,MERGE,1939,5,May conflict with existing domain file
+domains/admission/services/entrance_service.py,domain,admission,MERGE,1628,5,May conflict with existing domain file
+domains/admission/services/admission_service.py,domain,admission,MERGE,11128,17,May conflict with existing domain file; Large file (>10KB)
+domains/student/service.py,domain,student,KEEP,2424,5,
+domains/student/router.py,domain,student,KEEP,544,5,
+domains/student/routers/odc.py,domain,student,MERGE,1779,9,May conflict with existing domain file
+domains/student/routers/portal.py,domain,student,MERGE,3610,8,May conflict with existing domain file
+domains/student/routers/document.py,domain,student,MERGE,1275,7,May conflict with existing domain file
+domains/student/routers/students.py,domain,student,MERGE,1810,7,May conflict with existing domain file
+domains/student/models/odc.py,domain,student,MERGE,5396,6,May conflict with existing domain file
+domains/student/models/portal.py,domain,student,MERGE,5337,7,May conflict with existing domain file
+domains/student/models/parent.py,domain,student,MERGE,425,2,May conflict with existing domain file
+domains/student/models/__init__.py,domain,student,KEEP,643,7,
+domains/student/models/document.py,domain,student,MERGE,5596,8,May conflict with existing domain file
+domains/student/models/enrollment.py,domain,student,MERGE,914,6,May conflict with existing domain file
+domains/student/models/student.py,domain,student,MERGE,5627,11,May conflict with existing domain file
+domains/student/schemas/odc.py,domain,student,MERGE,924,4,May conflict with existing domain file
+domains/student/schemas/__init__.py,domain,student,KEEP,153,2,
+domains/student/schemas/student.py,domain,student,MERGE,1136,4,May conflict with existing domain file
+domains/student/services/odc.py,domain,student,MERGE,2279,5,May conflict with existing domain file
+domains/student/services/portal.py,domain,student,MERGE,7543,8,May conflict with existing domain file
+domains/student/services/__init__.py,domain,student,KEEP,103,3,
+domains/student/services/document.py,domain,student,MERGE,6321,10,May conflict with existing domain file
+domains/academic/service.py,domain,academic,KEEP,848,7,
+domains/academic/router.py,domain,academic,KEEP,1983,14,
+domains/academic/routers/regulations.py,domain,academic,MERGE,13814,8,May conflict with existing domain file; Large file (>10KB)
+domains/academic/routers/student_promotion.py,domain,academic,MERGE,13613,11,May conflict with existing domain file; Large file (>10KB)
+domains/academic/routers/sections.py,domain,academic,MERGE,3160,9,May conflict with existing domain file
+domains/academic/routers/attendance.py,domain,academic,MERGE,5634,7,May conflict with existing domain file
+domains/academic/routers/hall_ticket.py,domain,academic,MERGE,10564,8,May conflict with existing domain file; Large file (>10KB)
+domains/academic/routers/exams.py,domain,academic,MERGE,6771,11,May conflict with existing domain file
+domains/academic/routers/internal_exam.py,domain,academic,MERGE,9145,8,May conflict with existing domain file
+domains/academic/routers/university_exam.py,domain,academic,MERGE,6077,8,May conflict with existing domain file
+domains/academic/routers/timetable.py,domain,academic,MERGE,6175,7,May conflict with existing domain file
+domains/academic/routers/student_assignment.py,domain,academic,MERGE,5219,8,May conflict with existing domain file
+domains/academic/routers/allocations.py,domain,academic,MERGE,7387,9,May conflict with existing domain file
+domains/academic/routers/academic_dashboard.py,domain,academic,MERGE,1274,7,May conflict with existing domain file
+domains/academic/routers/batches.py,domain,academic,MERGE,20324,20,May conflict with existing domain file; Large file (>10KB)
+domains/academic/models/exam.py,domain,academic,MERGE,2457,7,May conflict with existing domain file
+domains/academic/models/attendance.py,domain,academic,MERGE,2407,5,May conflict with existing domain file
+domains/academic/models/batch.py,domain,academic,MERGE,6945,6,May conflict with existing domain file
+domains/academic/models/__init__.py,domain,academic,KEEP,1322,12,
+domains/academic/models/student_history.py,domain,academic,MERGE,8780,9,May conflict with existing domain file
+domains/academic/models/regulation.py,domain,academic,MERGE,7335,7,May conflict with existing domain file
+domains/academic/models/hall_ticket.py,domain,academic,MERGE,5808,7,May conflict with existing domain file
+domains/academic/models/setup.py,domain,academic,MERGE,4175,9,May conflict with existing domain file
+domains/academic/models/internal_exam.py,domain,academic,MERGE,6337,8,May conflict with existing domain file
+domains/academic/models/university_exam.py,domain,academic,MERGE,7854,8,May conflict with existing domain file
+domains/academic/models/timetable.py,domain,academic,MERGE,3275,7,May conflict with existing domain file
+domains/academic/models/assignment.py,domain,academic,MERGE,2627,7,May conflict with existing domain file
+domains/academic/models/allocation.py,domain,academic,MERGE,1131,3,May conflict with existing domain file
+domains/academic/models/entrance_exam.py,domain,academic,MERGE,126,1,May conflict with existing domain file
+domains/academic/services/student_assignment_service.py,domain,academic,MERGE,14013,6,May conflict with existing domain file; Large file (>10KB)
+domains/academic/services/bulk_setup_service.py,domain,academic,MERGE,14319,9,May conflict with existing domain file; Large file (>10KB)
+domains/academic/services/internal_exam_service.py,domain,academic,MERGE,11372,6,May conflict with existing domain file; Large file (>10KB)
+domains/academic/services/hall_ticket_service.py,domain,academic,MERGE,11040,10,May conflict with existing domain file; Large file (>10KB)
+domains/academic/services/dashboard_service.py,domain,academic,MERGE,9478,7,May conflict with existing domain file
+domains/academic/services/academic_service.py,domain,academic,MERGE,3613,4,May conflict with existing domain file
+domains/academic/services/university_exam_service.py,domain,academic,MERGE,10994,7,May conflict with existing domain file; Large file (>10KB)
+domains/academic/services/batch_cloning_service.py,domain,academic,MERGE,8743,7,May conflict with existing domain file
+domains/system/router.py,domain,system,KEEP,603,6,
+domains/system/routers/files.py,domain,system,MERGE,2005,8,May conflict with existing domain file
+domains/system/routers/audit.py,domain,system,MERGE,1574,7,May conflict with existing domain file
+domains/system/routers/imports.py,domain,system,MERGE,940,6,May conflict with existing domain file
+domains/system/routers/settings.py,domain,system,MERGE,3245,8,May conflict with existing domain file
+domains/system/routers/institute.py,domain,system,MERGE,1267,6,May conflict with existing domain file
+domains/system/models/files.py,domain,system,MERGE,1483,4,May conflict with existing domain file
+domains/system/models/system.py,domain,system,MERGE,2620,4,May conflict with existing domain file
+domains/system/models/__init__.py,domain,system,KEEP,228,4,
+domains/system/models/imports.py,domain,system,MERGE,553,3,May conflict with existing domain file
+domains/system/schemas/files.py,domain,system,MERGE,936,4,May conflict with existing domain file
+domains/system/schemas/system.py,domain,system,MERGE,1532,5,May conflict with existing domain file
+domains/system/schemas/imports.py,domain,system,MERGE,295,3,May conflict with existing domain file
+domains/system/schemas/institute.py,domain,system,MERGE,459,2,May conflict with existing domain file
+domains/system/services/__init__.py,domain,system,KEEP,76,1,
+domains/system/services/import_service.py,domain,system,MERGE,788,12,May conflict with existing domain file
+domains/system/services/storage_service.py,domain,system,MERGE,1908,10,May conflict with existing domain file
+domains/hr/router.py,domain,hr,KEEP,335,4,
+domains/hr/routers/designation.py,domain,hr,MERGE,1661,6,May conflict with existing domain file
+domains/hr/routers/staff.py,domain,hr,MERGE,4154,10,May conflict with existing domain file
+domains/hr/routers/faculty.py,domain,hr,MERGE,3654,10,May conflict with existing domain file
+domains/hr/models/designation.py,domain,hr,MERGE,964,4,May conflict with existing domain file
+domains/hr/models/staff.py,domain,hr,MERGE,1001,5,May conflict with existing domain file
+domains/hr/models/__init__.py,domain,hr,KEEP,162,3,
+domains/hr/models/faculty.py,domain,hr,MERGE,941,4,May conflict with existing domain file
+domains/hr/schemas/designation.py,domain,hr,MERGE,552,3,May conflict with existing domain file
+domains/hr/schemas/staff.py,domain,hr,MERGE,688,3,May conflict with existing domain file
+domains/hr/schemas/faculty.py,domain,hr,MERGE,607,2,May conflict with existing domain file
+domains/hr/services/hr_service.py,domain,hr,MERGE,2689,7,May conflict with existing domain file
+domains/hr/services/__init__.py,domain,hr,KEEP,61,1,
+domains/finance/router.py,domain,finance,KEEP,416,4,
+domains/finance/routers/fees.py,domain,finance,MERGE,2054,7,May conflict with existing domain file
+domains/finance/routers/gateway.py,domain,finance,MERGE,1031,7,May conflict with existing domain file
+domains/finance/routers/easebuzz.py,domain,finance,MERGE,1141,4,May conflict with existing domain file
+domains/finance/models/gateway.py,domain,finance,MERGE,5406,7,May conflict with existing domain file
+domains/finance/models/config.py,domain,finance,MERGE,3289,7,May conflict with existing domain file
+domains/finance/models/__init__.py,domain,finance,KEEP,407,3,
+domains/finance/models/fee.py,domain,finance,MERGE,8842,8,May conflict with existing domain file
+domains/finance/services/gateway.py,domain,finance,MERGE,1827,10,May conflict with existing domain file
+domains/finance/services/__init__.py,domain,finance,KEEP,105,3,
+domains/finance/services/fee.py,domain,finance,MERGE,3031,7,May conflict with existing domain file
+domains/finance/services/easebuzz.py,domain,finance,MERGE,3631,7,May conflict with existing domain file
+domains/communication/router.py,domain,communication,KEEP,144,2,
+domains/communication/routers/communication.py,domain,communication,MERGE,2976,7,May conflict with existing domain file
+domains/communication/models/__init__.py,domain,communication,KEEP,242,1,
+domains/communication/models/communication.py,domain,communication,MERGE,2740,5,May conflict with existing domain file
+domains/communication/schemas/communication.py,domain,communication,MERGE,1315,4,May conflict with existing domain file
+domains/communication/services/sms_service.py,domain,communication,MERGE,1604,3,May conflict with existing domain file
+domains/communication/services/__init__.py,domain,communication,KEEP,122,2,
+domains/communication/services/email_service.py,domain,communication,MERGE,3576,9,May conflict with existing domain file
+core/events.py,core,core,KEEP,26,0,
+core/security.py,core,core,KEEP,1371,5,
+core/rbac.py,core,core,KEEP,3542,5,
+core/permissions.py,core,core,KEEP,31,0,
+config/logging_conf.py,core,core,KEEP,24,0,
+config/settings.py,core,core,KEEP,5798,8,
+utils/academic_validation.py,core,unknown,KEEP,6069,6,Domain assignment unclear
+utils/audit.py,core,system,KEEP,3893,5,
+utils/file_upload.py,core,system,KEEP,3132,6,
+models/odc.py,legacy,student,DELETE,184,1,
+models/user.py,legacy,system,MERGE,1369,5,May conflict with existing domain file
+models/user_role.py,legacy,system,MERGE,384,2,May conflict with existing domain file
+models/enums.py,legacy,unknown,MOVE,1546,1,Domain assignment unclear
+models/staff.py,legacy,hr,DELETE,91,1,
+models/library.py,legacy,campus,DELETE,82,1,
+models/admission_settings.py,legacy,admission,DELETE,109,1,
+models/enhanced_admission.py,legacy,admission,MERGE,184,1,May conflict with existing domain file
+models/permission.py,legacy,system,MERGE,1534,5,May conflict with existing domain file
+models/subject.py,legacy,academic,MERGE,984,4,May conflict with existing domain file
+models/admissions.py,legacy,admission,MERGE,373,1,May conflict with existing domain file
+models/payment_gateway.py,legacy,finance,DELETE,49,1,
+models/documents.py,legacy,student,DELETE,124,1,
+models/lesson.py,legacy,academic,MERGE,3122,6,May conflict with existing domain file
+models/parent.py,legacy,student,DELETE,53,1,
+models/__init__.py,legacy,unknown,KEEP,5088,20,Domain assignment unclear
+models/role.py,legacy,system,MERGE,791,5,May conflict with existing domain file
+models/fee.py,legacy,finance,DELETE,45,1,
+models/operations.py,legacy,unknown,MOVE,1898,4,Domain assignment unclear
+models/hostel.py,legacy,campus,DELETE,81,1,
+models/communication.py,legacy,communication,DELETE,81,1,
+models/enrollment.py,legacy,student,DELETE,61,1,
+models/program.py,legacy,unknown,MOVE,2663,10,Domain assignment unclear
+models/student.py,legacy,student,DELETE,55,1,
+models/import_log.py,legacy,system,DELETE,90,1,
+models/master_data.py,legacy,unknown,MOVE,685,8,Domain assignment unclear
+models/student_portal.py,legacy,student,DELETE,167,1,
+models/audit_log.py,legacy,system,DELETE,88,1,
+models/file_metadata.py,legacy,system,DELETE,97,1,
+models/institute.py,legacy,system,DELETE,86,1,
+models/department.py,legacy,unknown,MOVE,522,3,Domain assignment unclear
+models/inventory.py,legacy,campus,DELETE,154,2,
+models/faculty.py,legacy,hr,DELETE,84,1,
+models/settings/registration.py,legacy,unknown,MOVE,3831,5,Domain assignment unclear
+models/settings/system.py,legacy,unknown,DELETE,96,1,Domain assignment unclear
+models/settings/__init__.py,legacy,unknown,KEEP,0,0,Domain assignment unclear
+models/settings/notifications.py,legacy,communication,MERGE,1618,4,May conflict with existing domain file
+models/campus/infrastructure.py,legacy,campus,MERGE,242,4,May conflict with existing domain file
+models/campus/__init__.py,legacy,unknown,KEEP,0,0,Domain assignment unclear
+models/finance/__init__.py,legacy,unknown,KEEP,0,0,Domain assignment unclear
+models/finance/fee_config.py,legacy,finance,DELETE,48,1,
+models/placement/company.py,legacy,unknown,MOVE,1467,5,Domain assignment unclear
+models/placement/__init__.py,legacy,unknown,KEEP,0,0,Domain assignment unclear
+schemas/odc.py,legacy,student,MERGE,3668,4,May conflict with existing domain file
+schemas/auth.py,legacy,unknown,MOVE,3114,2,Domain assignment unclear
+schemas/exam.py,legacy,academic,MERGE,1981,4,May conflict with existing domain file
+schemas/staff.py,legacy,hr,DELETE,111,1,
+schemas/library.py,legacy,campus,MERGE,1276,4,May conflict with existing domain file
+schemas/file_schema.py,legacy,system,MERGE,1282,4,May conflict with existing domain file
+schemas/permission.py,legacy,system,MERGE,411,2,May conflict with existing domain file
+schemas/subject.py,legacy,academic,MERGE,271,2,May conflict with existing domain file
+schemas/json_fields.py,legacy,unknown,MOVE,1277,2,Domain assignment unclear
+schemas/admissions.py,legacy,admission,MERGE,526,1,May conflict with existing domain file
+schemas/attendance.py,legacy,academic,MERGE,1661,7,May conflict with existing domain file
+schemas/lesson.py,legacy,academic,MERGE,2405,4,May conflict with existing domain file
+schemas/role.py,legacy,system,MERGE,894,3,May conflict with existing domain file
+schemas/fee.py,legacy,finance,MERGE,6286,5,May conflict with existing domain file
+schemas/dashboard.py,legacy,unknown,MOVE,2471,2,Domain assignment unclear
+schemas/operations.py,legacy,unknown,MOVE,1086,5,Domain assignment unclear
+schemas/hostel.py,legacy,campus,MERGE,2066,4,May conflict with existing domain file
+schemas/communication.py,legacy,communication,MERGE,1317,4,May conflict with existing domain file
+schemas/timetable.py,legacy,academic,MERGE,2002,4,May conflict with existing domain file
+schemas/settings.py,legacy,system,DELETE,82,1,
+schemas/program.py,legacy,unknown,MOVE,1278,3,Domain assignment unclear
+schemas/bulk_setup.py,legacy,unknown,MOVE,2399,2,Domain assignment unclear
+schemas/student_assignment.py,legacy,student,MERGE,1896,3,May conflict with existing domain file
+schemas/batch_cloning.py,legacy,academic,MERGE,1288,2,May conflict with existing domain file
+schemas/student.py,legacy,student,MERGE,7346,3,May conflict with existing domain file
+schemas/master_data.py,legacy,unknown,MOVE,17808,4,Domain assignment unclear; Large file (>10KB)
+schemas/import_schema.py,legacy,system,MERGE,2950,5,May conflict with existing domain file
+schemas/easebuzz.py,legacy,finance,MERGE,2087,2,May conflict with existing domain file
+schemas/audit_log.py,legacy,system,MERGE,636,3,May conflict with existing domain file
+schemas/institute.py,legacy,system,DELETE,85,1,
+schemas/inventory.py,legacy,campus,MERGE,2815,5,May conflict with existing domain file
+schemas/faculty.py,legacy,hr,DELETE,104,1,
+schemas/academic/batch.py,legacy,academic,MERGE,4495,4,May conflict with existing domain file
+schemas/academic/__init__.py,legacy,unknown,KEEP,1018,2,Domain assignment unclear
+schemas/academic/student_history.py,legacy,student,MERGE,4551,4,May conflict with existing domain file
+schemas/academic/regulation.py,legacy,academic,MERGE,8151,3,May conflict with existing domain file
+schemas/academic/hall_ticket.py,legacy,academic,MERGE,5009,3,May conflict with existing domain file
+schemas/academic/internal_exam.py,legacy,academic,MERGE,5030,3,May conflict with existing domain file
+schemas/academic/entrance_exam.py,legacy,admission,MERGE,311,1,May conflict with existing domain file
+db/session.py,core,core,KEEP,608,3,
+db/base.py,core,core,KEEP,126,1,
+db/alembic/env.py,core,core,KEEP,2262,9,
+api/deps.py,mixed,unknown,REVIEW,3142,13,Domain assignment unclear; Requires manual review
+api/api.py,mixed,unknown,REVIEW,257,2,Domain assignment unclear; Requires manual review
+api/v1/odc.py,legacy,student,DELETE,51,1,
+api/v1/auth.py,legacy,unknown,MOVE,5464,9,Domain assignment unclear
+api/v1/files.py,legacy,system,DELETE,86,1,
+api/v1/fees.py,legacy,finance,DELETE,52,1,
+api/v1/staff.py,legacy,hr,DELETE,82,1,
+api/v1/library.py,legacy,campus,DELETE,96,1,
+api/v1/audit.py,legacy,system,DELETE,86,1,
+api/v1/roles.py,legacy,system,MERGE,5396,9,May conflict with existing domain file
+api/v1/transport.py,legacy,campus,DELETE,100,1,
+api/v1/admissions.py,legacy,admission,MERGE,138,1,May conflict with existing domain file
+api/v1/payment_gateway.py,legacy,finance,DELETE,55,1,
+api/v1/documents.py,legacy,student,MERGE,7487,10,May conflict with existing domain file
+api/v1/lesson.py,legacy,academic,MERGE,3939,7,May conflict with existing domain file
+api/v1/hr.py,legacy,unknown,MOVE,5034,8,Domain assignment unclear
+api/v1/import_api.py,legacy,system,DELETE,88,1,
+api/v1/dashboard.py,legacy,unknown,MOVE,709,6,Domain assignment unclear
+api/v1/operations.py,legacy,unknown,MOVE,2347,8,Domain assignment unclear
+api/v1/programs.py,legacy,unknown,MOVE,2409,9,Domain assignment unclear
+api/v1/hostel.py,legacy,campus,DELETE,94,1,
+api/v1/communication.py,legacy,communication,DELETE,86,1,
+api/v1/reports.py,legacy,unknown,MOVE,2853,11,Domain assignment unclear
+api/v1/settings.py,legacy,system,DELETE,89,1,
+api/v1/fee_management.py,legacy,finance,DELETE,52,1,
+api/v1/analytics.py,legacy,unknown,MOVE,5767,8,Domain assignment unclear
+api/v1/placement.py,legacy,unknown,MOVE,5568,9,Domain assignment unclear
+api/v1/router.py,legacy,unknown,MOVE,2565,9,Domain assignment unclear
+api/v1/master_data.py,legacy,unknown,MOVE,48769,12,Domain assignment unclear; Large file (>10KB)
+api/v1/student_portal.py,legacy,student,DELETE,54,1,
+api/v1/password.py,legacy,unknown,MOVE,4932,8,Domain assignment unclear
+api/v1/students.py,legacy,student,MERGE,4212,8,May conflict with existing domain file
+api/v1/easebuzz.py,legacy,finance,DELETE,56,1,
+api/v1/institute.py,legacy,system,DELETE,90,1,
+api/v1/inventory.py,legacy,campus,DELETE,100,1,
+api/v1/faculty.py,legacy,hr,DELETE,84,1,
+api/endpoints/auth.py,mixed,unknown,REVIEW,3351,12,Domain assignment unclear; Requires manual review
+api/endpoints/dashboard.py,mixed,unknown,REVIEW,1368,7,Domain assignment unclear; Requires manual review
+workers/celery_app.py,mixed,unknown,DELETE,30,0,Domain assignment unclear
+services/easebuzz_service.py,legacy,finance,DELETE,86,1,
+services/auth_service.py,legacy,unknown,MOVE,6379,9,Domain assignment unclear
+services/odc_service.py,legacy,student,DELETE,57,1,
+services/payment_gateway_service.py,legacy,finance,DELETE,90,1,
+services/hr_service.py,legacy,unknown,DELETE,105,1,Domain assignment unclear
+services/admission_status.py,legacy,admission,MERGE,195,1,May conflict with existing domain file
+services/sms_service.py,legacy,communication,DELETE,105,1,
+services/document_service.py,legacy,student,DELETE,67,1,
+services/placement_service.py,legacy,unknown,MOVE,870,2,Domain assignment unclear
+services/pdf_service.py,legacy,unknown,MOVE,3590,9,Domain assignment unclear
+services/program_service.py,legacy,unknown,MOVE,2564,7,Domain assignment unclear
+services/activity_logger.py,legacy,unknown,MOVE,1401,5,Domain assignment unclear
+services/transport_service.py,legacy,campus,DELETE,132,1,
+services/hostel_service.py,legacy,campus,DELETE,123,1,
+services/password_service.py,legacy,unknown,MOVE,1907,5,Domain assignment unclear
+services/email_service.py,legacy,communication,DELETE,109,1,
+services/library_service.py,legacy,campus,DELETE,128,1,
+services/fee_service.py,legacy,finance,DELETE,71,1,
+services/student_portal_service.py,legacy,student,DELETE,89,1,
+services/admission_service.py,legacy,admission,MERGE,149,1,May conflict with existing domain file
+services/import_service.py,legacy,system,DELETE,103,1,
+services/storage_service.py,legacy,unknown,DELETE,106,1,Domain assignment unclear
+services/analytics_service.py,legacy,unknown,MOVE,3997,3,Domain assignment unclear

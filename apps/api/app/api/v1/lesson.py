@@ -9,6 +9,8 @@ from app.schemas.lesson import (
     QuestionCreate, QuestionRead, QuestionBankRead, PaperGenerateRequest
 )
 from datetime import datetime
+from app.shared.enums import TopicStatus
+
 
 router = APIRouter()
 

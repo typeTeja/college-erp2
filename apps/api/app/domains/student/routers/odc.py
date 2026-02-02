@@ -7,6 +7,8 @@ from ..models.student import Student
 from ..models.odc import ODCStatus
 from ..schemas.odc import ODCHotelCreate, ODCRequestCreate, SelectionUpdate
 from ..services.odc import odc_service
+from app.shared.enums import ODCStatus
+
 
 router = APIRouter()
 

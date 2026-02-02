@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from datetime import datetime
 from ..models.system import SettingGroup, AuditLogAction
 from enum import Enum
+from app.shared.enums import AuditLogAction, SettingGroup
+
 
 class ImportRowStatus(str, Enum):
     PENDING = "PENDING"

@@ -22,6 +22,8 @@ from typing import List, Optional
 from datetime import datetime
 import random
 import string
+from app.shared.enums import ApplicationStatus
+
 
 router = APIRouter()
 

@@ -8,6 +8,8 @@ from app.models.user import User
 from ..models.infrastructure import HostelBlock, HostelRoom, BedAllocation, HostelType, RoomType
 from ..models.operations import GatePass, HostelComplaint, GatePassStatus, ComplaintStatus
 from ..services.residency import hostel_residency_service
+from app.shared.enums import ComplaintStatus, HostelType, RoomType
+
 
 router = APIRouter(prefix="/hostels", tags=["Hostel Residency"])
 

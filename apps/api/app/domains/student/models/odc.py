@@ -2,45 +2,13 @@ from typing import TYPE_CHECKING, List, Optional
 from datetime import date, datetime
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
+from app.shared.enums import ApplicationStatus, BillingStatus, GenderPreference, ODCStatus, PaymentMethod, PayoutStatus
+
 
 if TYPE_CHECKING:
     from app.models.user import User
     from .student import Student
 
-class GenderPreference(str, Enum):
-    MALE = "MALE"
-    FEMALE = "FEMALE"
-    ANY = "ANY"
-
-class ODCStatus(str, Enum):
-    OPEN = "OPEN"
-    CLOSED = "CLOSED"
-    COMPLETED = "COMPLETED"
-    CANCELLED = "CANCELLED"
-
-class ApplicationStatus(str, Enum):
-    APPLIED = "APPLIED"
-    SELECTED = "SELECTED"
-    REJECTED = "REJECTED"
-    ATTENDED = "ATTENDED"
-    ABSENT = "ABSENT"
-    WITHDRAWN = "WITHDRAWN"
-
-class PayoutStatus(str, Enum):
-    PENDING = "PENDING"
-    PAID = "PAID"
-
-class BillingStatus(str, Enum):
-    DRAFT = "DRAFT"
-    SENT = "SENT"
-    PAID = "PAID"
-    CANCELLED = "CANCELLED"
-
-class PaymentMethod(str, Enum):
-    CASH = "CASH"
-    BANK_TRANSFER = "BANK_TRANSFER"
-    UPI = "UPI"
-    CHEQUE = "CHEQUE"
 
 class ODCHotel(SQLModel, table=True):
     """Hotel or Catering Partner for ODC"""

@@ -3,8 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.api.deps import get_current_user, get_session
 from app.models.user import User
-from app.domains.academic.models import AttendanceSession, AttendanceRecord, AttendanceStatus
 from app.schemas.attendance import (
+from app.shared.enums import AttendanceStatus
+
     AttendanceSessionCreate,
     AttendanceSessionRead,
     AttendanceSessionUpdate,

@@ -3,6 +3,8 @@ from datetime import date, datetime
 from decimal import Decimal
 from pydantic import BaseModel, Field
 from app.models.fee import FeeCategory, PaymentMode, PaymentStatus
+from app.shared.enums import FeeCategory, PaymentMode, PaymentStatus
+
 
 # ============================================================================
 # Fee Structure Schemas

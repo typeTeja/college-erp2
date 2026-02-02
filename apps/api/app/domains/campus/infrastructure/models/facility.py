@@ -1,7 +1,8 @@
 from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Column, Text
-from app.models.enums import RoomType
+from app.shared.enums import RoomType
+
 
 if TYPE_CHECKING:
     from app.models.department import Department

@@ -3,6 +3,8 @@ from datetime import time, datetime
 from pydantic import BaseModel
 from app.models.operations import TicketStatus, TicketPriority
 from app.schemas.staff import StaffRead
+from app.shared.enums import TicketPriority, TicketStatus
+
 
 # --- Shift ---
 class ShiftBase(BaseModel):

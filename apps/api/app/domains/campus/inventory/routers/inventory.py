@@ -8,6 +8,8 @@ from app.api.deps import get_session, get_current_active_superuser
 from app.models.user import User
 from ..models.asset import Asset, AssetAllocation, AssetAudit, UniformAllocation, AssetCategory, AllocationStatus, UniformSize
 from ..services.asset import inventory_service
+from app.shared.enums import AllocationStatus, AssetCategory, UniformSize
+
 
 router = APIRouter(prefix="/inventory", tags=["Inventory & Assets"])
 

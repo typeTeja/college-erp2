@@ -2,6 +2,8 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 from app.models.communication import CircularTarget, NotificationType, NotificationChannel
+from app.shared.enums import CircularTarget, NotificationChannel, NotificationType
+
 
 # Circular Schemas
 class CircularBase(BaseModel):

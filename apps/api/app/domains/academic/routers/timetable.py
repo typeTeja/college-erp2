@@ -8,6 +8,8 @@ from app.domains.academic.models import (
     TimetableTemplate, DayOfWeek, AdjustmentStatus
 )
 from app.schemas.timetable import (
+from app.shared.enums import AdjustmentStatus, DayOfWeek
+
     TimeSlotCreate, TimeSlotRead,
     ClassroomCreate, ClassroomRead,
     ClassScheduleCreate, ClassScheduleRead,

@@ -2,17 +2,12 @@ from typing import TYPE_CHECKING, List, Optional
 from datetime import datetime
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, JSON, Column
+from app.shared.enums import CircularTarget, NotificationChannel, NotificationType
+
 
 if TYPE_CHECKING:
     from app.models.user import User
 
-class CircularTarget(str, Enum):
-    ALL = "ALL"
-    STAFF = "STAFF"
-    STUDENTS = "STUDENTS"
-    PARENTS = "PARENTS"
-    SPECIFIC_ROLES = "SPECIFIC_ROLES"
-    SPECIFIC_DEPARTMENTS = "SPECIFIC_DEPARTMENTS"
 
 class Circular(SQLModel, table=True):
     """Internal institutional circulars/notices - Communication Domain"""
@@ -36,11 +31,6 @@ class Circular(SQLModel, table=True):
     # Relationships
     author: "User" = Relationship()
 
-class NotificationType(str, Enum):
-    INFO = "INFO"
-    SUCCESS = "SUCCESS"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
 
 class Notification(SQLModel, table=True):
     """In-app notifications for users - Communication Domain"""
@@ -61,11 +51,6 @@ class Notification(SQLModel, table=True):
     # Relationships
     user: "User" = Relationship()
 
-class NotificationChannel(str, Enum):
-    SMS = "SMS"
-    EMAIL = "EMAIL"
-    WHATSAPP = "WHATSAPP"
-    PUSH = "PUSH"
 
 class NotificationLog(SQLModel, table=True):
     """external communication logs - Communication Domain"""

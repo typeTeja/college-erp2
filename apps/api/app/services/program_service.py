@@ -5,6 +5,8 @@ from sqlalchemy.orm import selectinload
 from app.models.program import Program, ProgramType, ProgramStatus
 from app.models.department import Department
 from app.schemas.program import ProgramCreate
+from app.shared.enums import ProgramStatus, ProgramType
+
 
 class ProgramService:
     @staticmethod

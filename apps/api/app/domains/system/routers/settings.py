@@ -7,6 +7,8 @@ from app.api import deps
 from app.core import security
 from ..models.system import SystemSetting, SettingGroup, AuditLog, AuditLogAction
 from ..schemas.system import SystemSettingRead, SystemSettingUpdate, AuditLogRead, BulkSettingsUpdate, ProfileUpdate, PasswordChange
+from app.shared.enums import AuditLogAction, SettingGroup
+
 
 router = APIRouter()
 

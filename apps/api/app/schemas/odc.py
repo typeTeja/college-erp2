@@ -2,6 +2,8 @@ from typing import List, Optional
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 from app.models.odc import (
+from app.shared.enums import ApplicationStatus, BillingStatus, GenderPreference, ODCStatus, PaymentMethod
+
     GenderPreference, ODCStatus, ApplicationStatus, PayoutStatus,
     BillingStatus, PaymentMethod
 )

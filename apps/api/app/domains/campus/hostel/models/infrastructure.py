@@ -2,21 +2,13 @@ from typing import Optional, List, TYPE_CHECKING
 from enum import Enum
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
+from app.shared.enums import HostelType, RoomType
+
 
 if TYPE_CHECKING:
     from app.domains.student.models.student import Student
     from app.models.faculty import Faculty
 
-class HostelType(str, Enum):
-    BOYS = "BOYS"
-    GIRLS = "GIRLS"
-    STAFF = "STAFF"
-    GUEST = "GUEST"
-
-class RoomType(str, Enum):
-    AC = "AC"
-    NON_AC = "NON_AC"
-    SUITE = "SUITE"
 
 class HostelBlock(SQLModel, table=True):
     """Hostel Block - Infrastructure Owner for Residency"""

@@ -3,12 +3,8 @@ from enum import Enum
 from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import date
 from app.models.student import Gender, BloodGroup, ScholarshipCategory
+from app.shared.enums import BloodGroup, Gender, ImportRowStatus, ScholarshipCategory
 
-class ImportRowStatus(str, Enum):
-    VALID = "VALID"
-    INVALID = "INVALID"
-    WARNING = "WARNING"
-    DUPLICATE = "DUPLICATE"
 
 class StudentImportRow(BaseModel):
     # Basic Info - Strict Admission Number, everything else optional/defaulted

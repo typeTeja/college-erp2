@@ -1,6 +1,7 @@
 """Status transition validation for applications"""
-from .models import ApplicationStatus
 from typing import Dict, List
+from app.shared.enums import ApplicationStatus
+
 
 # Define allowed status transitions
 ALLOWED_TRANSITIONS: Dict[ApplicationStatus, List[ApplicationStatus]] = {

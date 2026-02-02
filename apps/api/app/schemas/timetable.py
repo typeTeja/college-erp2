@@ -1,7 +1,8 @@
 from typing import Optional, List
 from datetime import time, date
 from pydantic import BaseModel
-from app.domains.academic.models import DayOfWeek, SlotType, AdjustmentStatus
+from app.shared.enums import AdjustmentStatus, DayOfWeek, SlotType
+
 
 # --- TimeSlot ---
 class TimeSlotBase(BaseModel):

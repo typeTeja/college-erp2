@@ -1,7 +1,8 @@
 from typing import List, Optional
 from datetime import date, time
 from pydantic import BaseModel
-from app.domains.academic.models import ExamType, ExamStatus
+from app.shared.enums import ExamStatus, ExamType
+
 
 # --- Exam Schemas ---
 

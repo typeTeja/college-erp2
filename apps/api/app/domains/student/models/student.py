@@ -10,8 +10,9 @@ if TYPE_CHECKING:
     from .parent import Parent
     from app.domains.academic.models.student_history import StudentSemesterHistory, StudentPromotionLog
 
-from app.models.enums import Gender, BloodGroup, ScholarshipCategory, StudentStatus, CreatedFrom
 from app.schemas.json_fields import StudentDocuments
+from app.shared.enums import BloodGroup, CreatedFrom, Gender, ScholarshipCategory, StudentStatus
+
 
 class Student(SQLModel, table=True):
     """Student information model with comprehensive details"""

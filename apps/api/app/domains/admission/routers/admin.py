@@ -14,6 +14,8 @@ from ..service import AdmissionService
 from app.services.activity_logger import log_activity
 from typing import List, Optional
 from datetime import datetime
+from app.shared.enums import ApplicationStatus
+
 
 router = APIRouter()
 

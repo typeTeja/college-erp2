@@ -4,24 +4,13 @@ from enum import Enum
 from decimal import Decimal
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import DECIMAL
+from app.shared.enums import AllocationStatus, AssetCategory, UniformSize
+
 
 if TYPE_CHECKING:
     from app.domains.student.models.student import Student
     from app.models.faculty import Faculty
 
-class AssetCategory(str, Enum):
-    UNIFORM = "UNIFORM"
-    IT_EQUIPMENT = "IT_EQUIPMENT"
-    LAB_EQUIPMENT = "LAB_EQUIPMENT"
-    FURNITURE = "FURNITURE"
-    STATIONERY = "STATIONERY"
-    OTHERS = "OTHERS"
-
-class AllocationStatus(str, Enum):
-    ISSUED = "ISSUED"
-    RETURNED = "RETURNED"
-    DAMAGED = "DAMAGED"
-    LOST = "LOST"
 
 class Asset(SQLModel, table=True):
     """Main inventory and asset model - Physical Identity Owner"""
@@ -97,14 +86,6 @@ class AssetAudit(SQLModel, table=True):
     # Relationships
     asset: Asset = Relationship(back_populates="audit_records")
 
-class UniformSize(str, Enum):
-    XS = "XS"
-    S = "S"
-    M = "M"
-    L = "L"
-    XL = "XL"
-    XXL = "XXL"
-    CUSTOM = "CUSTOM"
 
 class UniformAllocation(SQLModel, table=True):
     """Specialized allocation for student uniforms"""

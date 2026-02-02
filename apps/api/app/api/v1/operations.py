@@ -6,6 +6,8 @@ from app.models.user import User
 from app.models.staff import Staff
 from app.models.operations import MaintenanceTicket, Shift, TicketStatus
 from app.schemas.operations import (
+from app.shared.enums import TicketStatus
+
     MaintenanceTicketCreate, MaintenanceTicketRead, MaintenanceTicketUpdate,
     ShiftCreate, ShiftRead
 )

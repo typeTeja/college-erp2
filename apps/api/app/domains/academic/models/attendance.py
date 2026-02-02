@@ -3,18 +3,11 @@ from typing import Optional, List
 from enum import Enum
 import sqlalchemy as sa
 from sqlmodel import Field, Relationship, SQLModel
+from app.shared.enums import AttendanceStatus, SessionStatus
+
 
 # Enums
-class AttendanceStatus(str, Enum):
-    PRESENT = "PRESENT"
-    ABSENT = "ABSENT"
-    LATE = "LATE"
-    ON_DUTY = "ON_DUTY"
     
-class SessionStatus(str, Enum):
-    SCHEDULED = "SCHEDULED"
-    COMPLETED = "COMPLETED"
-    CANCELLED = "CANCELLED"
 
 # Models
 class AttendanceSession(SQLModel, table=True):

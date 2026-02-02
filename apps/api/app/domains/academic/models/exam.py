@@ -2,22 +2,14 @@ from typing import TYPE_CHECKING, List, Optional
 from datetime import date, time
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
+from app.shared.enums import ExamStatus, ExamType
+
 
 if TYPE_CHECKING:
     from .batch import BatchSemester
     from ...models.subject import Subject
     from ...models.student import Student
 
-class ExamType(str, Enum):
-    MID_TERM = "MID_TERM"
-    FINAL = "FINAL"
-    INTERNAL = "INTERNAL"
-    PRACTICAL = "PRACTICAL"
-
-class ExamStatus(str, Enum):
-    DRAFT = "DRAFT"
-    PUBLISHED = "PUBLISHED"
-    COMPLETED = "COMPLETED"
 
 class Exam(SQLModel, table=True):
     """Represents an exam cycle (e.g., Fall 2024 Mid-Terms)"""
