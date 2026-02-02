@@ -13,7 +13,6 @@ from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
     from app.models.department import Department
-    from app.models.operations import Shift
     from app.models import User
     from app.domains.academic.models import Subject
 
@@ -51,7 +50,7 @@ class StaffBase(SQLModel):
     department: Optional[str] = None
     designation: str  # Will be linked to HR.Designation later
     join_date: date
-    shift_id: Optional[int] = Field(default=None, foreign_key="shift.id")
+    # shift_id: Optional[int] = Field(default=None, foreign_key="shift.id")  # TODO: Add Shift model
     is_active: bool = True
 
 
@@ -63,7 +62,7 @@ class Staff(StaffBase, table=True):
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     
     # Relationships
-    shift: Optional["Shift"] = Relationship(back_populates="staff_members")
+    # shift: Optional["Shift"] = Relationship(back_populates="staff_members")  # TODO: Add Shift model
 
 
 class Faculty(SQLModel, table=True):
