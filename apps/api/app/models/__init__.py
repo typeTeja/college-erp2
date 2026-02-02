@@ -2,73 +2,68 @@
 # Import all models here so Alembic can discover them
 
 from .user import User
-from .odc import ODCHotel, ODCRequest, StudentODCApplication
 from .role import Role
 from .user_role import UserRole
 from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
-from .academic.batch import AcademicBatch
-# Legacy models removed: LegacyProgramYear, Semester
 from .subject import Subject
-from .student import Student
-from .faculty import Faculty
-from .enrollment import Enrollment
-from .parent import Parent
-from .staff import Staff
+# HR Domain
+from app.domains.hr.models import Staff, Faculty, Designation
+# Student Domain
+from app.domains.student.models import (
+    Student, Parent, Enrollment,
+    ODCHotel, ODCRequest, StudentODCApplication, ODCBilling, ODCPayout,
+    DocumentCategory, StudentDocument, DocumentVerification
+)
 from .operations import Shift, MaintenanceTicket
-from .exam import Exam, ExamSchedule, ExamResult
-from .timetable import (
-    TimeSlot,
-    Classroom,
-    TimetableTemplate,
-    ClassSchedule,
-    ClassAdjustment,
+# Finance Domain
+from app.domains.finance.models import (
+    FeeStructure, FeeComponent, FeeInstallment, StudentFee,
+    FeePayment, FeeConcession, FeeFine, StudentFeeInstallment,
+    PaymentGatewayConfig, OnlinePayment, PaymentReceipt,
+    FeeHead, InstallmentPlan, ScholarshipSlab
 )
-from .fee import (
-    FeeStructure,
-    FeeComponent,
-    FeeInstallment,
-    StudentFee,
-    FeePayment,
-    FeeConcession,
-    FeeFine,
+
+# Admissions Domain
+from app.domains.admission.models import (
+    Application, ApplicationPayment, ApplicationDocument, 
+    ApplicationActivityLog, AdmissionSettings,
+    EntranceTestConfig, EntranceExamResult,
+    TentativeAdmission, ScholarshipCalculation
 )
-from .attendance import AttendanceSession, AttendanceRecord
-from .academic.entrance_exam import EntranceTestConfig, EntranceExamResult
-from .admissions import Application, ApplicationPayment, EntranceExamScore, ApplicationDocument, ApplicationActivityLog
-from .admission_settings import AdmissionSettings
-from .library import Book, BookIssue, LibraryFine
-from .hostel import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComplaint
-from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
-from .inventory import Asset, AssetAllocation, AssetMaintenance, AssetAudit, UniformAllocation
-from .communication import Circular, Notification, NotificationLog
-from .settings import SystemSetting, AuditLog as SettingsAuditLog
-from .audit_log import AuditLog
-from .institute import InstituteInfo
-from .master_data import (
-    AcademicYear,
-    # LegacyAcademicBatch removed
-    Section,
-    PracticalBatch,
-    SubjectConfig,
-    FeeHead,
-    InstallmentPlan,
-    ScholarshipSlab,
-    Board,
-    PreviousQualification,
-    StudyGroup,
-    ReservationCategory,
-    LeadSource,
-    Designation,
-    MasterClassroom,
-    PlacementCompany,
-    EmailTemplate,
-    SMSTemplate,
+
+# Academic Domain
+from app.domains.academic.models import (
+    AcademicBatch, ProgramYear, BatchSemester, BatchSubject,
+    Regulation, RegulationSemester, RegulationSubject, RegulationPromotionRule,
+    AcademicYear, Section, PracticalBatch, SubjectConfig,
+    InternalExam, InternalExamSubject, StudentInternalMarks, InternalMarksConsolidated,
+    UniversityExam, UniversityExamRegistration, UniversityExamResult, SemesterResult,
+    HallTicket, HallTicketConfig, DisciplineBlock,
+    StudentSectionAssignment, StudentLabAssignment,
+    StudentPracticalBatchAllocation,
+    StudentSemesterHistory, StudentPromotionLog, StudentRegulationMigration, PromotionEligibility,
+    Exam, ExamSchedule, ExamResult,
+    AttendanceSession, AttendanceRecord,
+    TimeSlot, Classroom, TimetableTemplate, ClassSchedule, 
+    ClassAdjustment, DayOfWeek, SlotType, AdjustmentStatus
 )
-from .academic.allocation import StudentPracticalBatchAllocation
-from .file_metadata import FileMetadata
-from .import_log import ImportLog
+
+# Campus Domain
+from app.domains.campus.models import (
+    HostelBlock, HostelRoom, BedAllocation, HostelType, RoomType,
+    GatePass, HostelComplaint, GatePassType, GatePassStatus, ComplaintStatus,
+    Book, LibraryMember, DigitalResource, BookStatus, MemberType,
+    BookIssue, LibraryFine, IssueStatus,
+    Asset, AssetAllocation, AssetAudit, UniformAllocation, AssetCategory, AllocationStatus, UniformSize,
+    Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog,
+    AssetMaintenance, MasterClassroom
+)
+# Communication Domain
+from app.domains.communication.models import Circular, Notification, NotificationLog
+# System Domain
+from app.domains.system.models import SystemSetting, AuditLog as SettingsAuditLog, InstituteInfo, FileMetadata, ImportLog
 
 __all__ = [
     "User",
@@ -76,8 +71,6 @@ __all__ = [
     "UserRole",
     "Department",
     "Program",
-    # LegacyProgramYear removed
-    # Semester removed
     "Subject",
     "Student",
     "Parent",
@@ -106,7 +99,6 @@ __all__ = [
     "FeeFine",
     "Application",
     "ApplicationPayment",
-    "EntranceExamScore",
     "ApplicationDocument",
     "ApplicationActivityLog",
     "AdmissionSettings",
@@ -137,15 +129,20 @@ __all__ = [
     "SettingsAuditLog",
     "AuditLog",
     "InstituteInfo",
+    "AttendanceSession",
+    "AttendanceRecord",
     "AcademicYear",
     "AcademicBatch",
-    # LegacyAcademicBatch removed
     "Section",
     "PracticalBatch",
     "SubjectConfig",
     "FeeHead",
     "InstallmentPlan",
     "ScholarshipSlab",
+    "PaymentGatewayConfig",
+    "OnlinePayment",
+    "PaymentReceipt",
+    "StudentFeeInstallment",
     "Board",
     "PreviousQualification",
     "StudyGroup",
@@ -159,4 +156,8 @@ __all__ = [
     "SMSTemplate",
     "FileMetadata",
     "ImportLog",
+    "EntranceTestConfig",
+    "EntranceExamResult",
+    "TentativeAdmission",
+    "ScholarshipCalculation"
 ]

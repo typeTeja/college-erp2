@@ -61,6 +61,23 @@ def get_current_active_student(
     session: Session = Depends(get_session),
 ) -> Student:
     """Get the student record associated with the current user"""
+    # STRICT CHECK: User must have STUDENT role
+    is_student_role = any(role.name == "STUDENT" for role in current_user.roles)
+    if not is_student_role:
+        # Check if they are just an applicant
+        is_applicant = any(role.name == "APPLICANT" for role in current_user.roles)
+        if is_applicant:
+             raise HTTPException(
+                status_code=403, 
+                detail="Admission not confirmed. Please complete the admission process to access this feature."
+            )
+        
+        # Fallback for other roles
+        raise HTTPException(
+            status_code=403,
+            detail="User does not have STUDENT privileges"
+        )
+        
     statement = select(Student).where(Student.user_id == current_user.id)
     student = session.exec(statement).first()
     

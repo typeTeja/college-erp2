@@ -1,38 +1,37 @@
-from fastapi import APIRouter
-from app.api.v1 import auth, odc, dashboard, admissions, admissions_enhanced, import_api, fees, attendance, exams, students, timetable, staff, operations, programs, library, hostel, faculty, lesson, inventory, communication, reports, settings, institute, files, master_data, regulations, batches, student_promotion, audit, academic_dashboard, sections, student_assignment, allocations, easebuzz
+from app.api.v1 import (
+    dashboard, admissions, import_api, fees, staff, operations, 
+    programs, library, hostel, faculty, lesson, inventory, 
+    communication, reports, settings, institute, files, master_data, 
+    audit, easebuzz, auth
+)
+from app.domains.academic.router import router as academic_router
+from app.domains.student.router import router as student_router
+from app.domains.finance.router import router as finance_router
+from app.domains.campus.router import router as campus_router
+from app.domains.hr.router import router as hr_router
+from app.domains.communication.router import router as communication_router
+from app.domains.system.router import router as system_router
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
-api_router.include_router(allocations.router, prefix="/allocations", tags=["allocations"])
+api_router.include_router(communication_router, prefix="/communication", tags=["Communication Domain"])
+api_router.include_router(system_router, prefix="/system", tags=["System Domain"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
-api_router.include_router(regulations.router, prefix="/regulations", tags=["regulations"])
-api_router.include_router(batches.router, prefix="/batches", tags=["batches"])
-api_router.include_router(student_promotion.router, prefix="/academic", tags=["student-promotion"])  # NEW
-api_router.include_router(odc.router, prefix="/odc", tags=["odc"])
+api_router.include_router(academic_router, prefix="/academic", tags=["Academic"])
+# ODC and other student modules now under /students/ prefix in Domain Router
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
-api_router.include_router(admissions_enhanced.router, prefix="/admissions", tags=["admissions-enhanced"])  # Enhanced workflow endpoints
 api_router.include_router(admissions.router, prefix="/admissions", tags=["admissions"])
 api_router.include_router(import_api.router, prefix="/import", tags=["import"])
-api_router.include_router(fees.router, prefix="/fees", tags=["fees"])
-api_router.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
-api_router.include_router(exams.router, prefix="/exams", tags=["exams"])
-api_router.include_router(students.router, prefix="/students", tags=["students"])
-api_router.include_router(timetable.router, prefix="/timetable", tags=["timetable"])
-api_router.include_router(staff.router, prefix="/staff", tags=["staff"])
+api_router.include_router(finance_router, prefix="/finance", tags=["Finance Domain"])
+api_router.include_router(student_router, prefix="/students", tags=["Student Domain"])
+api_router.include_router(campus_router, prefix="/campus", tags=["Campus Domain"])
+api_router.include_router(hr_router, prefix="/hr", tags=["People & HR Domain"])
 api_router.include_router(operations.router, prefix="/operations", tags=["operations"])
 api_router.include_router(programs.router, prefix="/programs", tags=["programs"])
-api_router.include_router(library.router, prefix="/library", tags=["library"])
-api_router.include_router(hostel.router, prefix="/hostel", tags=["hostel"])
 api_router.include_router(faculty.router, prefix="/faculty", tags=["faculty"])
 api_router.include_router(lesson.router, prefix="/lesson", tags=["lesson"])
-api_router.include_router(inventory.router, prefix="/inventory", tags=["inventory"])
-api_router.include_router(communication.router, prefix="/communication", tags=["communication"])
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
-api_router.include_router(easebuzz.router, prefix="/payment", tags=["easebuzz"]) # Easebuzz Payment Gateway
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
 api_router.include_router(institute.router, prefix="/institute", tags=["institute"])
 api_router.include_router(audit.router, prefix="/audit-logs", tags=["audit"])
-api_router.include_router(academic_dashboard.router, prefix="/academic-setup/dashboard", tags=["academic-dashboard"])
-api_router.include_router(sections.router, prefix="/sections", tags=["sections"])
-api_router.include_router(student_assignment.router, prefix="/assignments", tags=["student-assignment"])
 api_router.include_router(master_data.router, prefix="/master", tags=["master-data"])

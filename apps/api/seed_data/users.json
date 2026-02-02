@@ -118,5 +118,17 @@
                 "is_active": true
             }
         ]
+    },
+    {
+        "role_name": "APPLICANT",
+        "users": [
+            {
+                "email": "applicant@college.edu",
+                "full_name": "Sample Applicant",
+                "password": "password123",
+                "mobile": "6000000000",
+                "is_active": true
+            }
+        ]
     }
 ]

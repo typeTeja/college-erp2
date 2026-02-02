@@ -29,6 +29,7 @@ def create_initial_data():
                 {"name": "ADMIN", "description": "Administrator"},
                 {"name": "FACULTY", "description": "Faculty Member"},
                 {"name": "STUDENT", "description": "Student"},
+                {"name": "APPLICANT", "description": "Applicant (Pre-admission)"},
                 {"name": "PARENT", "description": "Parent/Guardian"},
                 {"name": "STAFF", "description": "Administrative Staff"},
             ]

@@ -6,6 +6,12 @@ from app.models.role import Role
 
 # Standard Permission Seeds
 CORE_PERMISSIONS = {
+    "Academics": [
+        ("academics:read", "View academic structures"),
+        ("academics:write", "Manage academic setups"),
+        ("timetable:manage", "Manage class schedules"),
+        ("attendance:manage", "Record and verify attendance"),
+    ],
     "Admissions": [
         ("admissions:read", "View admission applications"),
         ("admissions:write", "Create/Update applications"),
@@ -35,6 +41,16 @@ CORE_PERMISSIONS = {
     "Library": [
         ("library:read", "View book catalog"),
         ("library:write", "Issue/Return books and manage fines"),
+    ],
+    "Inventory": [
+        ("inventory:read", "View assets and stock"),
+        ("inventory:write", "Manage inventory and allocations"),
+    ],
+    "Communication": [
+        ("circulars:write", "Publish and manage circulars"),
+    ],
+    "Reports": [
+        ("reports:read", "View analytics and reports"),
     ],
     "Settings": [
         ("rbac:manage", "Manage roles and permissions (Super Admin only)"),

@@ -7,8 +7,7 @@ from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from datetime import date
 
-from app.models.master_data import Section, AcademicYear
-from app.models.academic.batch import BatchSemester, AcademicBatch
+from app.domains.academic.models import Section, AcademicYear, BatchSemester, AcademicBatch
 
 
 class AcademicValidationError(HTTPException):

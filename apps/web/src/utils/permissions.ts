@@ -28,6 +28,7 @@ export function filterNavigation(
     return {
         ...config,
         groups: config.groups
+            .filter(group => hasPermission(group.requiredPermissions, userPermissions))
             .map(group => ({
                 ...group,
                 items: group.items.filter(item =>

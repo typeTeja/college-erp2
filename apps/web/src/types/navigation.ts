@@ -21,6 +21,7 @@ export interface NavGroup {
     items: NavItem[];
     defaultExpanded?: boolean;
     order: number;
+    requiredPermissions?: string[];
 }
 
 export interface NavigationConfig {

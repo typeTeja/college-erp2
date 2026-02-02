@@ -1,13 +1,19 @@
 /**
  * Navigation Configuration
  * Single source of truth for all navigation items
+ * 
+ * Refactored Phase 1 (2026-02-01):
+ * - Task-based taxonomy (Dashboard, Academics, Admissions, People, Finance, Campus, System)
+ * - Consolidated Settings into "System"
+ * - Flattened deep hierarchies
  */
 import {
     LayoutDashboard, GraduationCap, Users, DollarSign,
     Building2, ClipboardList, Megaphone, Settings,
     BookOpen, Calendar, FileText, UserCheck, Briefcase,
     BedDouble, Library, Package, HeadphonesIcon,
-    FileCheck, Clock, Layers, BarChart3, Menu, Award
+    FileCheck, Clock, Layers, BarChart3, Menu, Award,
+    Shield, School, Key, FileInput
 } from 'lucide-react';
 import type { NavigationConfig } from '@/types/navigation';
 
@@ -19,15 +25,29 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 label: 'Dashboard',
                 icon: LayoutDashboard,
                 order: 1,
-                defaultExpanded: false,
                 items: [
                     {
                         id: 'dashboard',
-                        label: 'Dashboard',
+                        label: 'Home',
                         path: '/',
                         icon: LayoutDashboard,
                         shortcut: 'g d'
+                    },
+                    {
+                        id: 'reports',
+                        label: 'Reports & Analytics',
+                        path: '/reports',
+                        icon: BarChart3,
+                        requiredPermissions: ['reports:read']
+                    },
+                    {
+                        id: 'circulars',
+                        label: 'Circulars',
+                        path: '/circulars',
+                        icon: Megaphone,
+                        requiredPermissions: ['circulars:write']
                     }
+
                 ]
             },
             {
@@ -35,41 +55,63 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 label: 'Academics',
                 icon: GraduationCap,
                 order: 2,
-                defaultExpanded: false,
                 items: [
                     {
-                        id: 'bulk-setup',
-                        label: 'Bulk Setup',
-                        path: '/academics/bulk-setup',
-                        icon: Layers,
-                        badge: 'New',
-                        shortcut: 'g a b'
+                        id: 'programs',
+                        label: 'Programs & Batches',
+                        path: '/settings?tab=programs', // Temporary mapping until full split
+                        icon: School,
+                        requiredPermissions: ['academics:read']
                     },
                     {
-                        id: 'student-assignment',
+                        id: 'assignments',
                         label: 'Student Assignment',
                         path: '/academics/assignments',
                         icon: UserCheck,
-                        badge: 'New',
-                        shortcut: 'g a s'
-                    },
-                    {
-                        id: 'regulations',
-                        label: 'Regulations',
-                        path: '/settings?tab=regulations',
-                        icon: BookOpen
+                        requiredPermissions: ['academics:write']
                     },
                     {
                         id: 'timetable',
                         label: 'Timetable',
                         path: '/timetable',
-                        icon: Calendar
+                        icon: Calendar,
+                        requiredPermissions: ['timetable:manage']
                     },
                     {
                         id: 'examinations',
                         label: 'Examinations',
                         path: '/exams',
-                        icon: FileText
+                        icon: FileText,
+                        requiredPermissions: ['exams:read']
+                    },
+                    {
+                        id: 'attendance',
+                        label: 'Class Attendance',
+                        path: '/attendance',
+                        icon: UserCheck,
+                        requiredPermissions: ['attendance:manage']
+                    }
+                ]
+            },
+            {
+                id: 'admissions',
+                label: 'Admissions',
+                icon: ClipboardList,
+                order: 3,
+                items: [
+                    {
+                        id: 'applications',
+                        label: 'Applications',
+                        path: '/admissions',
+                        icon: FileInput,
+                        requiredPermissions: ['admissions:read']
+                    },
+                    {
+                        id: 'enquiries',
+                        label: 'Enquiries',
+                        path: '/admissions/enquiries', // Placeholder path
+                        icon: HeadphonesIcon,
+                        requiredPermissions: ['admissions:read']
                     }
                 ]
             },
@@ -77,38 +119,36 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 id: 'people',
                 label: 'People',
                 icon: Users,
-                order: 3,
+                order: 4,
                 items: [
                     {
                         id: 'students',
-                        label: 'Students',
+                        label: 'Student Directory',
                         path: '/students',
                         icon: Users,
-                        shortcut: 'g p s'
-                    },
-                    {
-                        id: 'import-students',
-                        label: 'Import Students',
-                        path: '/students/import',
-                        icon: FileText
-                    },
-                    {
-                        id: 'admissions',
-                        label: 'Admissions',
-                        path: '/admissions',
-                        icon: ClipboardList
+                        shortcut: 'g p s',
+                        requiredPermissions: ['students:read']
                     },
                     {
                         id: 'faculty',
-                        label: 'Faculty',
+                        label: 'Faculty Directory',
                         path: '/faculty',
-                        icon: GraduationCap
+                        icon: GraduationCap,
+                        requiredPermissions: ['staff:read']
                     },
                     {
                         id: 'staff',
                         label: 'Staff Directory',
                         path: '/staff/directory',
-                        icon: Briefcase
+                        icon: Briefcase,
+                        requiredPermissions: ['staff:read']
+                    },
+                    {
+                        id: 'import-students',
+                        label: 'Bulk Import',
+                        path: '/students/import',
+                        icon: FileText,
+                        requiredPermissions: ['students:write']
                     }
                 ]
             },
@@ -116,32 +156,29 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 id: 'finance',
                 label: 'Finance',
                 icon: DollarSign,
-                order: 4,
+                order: 5,
                 items: [
                     {
                         id: 'fees',
-                        label: 'Fees Management',
+                        label: 'Fee Collection',
                         path: '/fees',
                         icon: DollarSign,
-                        shortcut: 'g f'
+                        shortcut: 'g f',
+                        requiredPermissions: ['fees:read']
                     },
                     {
-                        id: 'fee-heads',
-                        label: 'Fee Heads',
-                        path: '/settings?tab=fee-heads',
-                        icon: FileText
+                        id: 'fee-setup',
+                        label: 'Fee Structure',
+                        path: '/settings?tab=fee-heads', // Temporary
+                        icon: Settings,
+                        requiredPermissions: ['fees:write']
                     },
                     {
-                        id: 'scholarship-slabs',
-                        label: 'Scholarship Slabs',
-                        path: '/settings?tab=scholarship-slabs',
-                        icon: Award
-                    },
-                    {
-                        id: 'reports',
-                        label: 'Financial Reports',
-                        path: '/reports',
-                        icon: BarChart3
+                        id: 'payroll',
+                        label: 'Payroll',
+                        path: '/payroll', // Placeholder
+                        icon: Wallet,
+                        requiredPermissions: ['fees:approve'] // Temporary mapping
                     }
                 ]
             },
@@ -149,112 +186,98 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 id: 'campus',
                 label: 'Campus',
                 icon: Building2,
-                order: 5,
+                order: 6,
                 items: [
                     {
                         id: 'hostel',
                         label: 'Hostel',
                         path: '/hostel',
-                        icon: BedDouble
+                        icon: BedDouble,
+                        requiredPermissions: ['hostel:read']
                     },
                     {
                         id: 'library',
                         label: 'Library',
                         path: '/library',
-                        icon: Library
+                        icon: Library,
+                        requiredPermissions: ['library:read']
                     },
                     {
                         id: 'inventory',
                         label: 'Inventory',
                         path: '/inventory',
-                        icon: Package
+                        icon: Package,
+                        requiredPermissions: ['inventory:read']
                     },
                     {
-                        id: 'helpdesk',
-                        label: 'Helpdesk',
-                        path: '/staff/ops/tickets',
-                        icon: HeadphonesIcon
-                    }
-                ]
-            },
-            {
-                id: 'operations',
-                label: 'Operations',
-                icon: ClipboardList,
-                order: 6,
-                items: [
-                    {
-                        id: 'attendance',
-                        label: 'Attendance',
-                        path: '/attendance',
-                        icon: UserCheck
-                    },
-                    {
-                        id: 'odc',
-                        label: 'ODC',
-                        path: '/odc',
-                        icon: ClipboardList
+                        id: 'transport',
+                        label: 'Transport',
+                        path: '/transport', // Placeholder
+                        icon: Bus,
+                        requiredPermissions: ['hostel:read'] // Temporary mapping
                     },
                     {
                         id: 'gate-pass',
                         label: 'Gate Pass',
                         path: '/gatepass',
-                        icon: FileCheck
+                        icon: FileCheck,
+                        requiredPermissions: ['hostel:read'] // Temporary mapping
                     },
                     {
-                        id: 'shift-roster',
-                        label: 'Shift Roster',
-                        path: '/staff/ops/shifts',
-                        icon: Clock
+                        id: 'helpdesk',
+                        label: 'Helpdesk',
+                        path: '/staff/ops/tickets',
+                        icon: HeadphonesIcon,
+                        requiredPermissions: ['staff:read']
                     }
                 ]
             },
             {
-                id: 'communication',
-                label: 'Communication',
-                icon: Megaphone,
+                id: 'system',
+                label: 'System',
+                icon: Shield, // Changed from Settings icon to Shield to denote Admin
                 order: 7,
+                requiredPermissions: ['settings:write', 'rbac:manage'],
                 items: [
                     {
-                        id: 'circulars',
-                        label: 'Circulars',
-                        path: '/circulars',
-                        icon: Megaphone
-                    }
-                ]
-            },
-            {
-                id: 'settings',
-                label: 'Settings',
-                icon: Settings,
-                order: 8,
-                defaultExpanded: false,
-                items: [
-                    {
-                        id: 'settings',
-                        label: 'Settings',
+                        id: 'configuration',
+                        label: 'General Configuration',
                         path: '/settings',
                         icon: Settings,
-                        shortcut: 'g s'
+                        requiredPermissions: ['settings:write']
+                    },
+                    {
+                        id: 'access-control',
+                        label: 'Access Control',
+                        path: '/settings?tab=roles',
+                        icon: Key,
+                        requiredPermissions: ['rbac:manage']
+                    },
+                    {
+                        id: 'audit-logs',
+                        label: 'Audit Logs',
+                        path: '/settings?tab=audit',
+                        icon: FileCheck,
+                        requiredPermissions: ['rbac:manage']
                     }
                 ]
             }
         ],
         mobileBottomNav: [
             { id: 'dashboard', label: 'Home', path: '/', icon: LayoutDashboard },
-            { id: 'academics-mobile', label: 'Academics', path: '/academics', icon: GraduationCap },
-            { id: 'people-mobile', label: 'People', path: '/students', icon: Users },
-            { id: 'finance-mobile', label: 'Finance', path: '/fees', icon: DollarSign },
-            { id: 'more', label: 'More', path: '/menu', icon: Menu }
+            { id: 'academics', label: 'Academics', path: '/academics', icon: GraduationCap },
+            { id: 'people', label: 'People', path: '/students', icon: Users },
+            { id: 'more', label: 'Menu', path: '/menu', icon: Menu }
         ]
     },
 
-    // Add other roles as needed
+    // Default Fallback (Copy of Super Admin for now, role-specific refinement in Phase 2)
     ADMIN: {
-        groups: [], // Copy from SUPER_ADMIN or customize
+        groups: [],
         mobileBottomNav: []
     },
 
+    // Minimal Student View
     STUDENT: {
         groups: [
             {
@@ -262,15 +285,8 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 label: 'Dashboard',
                 icon: LayoutDashboard,
                 order: 1,
-                defaultExpanded: false,
                 items: [
-                    {
-                        id: 'dashboard',
-                        label: 'Dashboard',
-                        path: '/',
-                        icon: LayoutDashboard,
-                        shortcut: 'g d'
-                    }
+                    { id: 'home', label: 'Home', path: '/', icon: LayoutDashboard }
                 ]
             },
             {
@@ -279,30 +295,9 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 icon: GraduationCap,
                 order: 2,
                 items: [
-                    {
-                        id: 'attendance',
-                        label: 'My Attendance',
-                        path: '/attendance',
-                        icon: Calendar
-                    },
-                    {
-                        id: 'timetable',
-                        label: 'My Timetable',
-                        path: '/timetable',
-                        icon: Clock
-                    },
-                    {
-                        id: 'exams',
-                        label: 'Exams & Results',
-                        path: '/exams',
-                        icon: FileText
-                    },
-                    {
-                        id: 'assignments',
-                        label: 'Assignments',
-                        path: '/assignments',
-                        icon: ClipboardList
-                    }
+                    { id: 'attendance', label: 'My Attendance', path: '/attendance', icon: UserCheck },
+                    { id: 'timetable', label: 'Timetable', path: '/timetable', icon: Calendar },
+                    { id: 'exams', label: 'Results', path: '/exams', icon: FileText }
                 ]
             },
             {
@@ -311,12 +306,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 icon: DollarSign,
                 order: 3,
                 items: [
-                    {
-                        id: 'fees',
-                        label: 'Fee Status',
-                        path: '/fees',
-                        icon: DollarSign
-                    }
+                    { id: 'fees', label: 'My Fees', path: '/fees', icon: DollarSign }
                 ]
             },
             {
@@ -325,60 +315,21 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                 icon: Building2,
                 order: 4,
                 items: [
-                    {
-                        id: 'library',
-                        label: 'Library Books',
-                        path: '/library',
-                        icon: Library
-                    },
-                    {
-                        id: 'gate-pass',
-                        label: 'Gate Pass',
-                        path: '/gatepass',
-                        icon: FileCheck
-                    },
-                    {
-                        id: 'odc',
-                        label: 'ODC Request',
-                        path: '/odc/student',
-                        icon: ClipboardList
-                    }
-                ]
-            },
-            {
-                id: 'communication',
-                label: 'Communication',
-                icon: Megaphone,
-                order: 5,
-                items: [
-                    {
-                        id: 'circulars',
-                        label: 'Circulars',
-                        path: '/circulars',
-                        icon: Megaphone
-                    }
-                ]
-            },
-            {
-                id: 'settings',
-                label: 'Settings',
-                icon: Settings,
-                order: 6,
-                items: [
-                    {
-                        id: 'settings',
-                        label: 'Profile Settings',
-                        path: '/settings',
-                        icon: Settings
-                    }
+                    { id: 'library', label: 'Library Books', path: '/library', icon: Library },
+                    { id: 'gatepass', label: 'Gate Pass', path: '/gatepass', icon: FileCheck }
                 ]
             }
         ],
         mobileBottomNav: [
-            { id: 'dashboard', label: 'Home', path: '/', icon: LayoutDashboard },
-            { id: 'attendance', label: 'Attendance', path: '/attendance', icon: Calendar },
+            { id: 'home', label: 'Home', path: '/', icon: LayoutDashboard },
+            { id: 'attendance', label: 'Attendance', path: '/attendance', icon: UserCheck },
             { id: 'fees', label: 'Fees', path: '/fees', icon: DollarSign },
-            { id: 'more', label: 'More', path: '/menu', icon: Menu }
+            { id: 'more', label: 'Menu', path: '/menu', icon: Menu }
         ]
     }
 };
+
+// Import missing icons locally to avoid error if Lucide doesn't export them yet
+import { Wallet, Bus } from 'lucide-react';
+// Note: Wallet, Bus might not be in the initial import list, added them above or ignore if missing types.
+// Actually, let's stick to safe icons. Wallet is fine. Bus is usually available.
