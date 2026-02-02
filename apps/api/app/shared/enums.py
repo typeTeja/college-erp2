@@ -123,6 +123,7 @@ class ExamType(str, Enum):
     FINAL = "FINAL"
     INTERNAL = "INTERNAL"
     PRACTICAL = "PRACTICAL"
+    BOTH = "BOTH"  # For subjects with both theory and practical
 
 
 class ExamStatus(str, Enum):
@@ -257,6 +258,7 @@ class PaymentMode(str, Enum):
 
 
 class PaymentStatus(str, Enum):
+    INITIATED = "INITIATED"
     PENDING = "PENDING"
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
