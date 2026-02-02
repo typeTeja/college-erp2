@@ -2,8 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.settings import settings
-from app.api.v1.router import api_router
-from app.api.v1.roles import router as roles_router
+# Import domain routers
+from app.domains.auth.router import router as auth_router
+from app.domains.system.router import router as system_router
+from app.domains.hr.router import router as hr_router
+from app.domains.academic.router import router as academic_router
+from app.domains.student.router import router as student_router
+from app.domains.admission.router import router as admission_router
+from app.domains.finance.router import router as finance_router
+from app.domains.communication.router import router as communication_router
+from app.domains.campus.router import router as campus_router
 from app.core.rbac import seed_permissions
 from app.db.session import engine, init_db
 from sqlmodel import Session
