@@ -6,7 +6,7 @@ from app.shared.enums import ComplaintStatus, GatePassStatus, GatePassType
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.models import Student
     from .infrastructure import HostelRoom
 
 

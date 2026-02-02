@@ -6,7 +6,7 @@ from app.shared.enums import BookStatus, MemberType
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.models import Student
 
 
 class Book(SQLModel, table=True):

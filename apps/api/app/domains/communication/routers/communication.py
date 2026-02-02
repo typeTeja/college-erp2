@@ -5,7 +5,7 @@ from app.api import deps
 from datetime import datetime
 
 from ..models.communication import Circular, Notification, NotificationLog, CircularTarget
-from ..schemas.communication import CircularCreate, CircularRead, NotificationRead, NotificationLogRead
+from ..schemas import CircularCreate, CircularRead, NotificationRead, NotificationLogRead
 
 router = APIRouter()
 

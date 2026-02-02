@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from ..models.infrastructure import HostelBlock, HostelRoom, BedAllocation, RoomType
 from ..models.operations import HostelComplaint, ComplaintStatus
-from app.domains.student.models.student import Student
+from app.models import Student
 from app.shared.enums import ComplaintStatus, RoomType
 
 

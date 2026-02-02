@@ -3,7 +3,7 @@ from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.models import Student
 
 class Vehicle(SQLModel, table=True):
     """Transport Fleet - Vehicle Identity ownership"""

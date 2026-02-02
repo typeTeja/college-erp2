@@ -6,7 +6,7 @@ from app.shared.enums import HostelType, RoomType
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.models import Student
     from app.models.faculty import Faculty
 
 
