@@ -1,29 +1,27 @@
 """
 System Domain Router
 
-All API endpoints for the system domain including:
-- User management
-- Role and permission management
-- System settings
-- Audit logs
-- File management
-- Data imports
+API endpoints for system configuration and management.
 """
 
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
-from typing import List, Optional
 
 from app.api.deps import get_session, get_current_user
 from app.domains.system.services import SystemService
 from app.domains.system.schemas import (
-    UserCreate, UserUpdate, UserResponse,
-    RoleCreate, RoleUpdate, RoleRead,
-    PermissionCreate, PermissionRead,
-    SystemSettingCreate, SystemSettingUpdate, SystemSettingRead,
-    AuditLogRead
+    SystemSettingCreate,
+    SystemSettingUpdate,
+    SystemSettingResponse,
+    InstituteInfoUpdate,
+    InstituteInfoResponse,
 )
-from app.domains.system.models import User
+from app.domains.system.models import (
+    SystemSetting,
+    InstituteInfo,
+)
+from app.models import User  # Import from central models (auth domain)
 from app.domains.system.exceptions import (
     UserNotFoundError, RoleNotFoundError, SettingNotFoundError,
     UserAlreadyExistsError
