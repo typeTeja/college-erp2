@@ -403,3 +403,44 @@ class TicketPriority(str, Enum):
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
+
+# Additional Admission Domain Enums
+class FeeMode(str, Enum):
+    """Payment mode for application fees"""
+    ONLINE = "ONLINE"
+    OFFLINE = "OFFLINE"
+
+class DocumentType(str, Enum):
+    """Types of documents for admission"""
+    PHOTO = "PHOTO"
+    SIGNATURE = "SIGNATURE"
+    AADHAAR = "AADHAAR"
+    TENTH_CERTIFICATE = "TENTH_CERTIFICATE"
+    TWELFTH_CERTIFICATE = "TWELFTH_CERTIFICATE"
+    TRANSFER_CERTIFICATE = "TRANSFER_CERTIFICATE"
+    COMMUNITY_CERTIFICATE = "COMMUNITY_CERTIFICATE"
+    INCOME_CERTIFICATE = "INCOME_CERTIFICATE"
+    OTHER = "OTHER"
+
+class DocumentStatus(str, Enum):
+    """Document verification status"""
+    PENDING = "PENDING"
+    VERIFIED = "VERIFIED"
+    REJECTED = "REJECTED"
+
+class ActivityType(str, Enum):
+    """Types of activities in admission process"""
+    APPLICATION_CREATED = "APPLICATION_CREATED"
+    APPLICATION_UPDATED = "APPLICATION_UPDATED"
+    PAYMENT_INITIATED = "PAYMENT_INITIATED"
+    PAYMENT_COMPLETED = "PAYMENT_COMPLETED"
+    DOCUMENT_UPLOADED = "DOCUMENT_UPLOADED"
+    DOCUMENT_VERIFIED = "DOCUMENT_VERIFIED"
+    STATUS_CHANGED = "STATUS_CHANGED"
+
+class TentativeAdmissionStatus(str, Enum):
+    """Status of tentative admission"""
+    PENDING = "PENDING"
+    CONFIRMED = "CONFIRMED"
+    EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
