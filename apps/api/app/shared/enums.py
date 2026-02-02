@@ -30,6 +30,7 @@ class BloodGroup(str, Enum):
 
 
 class RoomType(str, Enum):
+    # Classroom/facility types
     CLASSROOM = "CLASSROOM"
     LAB = "LAB"
     SEMINAR_HALL = "SEMINAR_HALL"
@@ -38,6 +39,10 @@ class RoomType(str, Enum):
     STAFF_ROOM = "STAFF_ROOM"
     OFFICE = "OFFICE"
     OTHER = "OTHER"
+    # Hostel room types
+    NON_AC = "NON_AC"
+    AC = "AC"
+    DELUXE = "DELUXE"
 
 
 class TopicStatus(str, Enum):
