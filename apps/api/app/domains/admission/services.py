@@ -169,7 +169,7 @@ class AdmissionService:
         background_tasks = None, payment_method: str = "UNKNOWN"
     ) -> bool:
         try:
-            from app.services.email_service import email_service
+            from app.domains.communication.services import email_service
             application = session.get(Application, application_id)
             if not application: return False
             
@@ -223,7 +223,7 @@ class AdmissionService:
     @staticmethod
     async def send_credentials_sms(phone: str, username: str, password: str, name: str = "", application_number: str = ""):
         try:
-            from app.services.sms_service import sms_service
+            from app.domains.communication.services import sms_service
             sms_service.send_portal_credentials(
                 mobile=phone, name=name, username=username,
                 password=password, application_number=application_number
