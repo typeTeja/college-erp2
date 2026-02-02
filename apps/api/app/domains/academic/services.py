@@ -1,21 +1,31 @@
 """
 Academic Domain Services
 
-Business logic for academic domain.
-Note: This is a simplified version. Full services can be added as needed.
+Consolidated services for academic operations including:
+- Batch management
+- Semester management  
+- Subject configuration
+- Section management
+- Regulation management
+- Program management (moved from app/services/program_service.py)
 """
+from typing import List, Optional, Dict, Any
+from datetime import datetime, date
+from sqlmodel import Session, select, func, or_, and_
+from sqlalchemy.orm import selectinload, joinedload
+from fastapi import HTTPException
 
-from typing import List, Optional
-from sqlmodel import Session, select
-
-from app.domains.academic.models import (
-    AcademicYear, AcademicBatch, Regulation, Section,
-    Exam, AttendanceRecord
+from .models import (
+    AcademicYear, Section, PracticalBatch, SubjectConfig,
+    Regulation, RegulationSubject, RegulationSemester, RegulationPromotionRule,
+    ProgramYear, AcademicBatch, BatchSemester, BatchSubject,
+    StudentSectionAssignment, StudentLabAssignment, StudentPracticalBatchAllocation,
+    StudentSemesterHistory, StudentPromotionLog, StudentRegulationMigration
 )
-from app.domains.academic.schemas import (
-    AcademicYearCreate, BatchCreate, RegulationCreate,
-    SectionCreate, ExamCreate, AttendanceRecordCreate
-)
+from app.models.program import Program, ProgramType, ProgramStatus
+from app.models.department import Department
+from app.schemas.program import ProgramCreate
+from app.shared.enums import ProgramStatus, ProgramType
 from app.domains.academic.exceptions import (
     AcademicYearNotFoundError, BatchNotFoundError,
     RegulationNotFoundError, SectionNotFoundError,
@@ -139,3 +149,64 @@ class AcademicValidationService:
 
 # Create singleton instance for backward compatibility
 academic_validation_service = AcademicValidationService()
+
+# ======================================================================
+# Program Service (moved from app/services/program_service.py)
+# ======================================================================
+
+class ProgramService:
+    @staticmethod
+    def create_program(session: Session, program_in: ProgramCreate) -> Program:
+        \"\"\"Create a new program\"\"\"
+        
+        # Check for existing code
+        existing = session.exec(select(Program).where(Program.code == program_in.code)).first()
+        if existing:
+            raise HTTPException(status_code=400, detail=\"Program with this code already exists\")
+            
+        # Create Program
+        program_data = program_in.dict()
+        program = Program(**program_data)
+        session.add(program)
+        session.commit()
+        session.refresh(program)
+        
+        # RELOAD with department for response schema
+        return session.exec(
+            select(Program).where(Program.id == program.id).options(selectinload(Program.department))
+        ).one()
+
+    @staticmethod
+    def get_program(session: Session, program_id: int) -> Optional[Program]:
+        return session.exec(
+            select(Program).where(Program.id == program_id).options(selectinload(Program.department))
+        ).first()
+
+    @staticmethod
+    def get_programs(session: Session, skip: int = 0, limit: int = 100, 
+                     type: Optional[ProgramType] = None, 
+                     status: Optional[ProgramStatus] = None) -> List[Program]:
+        query = select(Program).options(selectinload(Program.department))
+        if type:
+            query = query.where(Program.program_type == type)
+        if status:
+            query = query.where(Program.status == status)
+            
+        # Default Filter: Don't show Archived unless requested? 
+        # For now, show all
+        
+        return session.exec(query.offset(skip).limit(limit)).all()
+        
+    @staticmethod
+    def delete_program(session: Session, program_id: int) -> bool:
+        program = session.get(Program, program_id)
+        if not program:
+            raise HTTPException(status_code=404, detail=\"Program not found\")
+            
+        # Check dependencies (Students)
+        if len(program.students) > 0:
+             raise HTTPException(status_code=400, detail=\"Cannot delete program with enrolled students.\")
+             
+        session.delete(program)
+        session.commit()
+        return True
