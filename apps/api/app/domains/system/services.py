@@ -2,12 +2,12 @@
 System Domain Services
 
 Business logic for system domain including:
-- User management
-- Role and permission management  
 - System settings
 - File storage
 - Data imports
 - Audit logging
+
+Note: User, Role, Permission management moved to Auth domain
 """
 
 from typing import List, Optional, Any
@@ -15,12 +15,21 @@ from sqlmodel import Session, select
 from datetime import datetime, timedelta
 import secrets
 
+# System domain models
 from app.domains.system.models import (
-    Role, Permission, UserRole, RolePermission,
     SystemSetting, InstituteInfo, AuditLog, PermissionAuditLog,
     FileMetadata, ImportLog
 )
-from app.domains.auth.models import AuthUser as User  # Import from auth domain
+
+# Auth domain models (moved from system)
+from app.domains.auth.models import (
+    AuthUser as User,
+    Role,
+    Permission,
+    UserRole,
+    RolePermission,
+)
+
 from app.domains.system.schemas import (
     UserCreate, UserUpdate,
     RoleCreate, RoleUpdate,
