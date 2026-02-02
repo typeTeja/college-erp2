@@ -8,7 +8,7 @@ from ..models.fee import (
     FeeStructure, StudentFee, StudentFeeInstallment,
     FeePayment, FeeConcession, FeeFine, PaymentStatus
 )
-from app.domains.student.models.student import Student
+from app.models import Student
 
 class FeeService:
     """Service for fee management operations"""
