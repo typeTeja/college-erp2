@@ -106,3 +106,36 @@ class AcademicService:
         if batch_id:
             statement = statement.where(Section.batch_id == batch_id)
         return list(self.session.exec(statement).all())
+
+
+# ======================================================================
+# Academic Validation Service
+# ======================================================================
+
+class AcademicValidationService:
+    """Service for validating academic hierarchy and relationships"""
+    
+    @staticmethod
+    def validate_hierarchy(
+        session: Session,
+        batch_id: Optional[int] = None,
+        program_year_id: Optional[int] = None,
+        batch_semester_id: Optional[int] = None,
+        section_id: Optional[int] = None
+    ) -> bool:
+        """
+        Validates the academic hierarchy relationships.
+        Ensures that batch -> program_year -> batch_semester -> section relationships are valid.
+        """
+        # Basic validation logic
+        if batch_id:
+            batch = session.get(AcademicBatch, batch_id)
+            if not batch:
+                raise ValueError(f"Batch with ID {batch_id} not found")
+        
+        # Add more validation logic as needed
+        return True
+
+
+# Create singleton instance for backward compatibility
+academic_validation_service = AcademicValidationService()

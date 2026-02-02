@@ -1,44 +1,38 @@
 """
-Admission Domain Services
+Admission Services
 
-Business logic for admission domain including:
-- Application processing
-- Merit list management
-- Entrance exam management
+Consolidated services for the admission domain.
+Handles Quick Apply, Progressive Application, Admission Settings, Entrance Exams, and Merit Calculations.
 """
+from typing import Optional, List, Tuple, Dict, Any
+from datetime import datetime, date
+import secrets
+import string
+from sqlmodel import Session, select, or_, col
+from passlib.context import CryptContext
 
+from .models import (
+    Application, ApplicationStatus, ApplicationPayment, 
+    ApplicationPaymentStatus, ApplicationDocument, 
+    DocumentType, DocumentStatus, ApplicationActivityLog, 
+    ActivityType, AdmissionSettings, FeeMode,
+    EntranceTestConfig, EntranceExamResult,
+    ScholarshipCalculation, TentativeAdmission, TentativeAdmissionStatus
+)
+from app.models import User, Role
+from app.config.settings import settings
+from app.services.pdf_service import pdf_service
+from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus, StudentStatus
+from app.domains.finance.models import ScholarshipSlab
+
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ======================================================================
 # Admission Service
 # ======================================================================
-
-"""
-Admission Service
-Handles Quick Apply, Progressive Application, and Admission Settings
-"""
-from typing import Optional, List, Tuple
-from datetime import datetime
-import secrets
-import string
-from sqlmodel import Session, select
-from passlib.context import CryptContext
-
-from ..models import (
-    Application, ApplicationStatus, ApplicationPayment, 
-    ApplicationPaymentStatus, ApplicationDocument, 
-    DocumentType, DocumentStatus, ApplicationActivityLog, 
-    ActivityType, AdmissionSettings, FeeMode
-)
-from app.models import User
-from app.models import Role
-from app.config.settings import settings
-from app.services.pdf_service import pdf_service
-from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus, StudentStatus
-
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AdmissionService:
     @staticmethod
@@ -211,7 +205,6 @@ class AdmissionService:
 
     @staticmethod
     def cleanup_test_applications(session: Session, performed_by: int) -> int:
-        from sqlmodel import or_, col
         statement = select(Application).where(
             Application.is_deleted == False,
             or_(col(Application.name).ilike('%test%'), col(Application.email).ilike('%test%'))
@@ -302,23 +295,47 @@ class AdmissionService:
 
 
 # ======================================================================
-# Merit Service
+# Entrance Exam Service
 # ======================================================================
 
-"""
-Merit and Scholarship Service
-Handles scholarship slab determination and merit-based fee calculations.
-"""
-from typing import List, Optional, Dict, Any
-from datetime import datetime
-from sqlmodel import Session, select
-from ..models import (
-    ScholarshipCalculation, 
-    TentativeAdmission, 
-    Application,
-    TentativeAdmissionStatus
-)
-from app.domains.finance.models import ScholarshipSlab
+class EntranceExamService:
+    @staticmethod
+    def create_test_config(session: Session, data: Dict[str, Any]) -> EntranceTestConfig:
+        config = EntranceTestConfig(**data)
+        session.add(config)
+        session.commit()
+        session.refresh(config)
+        return config
+
+    @staticmethod
+    def get_test_config(session: Session, config_id: int) -> Optional[EntranceTestConfig]:
+        return session.get(EntranceTestConfig, config_id)
+
+    @staticmethod
+    def list_test_configs(session: Session, active_only: bool = True) -> List[EntranceTestConfig]:
+        statement = select(EntranceTestConfig)
+        if active_only:
+            statement = statement.where(EntranceTestConfig.is_active == True)
+        return session.exec(statement).all()
+
+    @staticmethod
+    def process_results(session: Session, config_id: int, results: List[Dict[str, Any]], entered_by: int) -> int:
+        count = 0
+        for res in results:
+            # Logic to create or update EntranceExamResult
+            # Should also link back to Application
+            pass
+        return count
+
+    @staticmethod
+    def generate_hall_ticket(session: Session, admission_id: int) -> str:
+        # Link to pdf_service for hall ticket generation
+        return "hall_ticket_url"
+
+
+# ======================================================================
+# Merit Service
+# ======================================================================
 
 class MeritService:
     @staticmethod
@@ -368,52 +385,3 @@ class MeritService:
         """
         # Logic to create TentativeAdmission
         pass
-
-
-# ======================================================================
-# Entrance Service
-# ======================================================================
-
-"""
-Entrance Exam Service
-Handles entrance test configurations, hall tickets, and result processing.
-"""
-from typing import List, Optional, Dict, Any
-from datetime import datetime, date
-from sqlmodel import Session, select, func
-from ..models import EntranceTestConfig, EntranceExamResult, Application
-from app.services.pdf_service import pdf_service
-
-class EntranceExamService:
-    @staticmethod
-    def create_test_config(session: Session, data: Dict[str, Any]) -> EntranceTestConfig:
-        config = EntranceTestConfig(**data)
-        session.add(config)
-        session.commit()
-        session.refresh(config)
-        return config
-
-    @staticmethod
-    def get_test_config(session: Session, config_id: int) -> Optional[EntranceTestConfig]:
-        return session.get(EntranceTestConfig, config_id)
-
-    @staticmethod
-    def list_test_configs(session: Session, active_only: bool = True) -> List[EntranceTestConfig]:
-        statement = select(EntranceTestConfig)
-        if active_only:
-            statement = statement.where(EntranceTestConfig.is_active == True)
-        return session.exec(statement).all()
-
-    @staticmethod
-    def process_results(session: Session, config_id: int, results: List[Dict[str, Any]], entered_by: int) -> int:
-        count = 0
-        for res in results:
-            # Logic to create or update EntranceExamResult
-            # Should also link back to Application
-            pass
-        return count
-
-    @staticmethod
-    def generate_hall_ticket(session: Session, admission_id: int) -> str:
-        # Link to pdf_service for hall ticket generation
-        return "hall_ticket_url"

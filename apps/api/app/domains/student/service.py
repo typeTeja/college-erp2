@@ -2,7 +2,7 @@ from typing import Any, List, Optional
 from fastapi import HTTPException
 from sqlmodel import Session, select, func
 from .models.student import Student
-from app.domains.academic.service import academic_validation_service
+from app.domains.academic.services import academic_validation_service
 
 class StudentService:
     """Consolidated service for Student operations"""

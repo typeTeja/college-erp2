@@ -3,7 +3,7 @@ from datetime import datetime, date
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, JSON, Text
-from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus
+from app.shared.enums import ApplicationPaymentStatus
 
 
 if TYPE_CHECKING:
@@ -123,7 +123,7 @@ class Application(SQLModel, table=True):
     
     # Payment tracking
     application_fee: float = Field(default=500.0)
-    payment_status: str = Field(default="pending")  # pending, paid, failed
+    payment_status: ApplicationPaymentStatus = Field(default=ApplicationPaymentStatus.PENDING)
     payment_id: Optional[str] = None
     payment_date: Optional[datetime] = None
     

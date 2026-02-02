@@ -20,7 +20,7 @@ from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import DECIMAL, JSON
 
 if TYPE_CHECKING:
-    from app.domains.academic.models.entrance_exam import EntranceExamResult
+    from app.domains.admission.models import EntranceExamResult
     from app.domains.admission.models import AdmissionSettings
 
 class FeeHead(SQLModel, table=True):
@@ -309,6 +309,10 @@ class OnlinePayment(SQLModel, table=True):
     __tablename__ = "online_payment"
     
     id: Optional[int] = Field(default=None, primary_key=True)
+    
+    # Idempotency protection for webhooks
+    idempotency_key: str = Field(unique=True, index=True)  # Prevents duplicate webhook processing
+    
     student_id: int = Field(foreign_key="student.id", index=True)
     student_fee_id: int = Field(foreign_key="student_fee.id", index=True)
     payment_gateway_config_id: int = Field(foreign_key="payment_gateway_config.id")

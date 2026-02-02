@@ -175,6 +175,12 @@ class SubjectType(str, Enum):
     AUDIT = "AUDIT"
 
 
+class BatchStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    ARCHIVED = "ARCHIVED"
+
+
 # ----------------------------------------------------------------------
 # Student Domain
 # ----------------------------------------------------------------------
@@ -226,13 +232,8 @@ class ApplicationPaymentStatus(str, Enum):
     FAILED = "FAILED"
 
 
-class ApplicationStatus(str, Enum):
-    APPLIED = "APPLIED"
-    SELECTED = "SELECTED"
-    REJECTED = "REJECTED"
-    ATTENDED = "ATTENDED"
-    ABSENT = "ABSENT"
-    WITHDRAWN = "WITHDRAWN"
+# NOTE: ApplicationStatus is defined in app.domains.admission.models
+# Use that domain-specific enum instead of a shared one
 
 
 class ScholarshipCategory(str, Enum):
@@ -241,6 +242,7 @@ class ScholarshipCategory(str, Enum):
     ST = "ST"
     OBC = "OBC"
     EWS = "EWS"
+
 
 
 # ----------------------------------------------------------------------

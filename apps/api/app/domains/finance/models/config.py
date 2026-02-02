@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import DECIMAL, JSON
 
 if TYPE_CHECKING:
-    from app.domains.academic.models.entrance_exam import EntranceExamResult
+    from app.domains.admission.models import EntranceExamResult
     from app.domains.admission.models import AdmissionSettings
 
 class FeeHead(SQLModel, table=True):

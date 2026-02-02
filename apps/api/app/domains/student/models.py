@@ -26,10 +26,10 @@ if TYPE_CHECKING:
     from .enrollment import Enrollment
     from app.models.program import Program
     from .parent import Parent
-    from app.domains.academic.models.student_history import StudentSemesterHistory, StudentPromotionLog
+    from app.domains.academic.models import StudentSemesterHistory, StudentPromotionLog
 
 from app.schemas.json_fields import StudentDocuments
-from app.shared.enums import BloodGroup, CreatedFrom, Gender, ScholarshipCategory, StudentStatus
+from app.shared.enums import BloodGroup, CreatedFrom, Gender, ScholarshipCategory, StudentStatus, PaymentStatus
 
 
 class Student(SQLModel, table=True):
@@ -175,7 +175,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
     from .student import Student
-    from app.domains.academic.models.batch import BatchSubject
+    from app.domains.academic.models import BatchSubject
     from app.models.subject import Subject
 
 class Enrollment(SQLModel, table=True):
@@ -363,7 +363,7 @@ from typing import TYPE_CHECKING, List, Optional
 from datetime import date, datetime
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
-from app.shared.enums import ApplicationStatus, BillingStatus, GenderPreference, ODCStatus, PaymentMethod, PayoutStatus
+from app.shared.enums import BillingStatus, GenderPreference, ODCStatus, PayoutStatus
 
 
 if TYPE_CHECKING:
@@ -420,7 +420,7 @@ class StudentODCApplication(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     request_id: int = Field(foreign_key="odc_request.id")
     student_id: int = Field(foreign_key="student.id")
-    status: ApplicationStatus = Field(default=ApplicationStatus.APPLIED)
+    status: ODCStatus = Field(default=ODCStatus.OPEN)
     admin_remarks: Optional[str] = None
     
     # Feedback fields
@@ -461,7 +461,7 @@ class ODCBilling(SQLModel, table=True):
     paid_date: Optional[date] = None
     
     # Payment details
-    payment_method: Optional[PaymentMethod] = None
+    payment_method: Optional[str] = None  # e.g., "CASH", "UPI", "CARD"
     payment_reference: Optional[str] = None
     
     # Metadata
@@ -482,7 +482,7 @@ class ODCPayout(SQLModel, table=True):
     
     # Payout details
     amount: float
-    payment_method: PaymentMethod
+    payment_method: str  # e.g., "BANK_TRANSFER", "UPI", "CHEQUE"
     transaction_reference: Optional[str] = None
     
     # Dates

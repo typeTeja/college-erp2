@@ -7,7 +7,7 @@ College Management ERP codebase and supporting documents.
 
 Primary Goal:
 Ensure this ERP is **maintainable, scalable, secure, and evolution-ready**
-for the next **10 years**, with minimal technical debt.
+for the next **20 years**, with minimal technical debt.
 
 ------------------------------------------------
 SCOPE OF ANALYSIS

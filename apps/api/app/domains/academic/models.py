@@ -24,7 +24,7 @@ from decimal import Decimal
 from enum import Enum as PyEnum
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import DECIMAL
-from app.shared.enums import AcademicYearStatus, ExamType, SubjectType
+from app.shared.enums import AcademicYearStatus, ExamType, SubjectType, BatchStatus
 
 
 if TYPE_CHECKING:
@@ -56,7 +56,6 @@ class Section(SQLModel, table=True):
     
     # Linked to BatchSemester
     batch_semester_id: int = Field(foreign_key="batch_semesters.id", index=True)
-    # Legacy semester_id removed
     
     batch_id: Optional[int] = Field(default=None, foreign_key="academic_batches.id", index=True)
     
@@ -72,7 +71,6 @@ class Section(SQLModel, table=True):
     
     # Relationships
     batch_semester: Optional["BatchSemester"] = Relationship(back_populates="sections")
-    # practical_batches relationship removed as PracticalBatch is now a sibling
 
 class PracticalBatch(SQLModel, table=True):
     """Practical Batch within a semester - independent of sections"""
@@ -84,8 +82,6 @@ class PracticalBatch(SQLModel, table=True):
     
     # Linked to BatchSemester directly (Sibling to Section)
     batch_semester_id: int = Field(foreign_key="batch_semesters.id", index=True)
-    
-    # Removed: section_id: int = Field(foreign_key="section.id", index=True)
     
     max_strength: int = Field(default=20)
     current_strength: int = Field(default=0)
@@ -419,7 +415,7 @@ class AcademicBatch(SQLModel, table=True):
     total_students: int = Field(default=0, ge=0)
     
     # Status
-    status: str = Field(default="active", max_length=20)  # active, completed, archived
+    status: BatchStatus = Field(default=BatchStatus.ACTIVE)
     is_active: bool = Field(default=True)
     
     # Timestamps
@@ -532,17 +528,6 @@ class BatchSubject(SQLModel, table=True):
     
     # Relationships
     batch: "AcademicBatch" = Relationship(back_populates="subjects")
-
-
-# Update Section model to use batch_semester_id
-# This will be in a separate file, but documenting the change here
-"""
-CRITICAL FIX: Section must link to BatchSemester, not global Semester
-
-class Section(SQLModel, table=True):
-    batch_semester_id: int = Field(foreign_key="batch_semesters.id", index=True)
-    # NOT: semester_id: int = Field(foreign_key="semester.id")
-"""
 
 
 # ======================================================================
