@@ -29,22 +29,38 @@ if settings.ENVIRONMENT == "production":
         trusted_hosts=["*"]  # Or specify your load balancer IPs
     )
 
-# Set all CORS enabled origins
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+# Set up CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app.include_router(api_router, prefix=settings.API_V1_STR)
-app.include_router(roles_router, prefix=f"{settings.API_V1_STR}/roles", tags=["rbac"])
+# Include domain routers
+app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+app.include_router(system_router, prefix=f"{settings.API_V1_STR}/system", tags=["system"])
+app.include_router(hr_router, prefix=f"{settings.API_V1_STR}/hr", tags=["hr"])
+app.include_router(academic_router, prefix=f"{settings.API_V1_STR}/academic", tags=["academic"])
+app.include_router(student_router, prefix=f"{settings.API_V1_STR}/students", tags=["students"])
+app.include_router(admission_router, prefix=f"{settings.API_V1_STR}/admissions", tags=["admissions"])
+app.include_router(finance_router, prefix=f"{settings.API_V1_STR}/finance", tags=["finance"])
+app.include_router(communication_router, prefix=f"{settings.API_V1_STR}/communication", tags=["communication"])
+app.include_router(campus_router, prefix=f"{settings.API_V1_STR}/campus", tags=["campus"])
 
 @app.get("/")
-def root():
-    return {"message": "Welcome to College ERP API", "docs": "/docs"}
+async def root():
+    return {
+        "message": "College ERP API",
+        "version": "2.0",
+        "docs": "/docs",
+        "domains": [
+            "auth", "system", "hr", "academic",
+            "students", "admissions", "finance",
+            "communication", "campus"
+        ]
+    }
 
 @app.get("/health")
 def health_check():

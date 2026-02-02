@@ -156,6 +156,11 @@ from app.domains.auth.models import (
 from app.domains.system.models import (
     SystemSetting,
     InstituteInfo,
+    AuditLog,
+    PermissionAuditLog,
+    FileMetadata,
+    ImportLog,
+)
 
 # Export all models
 __all__ = [
