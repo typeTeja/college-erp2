@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 from app.api.deps import get_session, get_current_active_superuser
 from app.models import User
-from ..models.logistics import Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog
-from ..services.logistics import transport_logistics_service
+from ..models import Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog
+from ..services import transport_logistics_service
 
 router = APIRouter(prefix="/transport", tags=["Transport Logistics"])
 
@@ -144,3 +144,4 @@ def get_fleet_statistics(
 ):
     """Get overall transport statistics"""
     return transport_logistics_service.get_fleet_statistics(session)
+

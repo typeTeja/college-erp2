@@ -6,8 +6,8 @@ from decimal import Decimal
 
 from app.api.deps import get_session, get_current_active_superuser
 from app.models import User
-from ..models.asset import Asset, AssetAllocation, AssetAudit, UniformAllocation, AssetCategory, AllocationStatus, UniformSize
-from ..services.asset import inventory_service
+from ..models import Asset, AssetAllocation, AssetAudit, UniformAllocation, AssetCategory, AllocationStatus, UniformSize
+from ..services import inventory_service
 from app.shared.enums import AllocationStatus, AssetCategory, UniformSize
 
 
@@ -117,3 +117,4 @@ def issue_uniform(
 ):
     """Record uniform issuance to a student"""
     return inventory_service.issue_uniform(session, uniform_data.model_dump())
+

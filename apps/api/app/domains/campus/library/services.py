@@ -3,8 +3,7 @@ from datetime import datetime, date, timedelta
 from sqlmodel import Session, select
 from fastapi import HTTPException
 
-from ..models.resource import Book, LibraryMember, BookStatus, MemberType
-from ..models.circulation import BookIssue, IssueStatus, LibraryFine
+from .models import Book, LibraryMember, BookIssue, LibraryFine
 from app.shared.enums import BookStatus, IssueStatus, MemberType
 
 

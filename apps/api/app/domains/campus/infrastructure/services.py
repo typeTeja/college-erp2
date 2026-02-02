@@ -4,7 +4,7 @@ from sqlmodel import Session, select, func
 from fastapi import HTTPException
 
 from ..models.maintenance import AssetMaintenance
-from ..models.facility import MasterClassroom, Designation
+from .models import MasterClassroom, Designation
 
 class InfrastructureService:
     """Service for facility lifecycle and maintenance management (Facility Owner)"""
@@ -59,3 +59,4 @@ class InfrastructureService:
         return designation
 
 infrastructure_service = InfrastructureService()
+

@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from .hostel.routers.hostel import router as hostel_router
-from .library.routers.library import router as library_router
-from .inventory.routers.inventory import router as inventory_router
-from .transport.routers.transport import router as transport_router
+from .hostel.router import router as hostel_router
+from .library.router import router as library_router
+from .inventory.router import router as inventory_router
+from .transport.router import router as transport_router
 
 router = APIRouter()
 

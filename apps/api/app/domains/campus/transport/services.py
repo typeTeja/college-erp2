@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlmodel import Session, select, func
 from fastapi import HTTPException
 
-from ..models.logistics import Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog
+from .models import Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog
 from app.domains.student.models.student import Student
 
 class TransportLogisticsService:
@@ -88,3 +88,4 @@ class TransportLogisticsService:
         }
 
 transport_logistics_service = TransportLogisticsService()
+

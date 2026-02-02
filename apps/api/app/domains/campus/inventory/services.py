@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlmodel import Session, select, func
 from fastapi import HTTPException
 
-from ..models.asset import Asset, AssetAllocation, AssetAudit, UniformAllocation, AllocationStatus
+from .models import Asset, AssetAllocation, AssetAudit, UniformAllocation, AllocationStatus
 from app.shared.enums import AllocationStatus
 
 
@@ -127,3 +127,4 @@ class InventoryService:
         return uniform
 
 inventory_service = InventoryService()
+
