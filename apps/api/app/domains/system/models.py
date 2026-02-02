@@ -1,12 +1,13 @@
 """
 System Domain Models
 
-All database models for the system domain including:
-- User authentication and authorization (User, Role, Permission)
+Database models for the system domain including:
 - System configuration (SystemSetting, InstituteInfo)
 - Audit logging (AuditLog, PermissionAuditLog)
 - File management (FileMetadata)
 - Data imports (ImportLog)
+
+Note: User, Role, Permission models moved to domains/auth/
 """
 
 from typing import TYPE_CHECKING, List, Optional, Any
@@ -33,88 +34,6 @@ class FileModule(str, Enum):
     COMMUNICATION = "COMMUNICATION"
     INSTITUTE = "INSTITUTE"
     OTHER = "OTHER"
-
-
-# ----------------------------------------------------------------------
-# Link Tables (Many-to-Many)
-# ----------------------------------------------------------------------
-
-class UserRole(SQLModel, table=True):
-    """Link table for User-Role many-to-many relationship"""
-    __tablename__ = "user_role"
-    
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
-    role_id: int = Field(foreign_key="role.id", index=True)
-
-
-class RolePermission(SQLModel, table=True):
-    """Link table for Role-Permission many-to-many relationship"""
-    __tablename__ = "role_permission"
-    
-    role_id: int = Field(foreign_key="role.id", primary_key=True)
-    permission_id: int = Field(foreign_key="permission.id", primary_key=True)
-
-
-# ----------------------------------------------------------------------
-# Core Models
-# ----------------------------------------------------------------------
-
-class User(SQLModel, table=True):
-    """User authentication and profile model"""
-    __tablename__ = "user"
-    
-    id: Optional[int] = Field(default=None, primary_key=True)
-    username: str = Field(index=True, unique=True)
-    email: str = Field(index=True, unique=True)
-    phone: Optional[str] = Field(default=None, index=True)
-    full_name: Optional[str] = None
-    hashed_password: str
-    is_active: bool = Field(default=True)
-    is_superuser: bool = Field(default=False)
-    
-    # Password reset fields
-    password_reset_token: Optional[str] = None
-    password_reset_expires: Optional[datetime] = None
-    
-    # Preferences (JSON store for notifications, theme, etc.)
-    preferences: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
-    
-    # Timestamps
-    last_login: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
-    # Relationships
-    roles: List["Role"] = Relationship(back_populates="users", link_model=UserRole)
-
-
-class Role(SQLModel, table=True):
-    """Role-based access control model"""
-    __tablename__ = "role"
-    
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(index=True, unique=True)
-    description: Optional[str] = None
-    is_system: bool = Field(default=False)
-    is_active: bool = Field(default=True)
-    
-    # Relationships
-    users: List["User"] = Relationship(back_populates="roles", link_model=UserRole)
-    permissions: List["Permission"] = Relationship(back_populates="roles", link_model=RolePermission)
-
-
-class Permission(SQLModel, table=True):
-    """Granular permission model"""
-    __tablename__ = "permission"
-    
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(index=True, unique=True)  # e.g., "admissions:read"
-    description: Optional[str] = None
-    module: str = Field(index=True)  # e.g., "Admissions", "Fees" (for grouping)
-    
-    # Relationships
-    roles: List["Role"] = Relationship(back_populates="permissions", link_model=RolePermission)
 
 
 # ----------------------------------------------------------------------

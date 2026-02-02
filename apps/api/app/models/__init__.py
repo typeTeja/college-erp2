@@ -67,10 +67,23 @@ from app.domains.campus.models import (
 )
 # Communication Domain
 from app.domains.communication.models import Circular, Notification, NotificationLog
-# System Domain
+# Auth Domain Models (moved from system)
+from app.domains.auth.models import (
+    AuthUser as User,  # Alias for backward compatibility
+    Role,
+    Permission,
+    UserRole,
+    RolePermission,
+)
+
+# System Domain Models
 from app.domains.system.models import (
-    User, Role, UserRole, Permission, RolePermission, PermissionAuditLog,
-    SystemSetting, AuditLog, InstituteInfo, FileMetadata, ImportLog
+    SystemSetting,
+    InstituteInfo,
+    AuditLog,
+    PermissionAuditLog,
+    FileMetadata,
+    ImportLog,
 )
 
 __all__ = [
