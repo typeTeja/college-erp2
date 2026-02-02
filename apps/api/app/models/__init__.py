@@ -132,7 +132,6 @@ from app.domains.campus.library.models import (
 from app.domains.campus.inventory.models import (
     Asset,
     AssetAllocation,
-    AssetMaintenance,
     AssetAudit,
     UniformAllocation,
 )
@@ -147,6 +146,7 @@ from app.domains.campus.transport.models import (
 from app.domains.campus.infrastructure.models import (
     MasterClassroom,
     MaintenanceTicket,
+    AssetMaintenance,
 )
 
 # Import models from legacy models subdirectories
