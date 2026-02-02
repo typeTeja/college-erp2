@@ -17,7 +17,7 @@ from app.domains.academic.schemas import (
     RegulationCreate, RegulationRead,
     SectionCreate, SectionRead
 )
-from app.domains.system.models import User
+from app.models import User
 from app.domains.academic.exceptions import (
     AcademicYearNotFoundError, BatchNotFoundError,
     RegulationNotFoundError, SectionNotFoundError

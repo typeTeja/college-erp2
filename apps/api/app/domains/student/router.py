@@ -16,7 +16,7 @@ from app.domains.student.schemas import (
     ParentCreate, ParentRead,
     EnrollmentCreate, EnrollmentRead
 )
-from app.domains.system.models import User
+from app.models import User
 from app.domains.student.exceptions import (
     StudentNotFoundError, ParentNotFoundError, EnrollmentNotFoundError
 )

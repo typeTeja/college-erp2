@@ -14,7 +14,7 @@ from sqlmodel import SQLModel, Field, Relationship
 if TYPE_CHECKING:
     from app.models.department import Department
     from app.models.operations import Shift
-    from app.domains.system.models import User
+    from app.models import User
     from app.domains.academic.models import Subject
 
 
