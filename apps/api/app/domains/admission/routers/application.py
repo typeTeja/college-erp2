@@ -11,7 +11,8 @@ from ..models import (
 from ..schemas import (
     ApplicationCreate, ApplicationUpdate, ApplicationRead,
     DocumentRead, DocumentUpload,
-    QuickApplyCreate, QuickApplyResponse, ApplicationCompleteUpdate
+    QuickApplyCreate, QuickApplyResponse, ApplicationCompleteUpdate,
+    ActivityLogRead
 )
 from app.services.activity_logger import log_activity
 from ..service import AdmissionService

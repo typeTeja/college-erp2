@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from fastapi import UploadFile, HTTPException
 
 from app.domains.student.models import Student, Gender, BloodGroup, ScholarshipCategory, StudentStatus
-from app.domains.academic.models import Program
+from app.models.program import Program
 from app.domains.student.models import Parent
 from app.models.user import User
 from ..models.imports import ImportLog

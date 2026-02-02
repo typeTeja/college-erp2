@@ -8,7 +8,7 @@ import hmac
 
 from ..models.gateway import (
     PaymentGatewayConfig, OnlinePayment, PaymentReceipt,
-    PaymentStatus, OnlinePaymentMode
+    PaymentStatus, PaymentMode
 )
 from app.domains.student.models.student import Student
 from ..models.fee import StudentFee

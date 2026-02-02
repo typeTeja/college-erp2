@@ -5,7 +5,7 @@ from fastapi import HTTPException
 import secrets
 
 from ..models.student import Student
-from ..models.portal import StudentPortalAccess, StudentActivity, Notification, ActivityType, NotificationPriority
+from ..models.portal import StudentPortalAccess, StudentActivity, StudentNotification, ActivityType, NotificationPriority
 # from app.models.fee import StudentFee # TODO: Update when Finance domain is ready
 
 class StudentPortalService:
@@ -122,13 +122,13 @@ class StudentPortalService:
         link: Optional[str] = None,
         requires_action: bool = False,
         expires_in_days: Optional[int] = None
-    ) -> Notification:
+    ) -> StudentNotification:
         """Create a notification for student"""
         expires_at = None
         if expires_in_days:
             expires_at = datetime.utcnow() + timedelta(days=expires_in_days)
         
-        notification = Notification(
+        notification = StudentNotification(
             student_id=student_id,
             notification_type=notification_type,
             title=title,
@@ -144,9 +144,9 @@ class StudentPortalService:
         return notification
 
     @staticmethod
-    def mark_notification_read(session: Session, notification_id: int) -> Notification:
+    def mark_notification_read(session: Session, notification_id: int) -> StudentNotification:
         """Mark notification as read"""
-        notification = session.get(Notification, notification_id)
+        notification = session.get(StudentNotification, notification_id)
         if not notification:
             raise HTTPException(status_code=404, detail="Notification not found")
         notification.is_read = True
@@ -167,9 +167,9 @@ class StudentPortalService:
         fee_summary = fee_service.get_student_fee_summary(session, student_id)
         total_pending = fee_summary.get("balance", 0.0) if fee_summary else 0.0
         
-        stmt = select(Notification).where(
-            Notification.student_id == student_id,
-            Notification.is_read == False
+        stmt = select(StudentNotification).where(
+            StudentNotification.student_id == student_id,
+            StudentNotification.is_read == False
         )
         unread_notifications = len(session.exec(stmt).all())
         

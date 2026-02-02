@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import date, datetime
 from pydantic import BaseModel, Field
-from ..models.odc import ODCStatus, ODCApplicationStatus, BillingStatus, ODCPaymentMethod
+from ..models.odc import ODCStatus, ApplicationStatus as ODCApplicationStatus, BillingStatus, PaymentMethod as ODCPaymentMethod
 
 class ODCHotelBase(BaseModel):
     name: str

@@ -1,3 +1,4 @@
+from fastapi import APIRouter
 from app.api.v1 import (
     dashboard, admissions, import_api, fees, staff, operations, 
     programs, library, hostel, faculty, lesson, inventory, 

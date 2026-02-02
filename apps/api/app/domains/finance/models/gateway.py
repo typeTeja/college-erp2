@@ -89,7 +89,7 @@ class OnlinePayment(SQLModel, table=True):
     refund_transaction_id: Optional[str] = None
     transaction_fee: float = Field(default=0.0)
     net_amount: float = Field(default=0.0)
-    metadata: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    meta_data: Optional[dict] = Field(default=None, sa_column=Column(JSON))
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)

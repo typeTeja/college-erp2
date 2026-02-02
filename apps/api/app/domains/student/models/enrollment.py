@@ -5,6 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 if TYPE_CHECKING:
     from .student import Student
     from app.domains.academic.models.batch import BatchSubject
+    from app.models.subject import Subject
 
 class Enrollment(SQLModel, table=True):
     """Student-Subject enrollment model"""
@@ -18,4 +19,4 @@ class Enrollment(SQLModel, table=True):
     
     # Relationships
     student: "Student" = Relationship(back_populates="enrollments")
-    # subject: "Subject" = Relationship(back_populates="enrollments") # Subject moved to Academic
+    subject: "Subject" = Relationship(back_populates="enrollments")

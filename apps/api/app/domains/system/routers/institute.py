@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from app.api.deps import get_current_active_superuser, get_session
+from app.db.session import get_session
+from app.api import deps
 from ..models.system import InstituteInfo
 from ..schemas.institute import InstituteInfoCreate, InstituteInfoRead
 

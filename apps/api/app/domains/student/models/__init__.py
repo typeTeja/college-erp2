@@ -9,6 +9,7 @@ from .document import (
     DocumentCategory, StudentDocument, DocumentVerification, VerificationStatus
 )
 from .portal import (
-    StudentPortalAccess, StudentActivity, Notification,
+    StudentPortalAccess, StudentActivity, StudentNotification,
     ActivityType as PortalActivityType, NotificationPriority
 )
+from app.models.enums import Gender, BloodGroup, ScholarshipCategory, StudentStatus

@@ -8,6 +8,10 @@ from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
 from .subject import Subject
+from .lesson import LessonPlan, SyllabusTopic, QuestionBank, Question
+from .master_data import Board, PreviousQualification, StudyGroup, ReservationCategory, LeadSource
+from .placement.company import PlacementCompany
+from .settings.notifications import EmailTemplate, SMSTemplate
 # HR Domain
 from app.domains.hr.models import Staff, Faculty, Designation
 # Student Domain
@@ -63,7 +67,7 @@ from app.domains.campus.models import (
 # Communication Domain
 from app.domains.communication.models import Circular, Notification, NotificationLog
 # System Domain
-from app.domains.system.models import SystemSetting, AuditLog as SettingsAuditLog, InstituteInfo, FileMetadata, ImportLog
+from app.domains.system.models import SystemSetting, AuditLog, AuditLog as SettingsAuditLog, InstituteInfo, FileMetadata, ImportLog
 
 __all__ = [
     "User",

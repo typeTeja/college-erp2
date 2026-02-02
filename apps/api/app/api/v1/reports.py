@@ -4,7 +4,7 @@ from sqlmodel import Session, select, func
 from app.api import deps
 from app.models.student import Student
 from app.models.fee import FeePayment
-from app.models.attendance import AttendanceRecord
+from app.models import AttendanceRecord
 from app.models.inventory import Asset
 from app.models.lesson import SyllabusTopic
 from app.models.user import User

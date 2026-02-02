@@ -2,9 +2,9 @@ from typing import List, Optional
 from datetime import datetime
 from sqlmodel import Session, select, desc, func
 from ..models.odc import (
-    ODCHotel, ODCRequest, StudentODCApplication, 
-    ODCStatus, ODCApplicationStatus, ODCBilling, ODCPayout,
-    BillingStatus, ODCPaymentMethod
+    ODCHotel, ODCRequest, StudentODCApplication, ODCBilling, ODCPayout,
+    ODCStatus, ApplicationStatus as ODCApplicationStatus, BillingStatus,
+    PaymentMethod as ODCPaymentMethod
 )
 from ..models.student import Student
 

@@ -97,7 +97,7 @@ class StudentActivity(SQLModel, table=True):
     # Activity details
     activity_type: ActivityType
     activity_description: str
-    metadata: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    meta_data: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Request details
     ip_address: Optional[str] = None
@@ -116,9 +116,9 @@ class StudentActivity(SQLModel, table=True):
     student_portal: "StudentPortalAccess" = Relationship(back_populates="activities")
 
 
-class Notification(SQLModel, table=True):
+class StudentNotification(SQLModel, table=True):
     """Student notifications"""
-    __tablename__ = "notification"
+    __tablename__ = "student_notification"
     
     id: Optional[int] = Field(default=None, primary_key=True)
     
@@ -154,7 +154,7 @@ class Notification(SQLModel, table=True):
     is_expired: bool = Field(default=False)
     
     # Metadata
-    metadata: Optional[str] = Field(default=None, sa_column=Column(JSON))
+    meta_data: Optional[str] = Field(default=None, sa_column=Column(JSON))
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)

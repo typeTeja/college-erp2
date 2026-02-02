@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING, List, Optional
-from datetime import datetime
+from datetime import datetime, date
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, JSON, Text
 
 if TYPE_CHECKING:
     from app.models.program import Program
@@ -378,8 +379,6 @@ class EntranceTestConfig(SQLModel, table=True):
     test_code: str = Field(unique=True, index=True, max_length=50)
     academic_year: str = Field(index=True)
     
-    from sqlalchemy import Column, JSON, Text
-    from datetime import date
     program_ids: List[int] = Field(default=[], sa_column=Column(JSON))
     
     test_date: date
@@ -424,7 +423,6 @@ class EntranceExamResult(SQLModel, table=True):
     total_secured_marks: float
     entrance_percentage: float = Field(ge=0, le=100)
     
-    from sqlalchemy import Column, JSON, Text
     subject_marks: List["SubjectMarksEntry"] = Field(default=[], sa_column=Column(JSON))
     
     previous_percentage: float = Field(ge=0, le=100)

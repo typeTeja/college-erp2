@@ -8,7 +8,8 @@ from .settings.registration import (
     Board, PreviousQualification, StudyGroup, 
     ReservationCategory, LeadSource
 )
-from .campus.infrastructure import Designation, MasterClassroom
+from app.domains.hr.models import Designation
+from app.domains.campus.infrastructure.models import MasterClassroom
 from .placement.company import PlacementCompany
 from .settings.notifications import EmailTemplate, SMSTemplate
 from .enums import AcademicYearStatus, SubjectType, ExamType, RoomType

@@ -2,6 +2,18 @@ from typing import List, Optional, Any, Dict
 from pydantic import BaseModel
 from datetime import datetime
 from ..models.system import SettingGroup, AuditLogAction
+from enum import Enum
+
+class ImportRowStatus(str, Enum):
+    PENDING = "PENDING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+    SKIPPED = "SKIPPED"
+
+class ImportExecuteRequest(BaseModel):
+    dry_run: bool = False
+    stop_on_error: bool = False
+    batch_size: int = 100
 
 class SystemSettingBase(BaseModel):
     key: str

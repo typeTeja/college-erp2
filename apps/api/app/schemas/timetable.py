@@ -1,7 +1,7 @@
 from typing import Optional, List
 from datetime import time, date
 from pydantic import BaseModel
-from app.models.timetable import DayOfWeek, SlotType, AdjustmentStatus
+from app.domains.academic.models import DayOfWeek, SlotType, AdjustmentStatus
 
 # --- TimeSlot ---
 class TimeSlotBase(BaseModel):

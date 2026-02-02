@@ -6,8 +6,8 @@ from pydantic import BaseModel
 from app.api.deps import get_session, get_current_user
 from app.models.user import User
 from ..models.portal import (
-    StudentPortalAccess, StudentActivity, Notification,
-    PortalActivityType as ActivityType, NotificationPriority
+    StudentPortalAccess, StudentActivity, StudentNotification,
+    ActivityType, NotificationPriority
 )
 from ..services.portal import portal_service
 
@@ -109,10 +109,10 @@ def get_notifications(
     limit: int = 50
 ):
     """Get student notifications"""
-    stmt = select(Notification).where(Notification.student_id == student_id)
+    stmt = select(StudentNotification).where(StudentNotification.student_id == student_id)
     if is_read is not None:
-        stmt = stmt.where(Notification.is_read == is_read)
-    stmt = stmt.order_by(Notification.created_at.desc()).limit(limit)
+        stmt = stmt.where(StudentNotification.is_read == is_read)
+    stmt = stmt.order_by(StudentNotification.created_at.desc()).limit(limit)
     return session.exec(stmt).all()
 
 @router.post("/notifications/{notification_id}/read")

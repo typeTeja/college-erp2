@@ -3,11 +3,13 @@ from .regulation import Regulation, RegulationSemester, RegulationSubject, Regul
 from .setup import AcademicYear, Section, PracticalBatch, SubjectConfig
 from .internal_exam import (
     InternalExam, InternalExamSubject, StudentInternalMarks, 
-    InternalMarksConsolidated, ExamType as InternalExamType, ResultStatus as InternalResultStatus
+    InternalMarksConsolidated, ExamType as InternalExamType, ResultStatus as InternalResultStatus,
+    ResultStatus
 )
 from .university_exam import (
     UniversityExam, UniversityExamRegistration, UniversityExamResult,
-    SemesterResult, ExamResultStatus as UniversityExamResultStatus
+    SemesterResult, ExamResultStatus as UniversityExamResultStatus,
+    ExamResultStatus
 )
 from .hall_ticket import HallTicket, HallTicketConfig, DisciplineBlock, HallTicketStatus, BlockReason
 from .assignment import StudentSectionAssignment, StudentLabAssignment

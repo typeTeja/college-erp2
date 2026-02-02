@@ -1,5 +1,6 @@
 from .routers.settings import router as settings_router
 from .routers.institute import router as institute_router
+from fastapi import APIRouter
 from .routers.files import router as files_router
 from .routers.audit import router as audit_router
 from .routers.imports import router as imports_router
