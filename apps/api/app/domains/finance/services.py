@@ -19,10 +19,11 @@ from decimal import Decimal
 from sqlmodel import Session, select
 from fastapi import HTTPException
 
-from ..models.fee import (
+from .models import (
     FeeStructure, StudentFee, StudentFeeInstallment,
-    FeePayment, FeeConcession, FeeFine, PaymentStatus
+    FeePayment, FeeConcession, FeeFine
 )
+from app.shared.enums import PaymentStatus
 from app.domains.student.models.student import Student
 
 class FeeService:
@@ -109,12 +110,11 @@ import secrets
 import hashlib
 import hmac
 
-from ..models.gateway import (
-    PaymentGatewayConfig, OnlinePayment, PaymentReceipt,
-    PaymentStatus, PaymentMode
+from .models import (
+    PaymentGatewayConfig, OnlinePayment, PaymentReceipt, StudentFee
 )
 from app.domains.student.models.student import Student
-from ..models.fee import StudentFee
+from app.shared.enums import PaymentStatus, PaymentMode
 
 class PaymentGatewayService:
     """Service for payment gateway operations"""
