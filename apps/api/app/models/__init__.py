@@ -1,10 +1,11 @@
 # Central registry for Alembic autogenerate
 # Import all models here so Alembic can discover them
 
-from .user import User
-from .role import Role
-from .user_role import UserRole
-from .permission import Permission, RolePermission, PermissionAuditLog
+# System models now in domains/system/models.py
+# from .user import User
+# from .role import Role
+# from .user_role import UserRole
+# from .permission import Permission, RolePermission, PermissionAuditLog
 from .department import Department
 from .program import Program
 from .subject import Subject
@@ -67,7 +68,10 @@ from app.domains.campus.models import (
 # Communication Domain
 from app.domains.communication.models import Circular, Notification, NotificationLog
 # System Domain
-from app.domains.system.models import SystemSetting, AuditLog, AuditLog as SettingsAuditLog, InstituteInfo, FileMetadata, ImportLog
+from app.domains.system.models import (
+    User, Role, UserRole, Permission, RolePermission, PermissionAuditLog,
+    SystemSetting, AuditLog, InstituteInfo, FileMetadata, ImportLog
+)
 
 __all__ = [
     "User",
