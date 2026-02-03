@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from fastapi import HTTPException
 
 from .models import HostelBlock, HostelRoom, BedAllocation, HostelComplaint
-from app.domains.student.models.student import Student
+from app.domains.student.models import Student
 from app.shared.enums import ComplaintStatus, RoomType
 
 

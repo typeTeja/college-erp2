@@ -24,7 +24,7 @@ from .models import (
     FeePayment, FeeConcession, FeeFine
 )
 from app.shared.enums import PaymentStatus
-from app.domains.student.models.student import Student
+from app.domains.student.models import Student
 
 class FeeService:
     """Service for fee management operations"""
@@ -113,7 +113,7 @@ import hmac
 from .models import (
     PaymentGatewayConfig, OnlinePayment, PaymentReceipt, StudentFee
 )
-from app.domains.student.models.student import Student
+from app.domains.student.models import Student
 from app.shared.enums import PaymentStatus, PaymentMode
 
 class PaymentGatewayService:

@@ -14,7 +14,7 @@ from app.shared.enums import (
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.domains.student.models import Student
     from app.models.faculty import Faculty
 
 

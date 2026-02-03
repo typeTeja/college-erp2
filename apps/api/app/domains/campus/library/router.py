@@ -7,7 +7,7 @@ from datetime import date
 from app.api.deps import get_session, get_current_active_superuser, get_current_user
 from app.models import User
 from ..models import Book, LibraryMember, DigitalResource, BookIssue
-from ..services import library_circulation_service
+from .services import library_circulation_service
 from app.shared.enums import IssueStatus, MemberType, BookStatus
 
 

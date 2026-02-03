@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from app.api.deps import get_session, get_current_active_superuser
 from app.models import User
 from ..models import Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog
-from ..services import transport_logistics_service
+from .services import transport_logistics_service
 
 router = APIRouter(prefix="/transport", tags=["Transport Logistics"])
 

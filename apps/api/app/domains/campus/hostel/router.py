@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from app.api.deps import get_session, get_current_active_superuser, get_current_user
 from app.models import User
 from ..models import HostelBlock, HostelRoom, BedAllocation, GatePass, HostelComplaint
-from ..services import hostel_residency_service
+from .services import hostel_residency_service
 from app.shared.enums import ComplaintStatus, HostelType, RoomType, GatePassStatus
 
 

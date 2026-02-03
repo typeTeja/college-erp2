@@ -11,7 +11,7 @@ from app.shared.enums import BookStatus, MemberType, IssueStatus
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.domains.student.models import Student
 
 
 # ======================================================================

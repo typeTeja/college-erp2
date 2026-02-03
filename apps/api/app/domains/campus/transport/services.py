@@ -4,7 +4,7 @@ from sqlmodel import Session, select, func
 from fastapi import HTTPException
 
 from .models import Vehicle, TransportRoute, TransportAllocation, VehicleGPSLog
-from app.domains.student.models.student import Student
+from app.domains.student.models import Student
 
 class TransportLogisticsService:
     """Service for transport logistics operations (Logistics Owner)"""

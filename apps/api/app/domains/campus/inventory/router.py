@@ -7,7 +7,7 @@ from decimal import Decimal
 from app.api.deps import get_session, get_current_active_superuser
 from app.models import User
 from ..models import Asset, AssetAllocation, AssetAudit, UniformAllocation, AssetCategory, AllocationStatus, UniformSize
-from ..services import inventory_service
+from .services import inventory_service
 from app.shared.enums import AllocationStatus, AssetCategory, UniformSize
 
 
