@@ -12,6 +12,7 @@ from jose import JWTError
 from sqlmodel import Session, select
 
 from app.db.session import get_session
+from app.core.rbac import RBACService
 from .models import AuthUser, Permission
 from .security import decode_token
 from .exceptions import AuthenticationError, AuthorizationError
@@ -146,36 +147,18 @@ def require_role(*role_names: str):
 def require_permission(*permission_names: str):
     """
     Require user to have one of the specified permissions
-    
-    Usage:
-        @router.post("/exams/{exam_id}/marks")
-        def enter_marks(
-            exam_id: int,
-            current_user: AuthUser = Depends(require_permission("EXAM_MARK_ENTRY"))
-        ):
-            # Context validation happens HERE (in academic domain)
-            # Check if user is faculty for this subject, etc.
-            ...
-    
-    Args:
-        *permission_names: One or more permission names (user must have at least one)
-    
-    Returns:
-        FastAPI dependency function
+    Uses RBACService for caching.
     """
     def dependency(
         current_user: AuthUser = Depends(get_current_user),
         session: Session = Depends(get_session)
     ) -> AuthUser:
-        # Get all permissions for user's roles
-        user_permissions = set()
-        for role in current_user.roles:
-            for perm in role.permissions:
-                user_permissions.add(perm.name)
-        
         # Superusers have all permissions
         if current_user.is_superuser:
             return current_user
+
+        # Get permissions via Cached Service
+        user_permissions = RBACService.get_user_permissions(session, current_user.id)
         
         if not any(perm in user_permissions for perm in permission_names):
             raise HTTPException(
@@ -199,36 +182,18 @@ def require_any_permission(*permission_names: str):
 def require_all_permissions(*permission_names: str):
     """
     Require user to have ALL of the specified permissions
-    
-    Usage:
-        @router.post("/sensitive-operation")
-        def sensitive_op(
-            current_user: AuthUser = Depends(require_all_permissions(
-                "EXAM_MARK_ENTRY",
-                "EXAM_MARK_APPROVE"
-            ))
-        ):
-            ...
-    
-    Args:
-        *permission_names: Permission names (user must have ALL of them)
-    
-    Returns:
-        FastAPI dependency function
+    Uses RBACService for caching.
     """
     def dependency(
         current_user: AuthUser = Depends(get_current_user),
         session: Session = Depends(get_session)
     ) -> AuthUser:
-        # Get all permissions for user's roles
-        user_permissions = set()
-        for role in current_user.roles:
-            for perm in role.permissions:
-                user_permissions.add(perm.name)
-        
         # Superusers have all permissions
         if current_user.is_superuser:
             return current_user
+            
+        # Get permissions via Cached Service
+        user_permissions = RBACService.get_user_permissions(session, current_user.id)
         
         if not all(perm in user_permissions for perm in permission_names):
             missing = set(permission_names) - user_permissions

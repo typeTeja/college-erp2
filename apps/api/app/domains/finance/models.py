@@ -107,7 +107,7 @@ from app.shared.enums import FeeCategory, PaymentMode, PaymentStatus
 
 if TYPE_CHECKING:
     from app.domains.student.models.student import Student
-    from app.models.program import Program
+    from app.domains.academic.models import Program
 
 
 class FeeStructure(SQLModel, table=True):
@@ -251,7 +251,7 @@ class StudentFeeInstallment(SQLModel, table=True):
     payment_date: Optional[date] = None
     fine_amount: Decimal = Field(default=Decimal("0.00"), sa_column=Column(DECIMAL(10, 2)))
     fine_waived: bool = Field(default=False)
-    fine_waived_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    fine_waived_by: Optional[int] = Field(default=None, foreign_key="users.id")
     fine_waived_date: Optional[datetime] = None
     fine_waiver_reason: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)

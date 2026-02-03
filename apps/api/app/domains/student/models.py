@@ -24,7 +24,7 @@ from sqlalchemy import Text
 
 if TYPE_CHECKING:
     from .enrollment import Enrollment
-    from app.models.program import Program
+    from app.domains.academic.models import Program
     from .parent import Parent
     from app.domains.academic.models import StudentSemesterHistory, StudentPromotionLog
 
@@ -98,7 +98,7 @@ class Student(SQLModel, table=True):
     # Example: {"photo": "url", "10th_certificate": "url", "12th_certificate": "url"}
     
     # Portal Access
-    portal_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    portal_user_id: Optional[int] = Field(default=None, foreign_key="users.id")
     portal_password_hash: Optional[str] = None
     portal_last_login: Optional[datetime] = None
     
@@ -109,7 +109,7 @@ class Student(SQLModel, table=True):
     pending_amount: Optional[float] = None
     
     # Academic Links
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
     program_id: int = Field(foreign_key="program.id", index=True)
     
     # Strict Academic Structure (Foreign Keys)
@@ -130,7 +130,7 @@ class Student(SQLModel, table=True):
     
     # Deactivation Tracking
     deactivated_at: Optional[datetime] = None
-    deactivated_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    deactivated_by: Optional[int] = Field(default=None, foreign_key="users.id")
     deactivation_reason: Optional[str] = Field(default=None, sa_column=Column(Text))
     
     # Metadata
@@ -282,12 +282,12 @@ class StudentDocument(SQLModel, table=True):
     
     # Upload tracking
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
-    uploaded_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    uploaded_by: Optional[int] = Field(default=None, foreign_key="users.id")
     upload_ip: Optional[str] = None
     
     # Verification
     verification_status: VerificationStatus = Field(default=VerificationStatus.PENDING)
-    verified_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    verified_by: Optional[int] = Field(default=None, foreign_key="users.id")
     verified_at: Optional[datetime] = None
     rejection_reason: Optional[str] = Field(default=None, sa_column=Column(Text))
     
@@ -332,7 +332,7 @@ class DocumentVerification(SQLModel, table=True):
     student_document_id: int = Field(foreign_key="student_document.id", index=True)
     
     # Verification details
-    verified_by: int = Field(foreign_key="user.id")
+    verified_by: int = Field(foreign_key="users.id")
     verified_at: datetime = Field(default_factory=datetime.utcnow)
     verification_status: VerificationStatus
     
@@ -402,7 +402,7 @@ class ODCRequest(SQLModel, table=True):
     pay_amount: float
     transport_provided: bool = Field(default=False)
     status: ODCStatus = Field(default=ODCStatus.OPEN)
-    created_by_id: int = Field(foreign_key="user.id")
+    created_by_id: int = Field(foreign_key="users.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Relationships
@@ -466,7 +466,7 @@ class ODCBilling(SQLModel, table=True):
     
     # Metadata
     notes: Optional[str] = None
-    created_by_id: int = Field(foreign_key="user.id")
+    created_by_id: int = Field(foreign_key="users.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -490,7 +490,7 @@ class ODCPayout(SQLModel, table=True):
     processed_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Metadata
-    processed_by_id: int = Field(foreign_key="user.id")
+    processed_by_id: int = Field(foreign_key="users.id")
     notes: Optional[str] = None
     
     # Relationships
@@ -543,7 +543,7 @@ class StudentPortalAccess(SQLModel, table=True):
     
     # Links
     student_id: int = Field(foreign_key="student.id", unique=True, index=True)
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id")
     
     # Access status
     is_active: bool = Field(default=True)

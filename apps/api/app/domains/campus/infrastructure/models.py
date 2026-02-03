@@ -13,7 +13,7 @@ from app.shared.enums import RoomType
 
 
 if TYPE_CHECKING:
-    from app.models.department import Department
+    from app.domains.hr.models import Department
 
 
 # ======================================================================

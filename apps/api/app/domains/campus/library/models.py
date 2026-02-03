@@ -42,7 +42,7 @@ class LibraryMember(SQLModel, table=True):
     __tablename__ = "library_member"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id")
     student_id: Optional[int] = Field(default=None, foreign_key="student.id")
     member_type: MemberType = Field(default=MemberType.STUDENT)
     card_number: str = Field(unique=True, index=True)

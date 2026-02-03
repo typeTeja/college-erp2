@@ -13,14 +13,48 @@ from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
     from app.models.department import Department
-    from app.models.operations import Shift
-    from app.domains.system.models import User
+    from app.domains.auth.models import AuthUser as User
     from app.domains.academic.models import Subject
 
 
 # ----------------------------------------------------------------------
 # Core Models
 # ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# Core Models
+# ----------------------------------------------------------------------
+
+class Department(SQLModel, table=True):
+    """Department Management (e.g., Computer Science, Mechanical)"""
+    __tablename__ = "department"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+    code: str = Field(unique=True, index=True)
+    alias: Optional[str] = None
+    
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Shift(SQLModel, table=True):
+    """Work Shift (e.g., Morning, Evening, General)"""
+    __tablename__ = "shift"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+    
+    start_time: str # HH:MM format
+    end_time: str   # HH:MM format
+    
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    staff_members: List["Staff"] = Relationship(back_populates="shift")
+
 
 class Designation(SQLModel, table=True):
     """Designation Management - HR Foundational Structure"""
@@ -60,7 +94,7 @@ class Staff(StaffBase, table=True):
     __tablename__ = "staff"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id")
     
     # Relationships
     shift: Optional["Shift"] = Relationship(back_populates="staff_members")
@@ -71,7 +105,7 @@ class Faculty(SQLModel, table=True):
     __tablename__ = "faculty"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
     name: str
     department: Optional[str] = None
     designation: Optional[str] = None  # Will be linked to HR.Designation later

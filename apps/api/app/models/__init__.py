@@ -28,9 +28,11 @@ from app.domains.system.models import (
 
 # HR Domain Models
 from app.domains.hr.models import (
+    Department,
     Designation,
     Staff,
     Faculty,
+    Shift,
 )
 
 # Academic Domain Models - Import only what exists
@@ -48,11 +50,12 @@ from app.domains.academic.models import (
     BatchSemester,
     BatchSubject,
     StudentSectionAssignment,
-    StudentLabAssignment,
     StudentPracticalBatchAllocation,
     StudentSemesterHistory,
     StudentPromotionLog,
     StudentRegulationMigration,
+    Program,
+    Subject,
 )
 
 # Student Domain Models
@@ -145,18 +148,13 @@ from app.domains.campus.transport.models import (
 
 from app.domains.campus.infrastructure.models import (
     MasterClassroom,
-    MaintenanceTicket,
     AssetMaintenance,
 )
 
 # Import models from legacy models subdirectories
-try:
-    from app.models.program import Program
-    from app.models.subject import Subject
-except ImportError:
-    # These might not exist yet, create placeholders
-    Program = None
-    Subject = None
+# Import models from legacy models subdirectories
+# ALL LEGAL MODELS ARE NOW MIGRATED
+
 
 # Export all models
 __all__ = [
@@ -174,9 +172,11 @@ __all__ = [
     "FileMetadata",
     "ImportLog",
     # HR
+    "Department",
     "Designation",
     "Staff",
     "Faculty",
+    "Shift",
     # Academic
     "AcademicYear",
     "Section",
@@ -191,7 +191,6 @@ __all__ = [
     "BatchSemester",
     "BatchSubject",
     "StudentSectionAssignment",
-    "StudentLabAssignment",
     "StudentPracticalBatchAllocation",
     "StudentSemesterHistory",
     "StudentPromotionLog",
@@ -262,7 +261,7 @@ __all__ = [
     "TransportAllocation",
     "VehicleGPSLog",
     "MasterClassroom",
-    "MaintenanceTicket",
+    # "MaintenanceTicket",
     # Legacy models (if they exist)
     "Program",
     "Subject",

@@ -86,7 +86,7 @@ class GatePass(SQLModel, table=True):
     actual_in_time: Optional[datetime] = None
     reason: str
     status: GatePassStatus = Field(default=GatePassStatus.PENDING)
-    approved_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    approved_by: Optional[int] = Field(default=None, foreign_key="users.id")
     remarks: Optional[str] = None
 
 

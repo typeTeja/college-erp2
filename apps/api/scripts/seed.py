@@ -12,8 +12,8 @@ from app.core.security import get_password_hash
 from app.models.user import User
 from app.models.role import Role
 from app.models.user_role import UserRole
-from app.models.department import Department
-from app.models.program import Program
+from app.domains.hr.models import Department
+from app.domains.academic.models import Program
 from app.models.master_data import (
     AcademicYear, Section, Designation, ScholarshipSlab
 )

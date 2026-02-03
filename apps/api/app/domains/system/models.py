@@ -52,7 +52,7 @@ class SystemSetting(SQLModel, table=True):
     description: Optional[str] = None
     
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    updated_by: Optional[int] = Field(default=None, foreign_key="users.id")
 
 
 class InstituteInfo(SQLModel, table=True):
@@ -79,7 +79,7 @@ class AuditLog(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
     
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
     action: AuditLogAction = Field(index=True)
     module: str = Field(index=True)  # e.g., 'SETTINGS', 'ADMISSIONS', 'FEES'
     
@@ -98,7 +98,7 @@ class PermissionAuditLog(SQLModel, table=True):
     __tablename__ = "permission_audit_log"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    actor_id: int = Field(foreign_key="user.id", index=True)
+    actor_id: int = Field(foreign_key="users.id", index=True)
     role_id: int = Field(foreign_key="role.id", index=True)
     action: str  # "ADD_PERMISSION", "REMOVE_PERMISSION"
     permission_name: str
@@ -129,7 +129,7 @@ class FileMetadata(SQLModel, table=True):
     entity_type: Optional[str] = Field(default=None, max_length=50, index=True)
     entity_id: Optional[int] = Field(default=None, index=True)
     
-    uploaded_by: Optional[int] = Field(default=None, foreign_key="user.id")
+    uploaded_by: Optional[int] = Field(default=None, foreign_key="users.id")
     uploaded_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     deleted_at: Optional[datetime] = None
     
@@ -147,7 +147,7 @@ class ImportLog(SQLModel, table=True):
     
     id: Optional[int] = Field(default=None, primary_key=True)
     file_name: str
-    uploaded_by_id: int = Field(foreign_key="user.id")
+    uploaded_by_id: int = Field(foreign_key="users.id")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     total_rows: int = 0
     imported_count: int = 0

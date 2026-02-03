@@ -137,6 +137,14 @@ class ExamStatus(str, Enum):
     COMPLETED = "COMPLETED"
 
 
+class ExamResultStatus(str, Enum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+    ABSENT = "ABSENT"
+    DETAINED = "DETAINED"
+    WITHHELD = "WITHHELD"
+
+
 class DayOfWeek(str, Enum):
     MONDAY = "MONDAY"
     TUESDAY = "TUESDAY"
@@ -175,10 +183,35 @@ class SubjectType(str, Enum):
     AUDIT = "AUDIT"
 
 
+class EvaluationType(str, Enum):
+    THEORY_ONLY = "THEORY_ONLY"
+    PRACTICAL_ONLY = "PRACTICAL_ONLY"
+    THEORY_AND_PRACTICAL = "THEORY_AND_PRACTICAL"
+    PROJECT = "PROJECT"
+
+
+class PromotionRuleType(str, Enum):
+    CREDIT_PERCENTAGE = "CREDIT_PERCENTAGE"
+    CREDIT_COUNT = "CREDIT_COUNT"
+    BACKLOG_COUNT = "BACKLOG_COUNT"
+
+
+class RegulationStatus(str, Enum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    ARCHIVED = "ARCHIVED"
+
+
 class BatchStatus(str, Enum):
     ACTIVE = "ACTIVE"
     COMPLETED = "COMPLETED"
     ARCHIVED = "ARCHIVED"
+
+
+class SemesterStatus(str, Enum):
+    UPCOMING = "UPCOMING"
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
 
 
 # ----------------------------------------------------------------------
@@ -232,8 +265,81 @@ class ApplicationPaymentStatus(str, Enum):
     FAILED = "FAILED"
 
 
-# NOTE: ApplicationStatus is defined in app.domains.admission.models
-# Use that domain-specific enum instead of a shared one
+class ApplicationStatus(str, Enum):
+    """Application workflow statuses"""
+    # Legacy Statuses (DB Support)
+    APPLIED = "APPLIED"
+    
+    # Enhanced Workflow Statuses
+    QUICK_APPLY_SUBMITTED = "QUICK_APPLY_SUBMITTED"  # Stage 1 complete, account created
+    LOGGED_IN = "LOGGED_IN"  # Student logged in but form incomplete
+    FORM_IN_PROGRESS = "FORM_IN_PROGRESS"  # Student started full form
+    
+    # Payment Statuses
+    PENDING_PAYMENT = "PENDING_PAYMENT"
+    PAYMENT_FAILED = "PAYMENT_FAILED"
+    PAID = "PAID"
+    
+    # Application Processing Statuses
+    FORM_COMPLETED = "FORM_COMPLETED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    APPROVED = "APPROVED"
+    ADMITTED = "ADMITTED"
+    REJECTED = "REJECTED"
+    WITHDRAWN = "WITHDRAWN"
+
+
+class FeeMode(str, Enum):
+    """Payment mode for application fee"""
+    ONLINE = "ONLINE"
+    OFFLINE = "OFFLINE"
+
+
+class DocumentType(str, Enum):
+    """Types of documents that can be uploaded"""
+    PHOTO = "PHOTO"
+    AADHAAR = "AADHAAR"
+    TENTH_MARKSHEET = "TENTH_MARKSHEET"
+    TWELFTH_MARKSHEET = "TWELFTH_MARKSHEET"
+    MIGRATION_CERTIFICATE = "MIGRATION_CERTIFICATE"
+    TRANSFER_CERTIFICATE = "TRANSFER_CERTIFICATE"
+    CASTE_CERTIFICATE = "CASTE_CERTIFICATE"
+    INCOME_CERTIFICATE = "INCOME_CERTIFICATE"
+    OTHER = "OTHER"
+
+
+class DocumentStatus(str, Enum):
+    """Document verification status"""
+    UPLOADED = "UPLOADED"
+    VERIFIED = "VERIFIED"
+    REJECTED = "REJECTED"
+
+
+class ActivityType(str, Enum):
+    """Types of activities that can be logged"""
+    APPLICATION_CREATED = "APPLICATION_CREATED"
+    PAYMENT_INITIATED = "PAYMENT_INITIATED"
+    PAYMENT_SUCCESS = "PAYMENT_SUCCESS"
+    PAYMENT_FAILED = "PAYMENT_FAILED"
+    OFFLINE_PAYMENT_VERIFIED = "OFFLINE_PAYMENT_VERIFIED"
+    FORM_COMPLETED = "FORM_COMPLETED"
+    DOCUMENT_UPLOADED = "DOCUMENT_UPLOADED"
+    DOCUMENT_VERIFIED = "DOCUMENT_VERIFIED"
+    DOCUMENT_REJECTED = "DOCUMENT_REJECTED"
+    STATUS_CHANGED = "STATUS_CHANGED"
+    ADMISSION_CONFIRMED = "ADMISSION_CONFIRMED"
+    ADMISSION_REJECTED = "ADMISSION_REJECTED"
+    APPLICATION_DELETED = "APPLICATION_DELETED"
+    APPLICATION_RESTORED = "APPLICATION_RESTORED"
+    TEST_DATA_CLEANUP = "TEST_DATA_CLEANUP"
+
+
+class TentativeAdmissionStatus(str, Enum):
+    """Tentative admission status"""
+    PENDING_PAYMENT = "PENDING_PAYMENT"
+    PAYMENT_RECEIVED = "PAYMENT_RECEIVED"
+    EXPIRED = "EXPIRED"
+
 
 
 class ScholarshipCategory(str, Enum):

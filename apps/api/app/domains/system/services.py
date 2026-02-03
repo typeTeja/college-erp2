@@ -16,9 +16,15 @@ from datetime import datetime, timedelta
 import secrets
 
 from app.domains.system.models import (
-    User, Role, Permission, UserRole, RolePermission,
     SystemSetting, InstituteInfo, AuditLog, PermissionAuditLog,
     FileMetadata, ImportLog
+)
+from app.domains.auth.models import (
+    AuthUser as User,
+    Role,
+    Permission,
+    UserRole,
+    RolePermission
 )
 from app.domains.system.schemas import (
     UserCreate, UserUpdate,

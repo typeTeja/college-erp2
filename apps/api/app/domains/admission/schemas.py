@@ -1,10 +1,25 @@
+"""
+Admission Domain Schemas
+
+API contract schemas for admission workflow.
+
+**CONTRACT VERSION: v1.0.0**
+**STATUS: FROZEN (2026-02-03)**
+
+⚠️ BREAKING CHANGES POLICY:
+- Enum additions: Safe (backward compatible)
+- New optional fields: Safe
+- Required field changes: Requires migration + 6-month deprecation
+- Enum removals: 6-month deprecation period
+- Field type changes: Major version bump
+
+Any changes to this file require approval and version bump.
+"""
 from typing import List, Optional, Any, Dict
 from datetime import datetime, date
-from pydantic import BaseModel, EmailStr
-from .models import (
-from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus
-
-    ApplicationStatus, 
+from pydantic import BaseModel, EmailStr, field_validator, Field
+from app.shared.enums import (
+    ApplicationStatus,
     ApplicationPaymentStatus,
     FeeMode,
     DocumentType,
@@ -14,14 +29,14 @@ from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus
 )
 
 class ApplicationBase(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1, max_length=200)
     email: EmailStr
-    phone: str
-    gender: str
-    program_id: int
-    state: str
-    board: str
-    group_of_study: str
+    phone: str = Field(..., pattern=r'^\d{10}$', description="10-digit phone number")
+    gender: str = Field(..., pattern=r'^(MALE|FEMALE|OTHER)$')
+    program_id: int = Field(..., gt=0)
+    state: str = Field(..., min_length=1, max_length=100)
+    board: str = Field(..., min_length=1, max_length=100)
+    group_of_study: str = Field(..., min_length=1, max_length=50)
 
 class ApplicationCreate(ApplicationBase):
     """Schema for Quick Apply (Stage 1)"""
@@ -29,11 +44,11 @@ class ApplicationCreate(ApplicationBase):
 
 class ApplicationUpdate(BaseModel):
     """Schema for completing the Full Application (Stage 2)"""
-    aadhaar_number: Optional[str] = None
-    father_name: Optional[str] = None
-    father_phone: Optional[str] = None
-    address: Optional[str] = None
-    previous_marks_percentage: Optional[float] = None
+    aadhaar_number: Optional[str] = Field(None, pattern=r'^\d{12}$', description="12-digit Aadhaar number")
+    father_name: Optional[str] = Field(None, min_length=1, max_length=200)
+    father_phone: Optional[str] = Field(None, pattern=r'^\d{10}$', description="10-digit phone number")
+    address: Optional[str] = Field(None, min_length=1, max_length=500)
+    previous_marks_percentage: Optional[float] = Field(None, ge=0, le=100)
     applied_for_scholarship: Optional[bool] = None
     hostel_required: Optional[bool] = None
     status: Optional[ApplicationStatus] = None

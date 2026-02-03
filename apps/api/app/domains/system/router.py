@@ -23,7 +23,7 @@ from app.domains.system.schemas import (
     SystemSettingCreate, SystemSettingUpdate, SystemSettingRead,
     AuditLogRead
 )
-from app.domains.system.models import User
+from app.domains.auth.models import AuthUser as User
 from app.domains.system.exceptions import (
     UserNotFoundError, RoleNotFoundError, SettingNotFoundError,
     UserAlreadyExistsError

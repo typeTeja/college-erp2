@@ -19,12 +19,12 @@ from .models import (
     AcademicYear, Section, PracticalBatch, SubjectConfig,
     Regulation, RegulationSubject, RegulationSemester, RegulationPromotionRule,
     ProgramYear, AcademicBatch, BatchSemester, BatchSubject,
-    StudentSectionAssignment, StudentLabAssignment, StudentPracticalBatchAllocation,
+    StudentSectionAssignment, StudentPracticalBatchAllocation,
     StudentSemesterHistory, StudentPromotionLog, StudentRegulationMigration
 )
-from app.models.program import Program, ProgramType, ProgramStatus
-from app.models.department import Department
-from app.schemas.program import ProgramCreate
+from app.domains.academic.models import Program
+from app.domains.hr.models import Department
+from app.domains.academic.schemas import ProgramCreate, AcademicYearCreate
 from app.shared.enums import ProgramStatus, ProgramType
 from app.domains.academic.exceptions import (
     AcademicYearNotFoundError, BatchNotFoundError,
@@ -157,12 +157,12 @@ academic_validation_service = AcademicValidationService()
 class ProgramService:
     @staticmethod
     def create_program(session: Session, program_in: ProgramCreate) -> Program:
-        \"\"\"Create a new program\"\"\"
+        """Create a new program"""
         
         # Check for existing code
         existing = session.exec(select(Program).where(Program.code == program_in.code)).first()
         if existing:
-            raise HTTPException(status_code=400, detail=\"Program with this code already exists\")
+            raise HTTPException(status_code=400, detail="Program with this code already exists")
             
         # Create Program
         program_data = program_in.dict()
@@ -201,11 +201,11 @@ class ProgramService:
     def delete_program(session: Session, program_id: int) -> bool:
         program = session.get(Program, program_id)
         if not program:
-            raise HTTPException(status_code=404, detail=\"Program not found\")
+            raise HTTPException(status_code=404, detail="Program not found")
             
         # Check dependencies (Students)
         if len(program.students) > 0:
-             raise HTTPException(status_code=400, detail=\"Cannot delete program with enrolled students.\")
+             raise HTTPException(status_code=400, detail="Cannot delete program with enrolled students.")
              
         session.delete(program)
         session.commit()

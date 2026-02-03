@@ -26,7 +26,7 @@ from .schemas import (
     AdmissionSettingsRead, AdmissionSettingsUpdate,
     OfflinePaymentVerify, OfflineApplicationCreate
 )
-from app.services.activity_logger import log_activity
+from app.domains.admission.services import log_activity
 from .services import AdmissionService, EntranceExamService, MeritService, log_activity
 from app.services.storage_service import storage_service
 from app.middleware.rate_limit import limiter

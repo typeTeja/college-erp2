@@ -10,6 +10,7 @@ from sqlmodel import Session, select
 from datetime import datetime, timedelta
 import secrets
 
+from app.core.rbac import RBACService
 from .models import AuthUser, Role, Permission, UserRole, RolePermission
 from .security import verify_password, get_password_hash, create_access_token, create_refresh_token
 from .exceptions import (
@@ -210,6 +211,9 @@ class AuthService:
         user_role = UserRole(user_id=user_id, role_id=role_id)
         self.session.add(user_role)
         self.session.commit()
+        
+        # Invalidate Cache
+        RBACService.invalidate_user_cache(user_id)
     
     def remove_role(self, user_id: int, role_id: int) -> None:
         """
@@ -231,6 +235,9 @@ class AuthService:
         if user_role:
             self.session.delete(user_role)
             self.session.commit()
+            
+            # Invalidate Cache
+            RBACService.invalidate_user_cache(user_id)
     
     def assign_permission(self, role_id: int, permission_id: int) -> None:
         """
@@ -256,6 +263,9 @@ class AuthService:
         role_perm = RolePermission(role_id=role_id, permission_id=permission_id)
         self.session.add(role_perm)
         self.session.commit()
+        
+        # Invalidate Cache (for all users with this role)
+        RBACService.invalidate_role_cache(self.session, role_id)
     
     def remove_permission(self, role_id: int, permission_id: int) -> None:
         """
@@ -277,6 +287,9 @@ class AuthService:
         if role_perm:
             self.session.delete(role_perm)
             self.session.commit()
+            
+            # Invalidate Cache
+            RBACService.invalidate_role_cache(self.session, role_id)
     
     def get_user_roles(self, user_id: int) -> List[str]:
         """Get user role names"""
@@ -287,14 +300,8 @@ class AuthService:
         return [role.name for role in user.roles]
     
     def get_user_permissions(self, user_id: int) -> List[str]:
-        """Get all permissions for user (via roles)"""
-        user = self.get_user_by_id(user_id)
-        if not user:
+        """Get all permissions for user (via cached service)"""
+        if not self.get_user_by_id(user_id):
             return []
-        
-        permissions = set()
-        for role in user.roles:
-            for perm in role.permissions:
-                permissions.add(perm.name)
-        
-        return list(permissions)
+            
+        return list(RBACService.get_user_permissions(self.session, user_id))

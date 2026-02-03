@@ -20,3 +20,6 @@ npm run build
 ## Start Frontend Server
 
 npm run start
+
+
+pkill -9 -f "uvicorn app.main:app" || echo "Killed server"

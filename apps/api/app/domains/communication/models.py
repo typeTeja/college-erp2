@@ -26,7 +26,7 @@ class Circular(SQLModel, table=True):
     published_at: datetime = Field(default_factory=datetime.utcnow)
     expires_at: Optional[datetime] = None
     
-    author_id: int = Field(foreign_key="user.id")
+    author_id: int = Field(foreign_key="users.id")
     
     # Relationships
     author: "User" = Relationship()
@@ -37,7 +37,7 @@ class Notification(SQLModel, table=True):
     __tablename__ = "notification"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
+    user_id: int = Field(foreign_key="users.id", index=True)
     
     title: str
     message: str
@@ -57,7 +57,7 @@ class NotificationLog(SQLModel, table=True):
     __tablename__ = "notification_log"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
     recipient_identifier: str  # Phone number or email
     
     channel: NotificationChannel

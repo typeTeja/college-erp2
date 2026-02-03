@@ -35,7 +35,14 @@ class Settings(BaseSettings):
     def fix_database_url(cls, v: str) -> str:
         if v and v.startswith("postgres://"):
             return v.replace("postgres://", "postgresql://", 1)
+    @classmethod
+    def fix_database_url(cls, v: str) -> str:
+        if v and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
         return v
+    
+    # Redis
+    REDIS_URL: str = "redis://localhost:6379/0"
     
     # Security
     SECRET_KEY: str = ""

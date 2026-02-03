@@ -11,6 +11,31 @@ from datetime import datetime, date
 
 
 # ----------------------------------------------------------------------
+# Program Schemas
+# ----------------------------------------------------------------------
+
+class ProgramBase(BaseModel):
+    code: str
+    name: str
+    short_name: Optional[str] = None
+    program_type: str  # UG, PG, DIPLOMA, CERTIFICATE
+    department_id: int
+    duration_years: int
+    total_semesters: int
+    status: str = "ACTIVE"  # ACTIVE, INACTIVE, ARCHIVED
+
+class ProgramCreate(ProgramBase):
+    pass
+
+class ProgramRead(ProgramBase):
+    id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# ----------------------------------------------------------------------
 # Academic Year Schemas
 # ----------------------------------------------------------------------
 
