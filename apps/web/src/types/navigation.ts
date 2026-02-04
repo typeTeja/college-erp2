@@ -11,6 +11,7 @@ export interface NavItem {
     icon: LucideIcon;
     badge?: string;
     shortcut?: string;
+    aliases?: string[];
     requiredPermissions?: string[];
 }
 

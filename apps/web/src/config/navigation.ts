@@ -61,6 +61,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                         label: 'Programs & Batches',
                         path: '/settings?tab=programs', // Temporary mapping until full split
                         icon: School,
+                        aliases: ['academic settings', 'departments', 'courses', 'programs setup'],
                         requiredPermissions: ['academics:read']
                     },
                     {
@@ -171,6 +172,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                         label: 'Fee Structure',
                         path: '/settings?tab=fee-heads', // Temporary
                         icon: Settings,
+                        aliases: ['finance settings', 'fee heads', 'scholarships', 'finance config'],
                         requiredPermissions: ['fees:write']
                     },
                     {
@@ -244,6 +246,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                         label: 'General Configuration',
                         path: '/settings',
                         icon: Settings,
+                        aliases: ['institutional setup', 'basic info', 'contact details', 'branding', 'settings'],
                         requiredPermissions: ['settings:write']
                     },
                     {
@@ -251,6 +254,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                         label: 'Access Control',
                         path: '/settings?tab=roles',
                         icon: Key,
+                        aliases: ['role management', 'user permissions', 'system admin', 'roles'],
                         requiredPermissions: ['rbac:manage']
                     },
                     {
@@ -258,6 +262,7 @@ export const NAVIGATION_CONFIG: Record<string, NavigationConfig> = {
                         label: 'Audit Logs',
                         path: '/settings?tab=audit',
                         icon: FileCheck,
+                        aliases: ['system logs', 'activity logs', 'security logs'],
                         requiredPermissions: ['rbac:manage']
                     }
                 ]

@@ -13,6 +13,8 @@ export function useStudentDashboard() {
     queryKey: ['dashboard', 'student'],
     queryFn: () => dashboardApi.getStudentDashboard(),
     staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes cache
+    refetchOnWindowFocus: false,
     retry: 2, // Retry failed requests twice
   });
 }

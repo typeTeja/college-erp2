@@ -39,10 +39,36 @@ export function CommandPalette() {
         return recentlyVisited.filter(id => validIds.has(id)).slice(0, 5);
     }, [recentlyVisited, filteredConfig]);
 
+    const [search, setSearch] = useState('');
+
+    const filteredGroups = useMemo(() => {
+        if (!search) return filteredConfig.groups;
+
+        const lowerSearch = search.toLowerCase();
+
+        return filteredConfig.groups.map(group => {
+            const filteredItems = group.items.filter(item => {
+                // Match label
+                if (item.label.toLowerCase().includes(lowerSearch)) return true;
+                
+                // Match aliases
+                if (item.aliases?.some(alias => alias.toLowerCase().includes(lowerSearch))) return true;
+                
+                return false;
+            });
+
+            return {
+                ...group,
+                items: filteredItems
+            };
+        }).filter(group => group.items.length > 0);
+    }, [filteredConfig.groups, search]);
+
     const handleSelect = (path: string, itemId: string) => {
         router.push(path);
         addToRecent(itemId);
         setOpen(false);
+        setSearch('');
     };
 
     return (
@@ -54,8 +80,10 @@ export function CommandPalette() {
             <div className="flex items-center border-b px-4">
                 <Search className="h-5 w-5 text-gray-400 mr-2" />
                 <Command.Input
-                    placeholder="Search menu..."
+                    placeholder="Search menu or type 'settings'..."
                     className="flex-1 py-3 outline-none text-sm"
+                    value={search}
+                    onValueChange={setSearch}
                 />
             </div>
 
@@ -64,8 +92,8 @@ export function CommandPalette() {
                     No results found.
                 </Command.Empty>
 
-                {/* Recently Visited */}
-                {validRecentItems.length > 0 && (
+                {/* Recently Visited (only show when not searching) */}
+                {!search && validRecentItems.length > 0 && (
                     <Command.Group heading="Recently Visited" className="mb-2">
                         {validRecentItems.map((itemId) => {
                             const item = findItemById(filteredConfig.groups, itemId);
@@ -87,8 +115,8 @@ export function CommandPalette() {
                     </Command.Group>
                 )}
 
-                {/* All Groups */}
-                {filteredConfig.groups.map((group) => (
+                {/* Filtered Groups */}
+                {filteredGroups.map((group) => (
                     <Command.Group
                         key={group.id}
                         heading={group.label}

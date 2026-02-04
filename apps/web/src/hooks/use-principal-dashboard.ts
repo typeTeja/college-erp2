@@ -12,8 +12,10 @@ export function usePrincipalDashboard() {
   return useQuery({
     queryKey: ['dashboard', 'principal'],
     queryFn: () => dashboardApi.getPrincipalDashboard(),
-    staleTime: 1000 * 60, // 1 minute
-    refetchInterval: 1000 * 60, // Auto-refresh every minute
-    retry: 2, // Retry failed requests twice
+    staleTime: 1000 * 60 * 5, // 5 minutes (increased from 1 minute)
+    gcTime: 1000 * 60 * 10, // 10 minutes cache
+    refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 }
