@@ -106,7 +106,7 @@ from app.shared.enums import FeeCategory, PaymentMode, PaymentStatus
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.domains.student.models import Student
     from app.domains.academic.models import Program
 
 
@@ -272,7 +272,7 @@ from app.shared.enums import PaymentMode, PaymentStatus
 
 
 if TYPE_CHECKING:
-    from app.domains.student.models.student import Student
+    from app.domains.student.models import Student
     from .fee import StudentFee
 
 
