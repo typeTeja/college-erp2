@@ -183,6 +183,20 @@ const nextConfig = {
                 destination: '/config/admission/sources',
                 permanent: false,
             },
+            
+            // System Administration redirects (Week 4)
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'integrations' }],
+                destination: '/system/integrations',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'logs' }],
+                destination: '/system/audit',
+                permanent: false,
+            },
         ];
     },
 };
