@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, Pencil, Loader2 } from 'lucide-react';
+import { formatError } from '@/utils/error-handler';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -75,7 +76,7 @@ export function InlineEditableField({
             await onSave(type === 'number' ? Number(editValue) : editValue);
             setIsEditing(false);
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Failed to save');
+            setError(formatError(err));
             // Revert to original value
             setEditValue(value);
         } finally {

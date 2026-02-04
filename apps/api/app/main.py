@@ -12,6 +12,7 @@ from app.domains.admission.router import router as admission_router
 from app.domains.finance.router import router as finance_router
 from app.domains.communication.router import router as communication_router
 from app.domains.campus.router import router as campus_router
+from app.domains.dashboard.router import router as dashboard_router
 from app.core.rbac import seed_permissions
 from app.db.session import engine, init_db
 from sqlmodel import Session
@@ -56,6 +57,10 @@ app.include_router(admission_router, prefix=f"{settings.API_V1_STR}/admissions",
 app.include_router(finance_router, prefix=f"{settings.API_V1_STR}/finance", tags=["finance"])
 app.include_router(communication_router, prefix=f"{settings.API_V1_STR}/communication", tags=["communication"])
 app.include_router(campus_router, prefix=f"{settings.API_V1_STR}/campus", tags=["campus"])
+app.include_router(dashboard_router, prefix=f"{settings.API_V1_STR}/dashboard", tags=["dashboard"])
+@app.get(f"{settings.API_V1_STR}/health")
+def api_v1_health_check():
+    return health_check()
 
 @app.get("/")
 async def root():

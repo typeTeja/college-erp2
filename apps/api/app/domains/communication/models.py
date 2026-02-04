@@ -6,7 +6,7 @@ from app.shared.enums import CircularTarget, NotificationChannel, NotificationTy
 
 
 if TYPE_CHECKING:
-    from app.models import User
+    from app.domains.auth.models import AuthUser
 
 
 class Circular(SQLModel, table=True):
@@ -29,7 +29,7 @@ class Circular(SQLModel, table=True):
     author_id: int = Field(foreign_key="users.id")
     
     # Relationships
-    author: "User" = Relationship()
+    author: "AuthUser" = Relationship()
 
 
 class Notification(SQLModel, table=True):
@@ -49,7 +49,7 @@ class Notification(SQLModel, table=True):
     read_at: Optional[datetime] = None
     
     # Relationships
-    user: "User" = Relationship()
+    user: "AuthUser" = Relationship()
 
 
 class NotificationLog(SQLModel, table=True):

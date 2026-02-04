@@ -153,6 +153,44 @@ export interface StudentDashboardData {
 }
 
 // ============================================================================
+// Faculty Dashboard Types
+// ============================================================================
+
+export interface FacultyDashboardData {
+  kpis: {
+    classesToday: number;
+    pendingAttendance: number;
+    assignmentsToGrade: number;
+    nextLecture: string;
+    nextLectureDetail: string;
+  };
+  todaysClasses: {
+    id: number;
+    time: string;
+    subject: string;
+    room: string;
+    batch: string;
+    status: 'completed' | 'upcoming' | 'cancelled';
+  }[];
+  attendancePending: {
+    id: number;
+    date: string;
+    subject: string;
+    batch: string;
+    period: number;
+    status: 'pending';
+  }[];
+  assignmentsToGrade: {
+    id: number;
+    title: string;
+    subject: string;
+    submitted: number;
+    total: number;
+    dueDate: string;
+  }[];
+}
+
+// ============================================================================
 // Staff Dashboard Types
 // ============================================================================
 

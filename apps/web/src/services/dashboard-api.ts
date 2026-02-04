@@ -70,6 +70,17 @@ export const dashboardApi = {
   },
 
   /**
+   * Get Faculty Dashboard data
+   * 
+   * Requires: FACULTY role
+   * Returns: Teaching schedule and academic tasks
+   */
+  getFacultyDashboard: async (): Promise<FacultyDashboardData> => {
+    const response = await api.get(`${BASE_URL}/faculty`);
+    return response.data;
+  },
+
+  /**
    * Refresh dashboard data
    * 
    * Forces a refresh of cached dashboard data

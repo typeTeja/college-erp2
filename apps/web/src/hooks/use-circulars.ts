@@ -6,7 +6,7 @@ import { api } from '@/utils/api';
 
 const circularsApi = {
     list: async () => {
-        const response = await api.get('/circulars');
+        const response = await api.get('/communication/circulars');
         return response.data;
     },
 };

@@ -6,23 +6,23 @@ import { api } from '@/utils/api';
 
 const staffApi = {
     list: async () => {
-        const response = await api.get('/staff');
+        const response = await api.get('/hr/staff');
         return response.data;
     },
     getShifts: async () => {
-        const response = await api.get('/staff/shifts');
+        const response = await api.get('/hr/shifts');
         return response.data;
     },
     create: async (data: any) => {
-        const response = await api.post('/staff', data);
+        const response = await api.post('/hr/staff', data);
         return response.data;
     },
     update: async (id: number, data: any) => {
-        const response = await api.put(`/staff/${id}`, data);
+        const response = await api.put(`/hr/staff/${id}`, data);
         return response.data;
     },
     delete: async (id: number) => {
-        const response = await api.delete(`/staff/${id}`);
+        const response = await api.delete(`/hr/staff/${id}`);
         return response.data;
     }
 };

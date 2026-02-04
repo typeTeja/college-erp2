@@ -11,6 +11,7 @@ import { examService } from '@/utils/exam-service';
 import { getAcademicBatches, getBatchSemesters } from '@/utils/master-data-service';
 import { CreateExamDTO, ExamType } from '@/types/exam';
 import { toast } from "sonner";
+import { formatError } from '@/utils/error-handler';
 
 export function AdminExamPanel() {
     const queryClient = useQueryClient();
@@ -57,7 +58,7 @@ export function AdminExamPanel() {
             });
         },
         onError: (err: any) => {
-            toast.error(err.response?.data?.detail || "Failed to create exam");
+            toast.error(formatError(err));
         }
     });
 

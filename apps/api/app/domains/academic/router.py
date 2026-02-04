@@ -15,8 +15,10 @@ from app.domains.academic.schemas import (
     AcademicYearCreate, AcademicYearRead,
     BatchCreate, BatchRead,
     RegulationCreate, RegulationRead,
-    SectionCreate, SectionRead
+    SectionCreate, SectionRead,
+    ProgramRead
 )
+from app.domains.hr.schemas import DepartmentRead
 from app.domains.auth.models import AuthUser as User
 from app.domains.academic.exceptions import (
     AcademicYearNotFoundError, BatchNotFoundError,
@@ -24,7 +26,34 @@ from app.domains.academic.exceptions import (
 )
 
 
+from app.domains.hr.services import HRService
+from app.domains.academic.services import ProgramService
+
+
 router = APIRouter()
+
+
+# ----------------------------------------------------------------------
+# Program & Department Master Data
+# ----------------------------------------------------------------------
+
+@router.get("/programs", response_model=List[ProgramRead])
+def list_programs(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """List all academic programs"""
+    return ProgramService.get_programs(session)
+
+
+@router.get("/departments", response_model=List[DepartmentRead])
+def list_departments(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """List all functional departments (HR/Academic)"""
+    hr_service = HRService(session)
+    return hr_service.list_departments()
 
 
 # ----------------------------------------------------------------------
@@ -83,6 +112,48 @@ def get_batch(
         return batch
     except BatchNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/batches/{batch_id}/semesters", response_model=List[dict])
+def get_batch_semesters(
+    batch_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get semesters for a batch"""
+    from app.domains.academic.models.batch import AcademicBatch
+    batch = session.get(AcademicBatch, batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    return batch.semesters
+
+
+@router.get("/batches/{batch_id}/program-years", response_model=List[dict])
+def get_program_years(
+    batch_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get academic years (program years) for a batch"""
+    from app.domains.academic.models.batch import ProgramYear
+    return session.exec(select(ProgramYear)).all()
+
+
+@router.get("/batches/{batch_id}/subjects", response_model=List[dict])
+def get_batch_subjects(
+    batch_id: int,
+    semester_no: Optional[int] = None,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get subjects for a batch, optionally filtered by semester"""
+    from app.domains.academic.models.batch import AcademicBatch, BatchSemester, BatchSubject
+    
+    statement = select(BatchSubject).join(BatchSemester).where(BatchSemester.batch_id == batch_id)
+    if semester_no:
+        statement = statement.where(BatchSemester.semester_number == semester_no)
+    
+    return session.exec(statement).all()
 
 
 # ----------------------------------------------------------------------

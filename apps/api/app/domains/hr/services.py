@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 from datetime import date
 from sqlmodel import Session, select, func
 
-from app.domains.hr.models import Designation, Staff, Faculty
+from app.domains.hr.models import Designation, Staff, Faculty, Department, Shift
 from app.domains.hr.schemas import (
     DesignationCreate, DesignationUpdate,
     StaffCreate, StaffUpdate,
@@ -30,6 +30,25 @@ class HRService:
     def __init__(self, session: Session):
         self.session = session
     
+    # ----------------------------------------------------------------------
+    # Department Management
+    # ----------------------------------------------------------------------
+    
+    def list_departments(self) -> List[Department]:
+        """List all departments"""
+        from app.domains.hr.models import Department
+        statement = select(Department).where(Department.is_active == True)
+        return list(self.session.exec(statement).all())
+    
+    # ----------------------------------------------------------------------
+    # Shift Management
+    # ----------------------------------------------------------------------
+    
+    def list_shifts(self) -> List[Shift]:
+        """List all shifts"""
+        from app.domains.hr.models import Shift
+        return list(self.session.exec(select(Shift).where(Shift.is_active == True)).all())
+
     # ----------------------------------------------------------------------
     # Designation Management
     # ----------------------------------------------------------------------

@@ -88,6 +88,18 @@ async def quick_apply(
     session.refresh(application)
     return application
 
+@router.get("/recent", response_model=List[ApplicationRead])
+async def get_recent_admissions(
+    limit: int = 5,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Compatibility endpoint for legacy /admissions/recent.
+    """
+    statement = select(Application).where(Application.is_deleted == False).order_by(Application.created_at.desc()).limit(limit)
+    return session.exec(statement).all()
+
 @router.get("/my-application", response_model=ApplicationRead)
 async def get_my_application(
     session: Session = Depends(get_session),

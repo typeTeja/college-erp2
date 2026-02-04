@@ -11,7 +11,7 @@ from .services import inventory_service
 from app.shared.enums import AllocationStatus, AssetCategory, UniformSize
 
 
-router = APIRouter(prefix="/inventory", tags=["Inventory & Assets"])
+router = APIRouter(tags=["Inventory & Assets"])
 
 # Schemas
 class AssetCreate(BaseModel):

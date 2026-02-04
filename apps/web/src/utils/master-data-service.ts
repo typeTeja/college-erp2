@@ -21,22 +21,22 @@ export interface AcademicYear {
 
 export const getAcademicYears = async (isCurrent?: boolean): Promise<AcademicYear[]> => {
     const params = isCurrent !== undefined ? { is_current: isCurrent } : {};
-    const response = await api.get('/master/academic-years', { params });
+    const response = await api.get('/academic/academic-years', { params });
     return response.data;
 };
 
 export const createAcademicYear = async (data: Partial<AcademicYear>): Promise<AcademicYear> => {
-    const response = await api.post('/master/academic-years', data);
+    const response = await api.post('/academic/academic-years', data);
     return response.data;
 };
 
 export const updateAcademicYear = async (id: number, data: Partial<AcademicYear>): Promise<AcademicYear> => {
-    const response = await api.patch(`/master/academic-years/${id}`, data);
+    const response = await api.patch(`/academic/academic-years/${id}`, data);
     return response.data;
 };
 
 export const deleteAcademicYear = async (id: number): Promise<void> => {
-    await api.delete(`/master/academic-years/${id}`);
+    await api.delete(`/academic/academic-years/${id}`);
 };
 
 // ============================================================================
@@ -52,7 +52,7 @@ export interface ProgramInfo {
 }
 
 export const getProgramsList = async (): Promise<ProgramInfo[]> => {
-    const response = await api.get('/master/programs-list');
+    const response = await api.get('/academic/programs');
     return response.data;
 };
 
@@ -87,24 +87,19 @@ export interface DepartmentInfo {
 
 export const getPrograms = async (isActive?: boolean): Promise<ProgramFull[]> => {
     const params = isActive !== undefined ? { is_active: isActive } : {};
-    // Updated endpoint: /programs (served by programs.py)
-    const response = await api.get('/programs/', { params });
+    // Updated endpoint: /academic/programs
+    const response = await api.get('/academic/programs', { params });
     return response.data;
 };
 
 export const getDepartmentsList = async (): Promise<DepartmentInfo[]> => {
-    // The list endpoint for selection is here
-    const response = await api.get('/master/departments-list');
+    const response = await api.get('/academic/departments');
     return response.data;
 };
 
 // CRUD for Department Management
 export const getDepartments = async (): Promise<DepartmentInfo[]> => {
-    // Reusing the list endpoint for now, or use the newly created generic one if I made one?
-    // I created CRUD, so I can use GET /departments if I added it... 
-    // Wait, I didn't add GET /departments (list all), I just added POST/PATCH/DELETE and kept the existing /departments-list
-    // But /departments-list returns basic info correctly.
-    const response = await api.get('/master/departments-list');
+    const response = await api.get('/academic/departments');
     return response.data;
 };
 
@@ -172,26 +167,26 @@ export const getAcademicBatches = async (programId?: number, isActive?: boolean)
     const params: Record<string, any> = {};
     if (programId) params.program_id = programId;
     if (isActive !== undefined) params.is_active = isActive;
-    // Updated endpoint: /batches
-    const response = await api.get('/batches/', { params });
+    // Updated endpoint: /academic/batches
+    const response = await api.get('/academic/batches', { params });
     return response.data;
 };
 
 export const createAcademicBatch = async (data: Partial<AcademicBatch>): Promise<AcademicBatch> => {
-    // Updated endpoint: /batches
-    const response = await api.post('/batches/', data);
+    // Updated endpoint: /academic/batches
+    const response = await api.post('/academic/batches', data);
     return response.data;
 };
 
 export const updateAcademicBatch = async (id: number, data: Partial<AcademicBatch>): Promise<AcademicBatch> => {
-    // Updated endpoint: /batches/{id}
-    const response = await api.patch(`/batches/${id}`, data);
+    // Updated endpoint: /academic/batches/{id}
+    const response = await api.patch(`/academic/batches/${id}`, data);
     return response.data;
 };
 
 export const deleteAcademicBatch = async (id: number): Promise<void> => {
-    // Updated endpoint: /batches/{id}
-    const response = await api.delete(`/batches/${id}`);
+    // Updated endpoint: /academic/batches/{id}
+    const response = await api.delete(`/academic/batches/${id}`);
 };
 
 // ============================================================================
@@ -711,15 +706,15 @@ export const deleteSMSTemplate = async (id: number): Promise<void> => {
 import { BatchSemester, BatchSubject, ProgramYear } from '../types/academic-batch';
 
 export const getBatchSemesters = async (batchId: number): Promise<BatchSemester[]> => {
-    // Updated endpoint: /batches/{id}/semesters
-    const response = await api.get(`/batches/${batchId}/semesters`);
+    // Updated endpoint: /academic/batches/{id}/semesters
+    const response = await api.get(`/academic/batches/${batchId}/semesters`);
     return response.data;
 };
 
 // Note: Semesters are now auto-generated via Regulation/Batch and are not manually created.
 
 export const updateBatchSemester = async (batchId: number, semesterId: number, data: Partial<BatchSemester>): Promise<BatchSemester> => {
-    const response = await api.patch(`/batches/${batchId}/semesters/${semesterId}`, data);
+    const response = await api.patch(`/academic/batches/${batchId}/semesters/${semesterId}`, data);
     return response.data;
 };
 
@@ -728,14 +723,14 @@ export const updateBatchSemester = async (batchId: number, semesterId: number, d
 // ============================================================================
 
 export const getProgramYears = async (batchId: number): Promise<ProgramYear[]> => {
-    const response = await api.get(`/batches/${batchId}/program-years`);
+    const response = await api.get(`/academic/batches/${batchId}/program-years`);
     return response.data;
 };
 
 export const getBatchSubjects = async (batchId: number, semesterNo?: number): Promise<BatchSubject[]> => {
     const params: any = {};
     if (semesterNo) params.semester_no = semesterNo;
-    const response = await api.get(`/batches/${batchId}/subjects`, { params });
+    const response = await api.get(`/academic/batches/${batchId}/subjects`, { params });
     return response.data;
 };
 

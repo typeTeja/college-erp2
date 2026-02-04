@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from .batch import AcademicBatch
     from .regulation import Regulation
     from app.domains.student.models import Student
+    from app.domains.finance.models.fee_management import FeeStructure
 
 class Program(SQLModel, table=True):
     """
@@ -42,3 +43,4 @@ class Program(SQLModel, table=True):
     batches: List["AcademicBatch"] = Relationship(back_populates="program")
     regulations: List["Regulation"] = Relationship(back_populates="program")
     students: List["Student"] = Relationship(back_populates="program")
+    fee_structures: List["FeeStructure"] = Relationship(back_populates="program")

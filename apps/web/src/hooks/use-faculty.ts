@@ -8,11 +8,11 @@ import { api } from '@/utils/api';
 // Placeholder - will need actual API service
 const facultyApi = {
     list: async (filters?: any) => {
-        const response = await api.get('/faculty');
+        const response = await api.get('/hr/faculty');
         return response.data;
     },
     getProfile: async () => {
-        const response = await api.get('/faculty/me');
+        const response = await api.get('/hr/faculty/me');
         return response.data;
     }
 };

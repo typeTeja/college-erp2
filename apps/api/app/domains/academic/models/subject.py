@@ -6,6 +6,7 @@ from app.shared.enums import SubjectType, EvaluationType
 if TYPE_CHECKING:
     from .batch import BatchSemester
     from app.domains.hr.models import Faculty
+    from app.domains.student.models import Enrollment
 
 class Subject(SQLModel, table=True):
     """
@@ -18,6 +19,12 @@ class Subject(SQLModel, table=True):
     name: str = Field(index=True)
     code: str = Field(unique=True, index=True)
     description: Optional[str] = None
+    
+    # Relationships
+    faculty_id: Optional[int] = Field(default=None, foreign_key="faculty.id")
+    faculty: Optional["Faculty"] = Relationship(back_populates="subjects")
+    
+    enrollments: List["Enrollment"] = Relationship(back_populates="subject")
     
     # Metadata
     is_active: bool = Field(default=True)

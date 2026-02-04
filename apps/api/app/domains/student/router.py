@@ -22,7 +22,14 @@ from app.domains.student.exceptions import (
 )
 
 
+from .odc_router import router as odc_router
+from .portal_router import router as portal_router
+
 router = APIRouter()
+
+# Include sub-routers
+router.include_router(odc_router, prefix="/odc", tags=["Student - ODC"])
+router.include_router(portal_router, prefix="/portal", tags=["Student - Portal"])
 
 
 # ----------------------------------------------------------------------

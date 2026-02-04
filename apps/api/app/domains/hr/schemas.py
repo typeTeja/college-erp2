@@ -13,6 +13,42 @@ from datetime import datetime, date
 
 
 # ----------------------------------------------------------------------
+# Department Schemas
+# ----------------------------------------------------------------------
+
+class DepartmentBase(BaseModel):
+    name: str
+    code: str
+    alias: Optional[str] = None
+    is_active: bool = True
+
+class DepartmentRead(DepartmentBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ----------------------------------------------------------------------
+# Shift Schemas
+# ----------------------------------------------------------------------
+
+class ShiftBase(BaseModel):
+    name: str
+    start_time: str
+    end_time: str
+    is_active: bool = True
+
+class ShiftRead(ShiftBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ----------------------------------------------------------------------
 # Designation Schemas
 # ----------------------------------------------------------------------
 

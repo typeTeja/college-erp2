@@ -6,11 +6,11 @@ import { api } from '@/utils/api';
 
 const rolesApi = {
     list: async () => {
-        const response = await api.get('/roles');
+        const response = await api.get('/system/roles');
         return response.data;
     },
     getPermissions: async () => {
-        const response = await api.get('/permissions');
+        const response = await api.get('/system/permissions');
         return response.data;
     },
 };

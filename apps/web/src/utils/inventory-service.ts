@@ -13,7 +13,7 @@ export const inventoryService = {
         return useQuery({
             queryKey: ["assets", filters],
             queryFn: async () => {
-                const response = await api.get<Asset[]>("/inventory/assets", { params: filters });
+                const response = await api.get<Asset[]>("/campus/inventory/assets", { params: filters });
                 return response.data;
             }
         });
@@ -23,7 +23,7 @@ export const inventoryService = {
         return useQuery({
             queryKey: ["asset", id],
             queryFn: async () => {
-                const response = await api.get<Asset>(`/inventory/assets/${id}`);
+                const response = await api.get<Asset>(`/campus/inventory/assets/${id}`);
                 return response.data;
             },
             enabled: !!id
@@ -34,7 +34,7 @@ export const inventoryService = {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (data: AssetCreateDTO) => {
-                const response = await api.post<Asset>("/inventory/assets", data);
+                const response = await api.post<Asset>("/campus/inventory/assets", data);
                 return response.data;
             },
             onSuccess: () => {
@@ -48,7 +48,7 @@ export const inventoryService = {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (data: AllocationCreateDTO) => {
-                const response = await api.post<AssetAllocation>("/inventory/allocate", data);
+                const response = await api.post<AssetAllocation>("/campus/inventory/allocate", data);
                 return response.data;
             },
             onSuccess: () => {
@@ -62,7 +62,7 @@ export const inventoryService = {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async ({ id, status }: { id: number; status: string }) => {
-                const response = await api.put<AssetAllocation>(`/inventory/return/${id}`, null, { params: { status } });
+                const response = await api.put<AssetAllocation>(`/campus/inventory/return/${id}`, null, { params: { status } });
                 return response.data;
             },
             onSuccess: () => {
@@ -77,7 +77,7 @@ export const inventoryService = {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (data: AuditCreateDTO) => {
-                const response = await api.post<AssetAudit>("/inventory/audit", data);
+                const response = await api.post<AssetAudit>("/campus/inventory/audit", data);
                 return response.data;
             },
             onSuccess: () => {
@@ -91,7 +91,7 @@ export const inventoryService = {
         return useQuery({
             queryKey: ["student-uniforms", studentId],
             queryFn: async () => {
-                const response = await api.get<UniformAllocation[]>(`/inventory/uniforms/student/${studentId}`);
+                const response = await api.get<UniformAllocation[]>(`/campus/inventory/uniforms/student/${studentId}`);
                 return response.data;
             },
             enabled: !!studentId
@@ -102,7 +102,7 @@ export const inventoryService = {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (data: UniformAllocationCreateDTO) => {
-                const response = await api.post<UniformAllocation>("/inventory/uniforms", data);
+                const response = await api.post<UniformAllocation>("/campus/inventory/uniforms", data);
                 return response.data;
             },
             onSuccess: (data) => {

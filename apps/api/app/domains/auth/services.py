@@ -46,10 +46,10 @@ class AuthService:
     
     def authenticate(self, email: str, password: str) -> Optional[AuthUser]:
         """
-        Authenticate user by email and password
+        Authenticate user by email/username and password
         
         Args:
-            email: User email
+            email: User email or username
             password: Plain text password
         
         Returns:
@@ -59,8 +59,15 @@ class AuthService:
             InvalidCredentialsError: If credentials are incorrect
             InactiveUserError: If user account is inactive
         """
+        # User might provide email OR username
+        from sqlalchemy import or_
         user = self.session.exec(
-            select(AuthUser).where(AuthUser.email == email)
+            select(AuthUser).where(
+                or_(
+                    AuthUser.email == email,
+                    AuthUser.username == email
+                )
+            )
         ).first()
         
         if not user:

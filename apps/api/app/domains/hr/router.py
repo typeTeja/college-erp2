@@ -16,7 +16,8 @@ from app.domains.hr.services import HRService
 from app.domains.hr.schemas import (
     DesignationCreate, DesignationUpdate, DesignationRead,
     StaffCreate, StaffUpdate, StaffRead,
-    FacultyCreate, FacultyUpdate, FacultyRead
+    FacultyCreate, FacultyUpdate, FacultyRead,
+    ShiftRead
 )
 from app.domains.auth.models import AuthUser as User
 from app.domains.hr.exceptions import (
@@ -26,6 +27,20 @@ from app.domains.hr.exceptions import (
 
 
 router = APIRouter()
+
+
+# ----------------------------------------------------------------------
+# Shift Endpoints
+# ----------------------------------------------------------------------
+
+@router.get("/shifts", response_model=List[ShiftRead])
+def list_shifts(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """List all shifts"""
+    service = HRService(session)
+    return service.list_shifts()
 
 
 # ----------------------------------------------------------------------
@@ -132,6 +147,21 @@ def list_faculty(
     """List all faculty"""
     service = HRService(session)
     faculty = service.list_faculty(department=department)
+    return faculty
+
+
+@router.get("/faculty/me", response_model=FacultyRead)
+def get_faculty_me(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get current user's faculty profile"""
+    service = HRService(session)
+    faculty = session.exec(
+        select(Faculty).where(Faculty.user_id == current_user.id)
+    ).first()
+    if not faculty:
+        raise HTTPException(status_code=404, detail="Faculty profile not found")
     return faculty
 
 

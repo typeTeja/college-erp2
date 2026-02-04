@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/use-auth-store';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
+import { formatError } from '@/utils/error-handler';
 
 const loginSchema = z.object({
     username: z.string().min(1, 'Username or Email is required'),
@@ -38,7 +39,7 @@ export default function LoginPage() {
             await login({ email: data.username, password: data.password });
             router.push('/'); // Redirect to dashboard
         } catch (err: any) {
-            setError(err.response?.data?.detail || err.response?.data?.message || 'Login failed. Please check your credentials.');
+            setError(formatError(err));
         } finally {
             setIsLoading(false);
         }

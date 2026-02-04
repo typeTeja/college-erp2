@@ -15,8 +15,8 @@ from datetime import datetime
 # ======================================================================
 
 class LoginRequest(BaseModel):
-    """Login request with email and password"""
-    email: EmailStr
+    """Login request with email or username and password"""
+    email: str = Field(..., description="Email or Username")
     password: str
 
 

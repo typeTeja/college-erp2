@@ -32,12 +32,9 @@ export const useAuthStore = create<AuthState>()(
             hasHydrated: false,
 
             login: async (credentials) => {
-                const formData = new URLSearchParams();
-                formData.append('username', credentials.email); // Map email to username
-                formData.append('password', credentials.password);
-
-                const { data } = await api.post('/auth/login', formData, {
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                const { data } = await api.post('/auth/login', {
+                    email: credentials.email,
+                    password: credentials.password,
                 });
                 const { access_token, refresh_token, user } = data;
 

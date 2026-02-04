@@ -12,7 +12,7 @@ export const admissionsService = {
         return useQuery({
             queryKey: ["applications", status],
             queryFn: async () => {
-                const response = await api.get<Application[]>("/admissions/", {
+                const response = await api.get<Application[]>("/admissions/admin/applications", {
                     params: { status }
                 });
                 return response.data;

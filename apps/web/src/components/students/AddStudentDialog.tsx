@@ -11,6 +11,7 @@ import { studentSchema, StudentFormValues } from '@/schemas/student-schema'
 import { useCreateStudent } from '@/hooks/use-students'
 import { programService } from '@/utils/program-service'
 import { Plus } from 'lucide-react'
+import { formatError } from '@/utils/error-handler'
 
 export function AddStudentDialog() {
     const [open, setOpen] = useState(false)
@@ -73,7 +74,7 @@ export function AddStudentDialog() {
             onError: (err: any) => {
                 toast({
                     title: "Error",
-                    description: err.response?.data?.detail || "Failed to create student.",
+                    description: formatError(err),
                     variant: "destructive"
                 })
             }

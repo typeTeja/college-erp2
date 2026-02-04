@@ -23,10 +23,10 @@ from sqlmodel import SQLModel, Field, Relationship, Column, JSON
 from sqlalchemy import Text
 
 if TYPE_CHECKING:
-    from .enrollment import Enrollment
     from app.domains.academic.models import Program
     from .parent import Parent
     from app.domains.academic.models import StudentSemesterHistory, StudentPromotionLog
+    from app.domains.auth.models import AuthUser
 
 from app.schemas.json_fields import StudentDocuments
 from app.shared.enums import BloodGroup, CreatedFrom, Gender, ScholarshipCategory, StudentStatus, PaymentStatus
@@ -125,8 +125,19 @@ class Student(SQLModel, table=True):
     scholarship_category: ScholarshipCategory = Field(default=ScholarshipCategory.GENERAL)
     lateral_entry: bool = Field(default=False)
     
+    # Academic Details
+    # admission_year_id: Optional[int] = Field(default=None, foreign_key="academic_year.id", index=True)
+    academic_year_id: Optional[int] = Field(default=None, foreign_key="academic_year.id", index=True)
+    program_id: Optional[int] = Field(default=None, foreign_key="program.id", index=True)
+    batch_id: Optional[int] = Field(default=None, foreign_key="academic_batches.id", index=True)
+    
+    # NEW: Link to ProgramYear
+    program_year_id: Optional[int] = Field(default=None, foreign_key="program_years.id", index=True)
+    
     # Status
-    status: StudentStatus = Field(default=StudentStatus.IMPORTED_PENDING_VERIFICATION)
+    status: StudentStatus = Field(default=StudentStatus.ACTIVE, index=True)
+    payment_status: PaymentStatus = Field(default=PaymentStatus.PENDING, index=True)
+    is_lateral_entry: bool = Field(default=False)
     
     # Deactivation Tracking
     deactivated_at: Optional[datetime] = None
@@ -137,13 +148,19 @@ class Student(SQLModel, table=True):
     created_from: CreatedFrom = Field(default=CreatedFrom.MANUAL)  # manual, admission, bulk_upload
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: Optional[int] = Field(default=None, foreign_key="users.id")
     
     # Relationships
-    program: "Program" = Relationship(back_populates="students")
+    user: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "Student.user_id"})
+    academic_year: Optional["AcademicYear"] = Relationship()
+    program: Optional["Program"] = Relationship(back_populates="students")
+    batch: Optional["AcademicBatch"] = Relationship(back_populates="students")
+    program_year: Optional["ProgramYear"] = Relationship(back_populates="students")
+    
     enrollments: List["Enrollment"] = Relationship(back_populates="student")
     parent: Optional["Parent"] = Relationship(sa_relationship_kwargs={"uselist": False, "foreign_keys": "Parent.linked_student_id"})
     
-    # Academic foundation relationships
+    # History
     semester_history: List["StudentSemesterHistory"] = Relationship(back_populates="student")
     promotion_logs: List["StudentPromotionLog"] = Relationship(back_populates="student")
 

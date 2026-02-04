@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { odcService } from '@/utils/odc-service';
+import { formatError } from '@/utils/error-handler';
 
 interface FeedbackFormProps {
     applicationId: number;
@@ -42,7 +43,7 @@ export default function FeedbackForm({ applicationId, onSuccess }: FeedbackFormP
             if (onSuccess) onSuccess();
         } catch (error: any) {
             console.error('Error submitting feedback:', error);
-            alert(error.response?.data?.detail || 'Failed to submit feedback');
+            alert(formatError(error));
         } finally {
             setSubmitting(false);
         }

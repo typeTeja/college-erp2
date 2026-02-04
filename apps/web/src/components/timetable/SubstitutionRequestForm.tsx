@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea"; // Assuming this exists, or use Input
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { formatError } from "@/utils/error-handler";
 
 export function SubstitutionRequestForm({ facultyId }: { facultyId: number }) {
     const { toast } = useToast();
@@ -34,7 +35,7 @@ export function SubstitutionRequestForm({ facultyId }: { facultyId: number }) {
         onError: (error: any) => {
             toast({
                 title: "Error",
-                description: error.response?.data?.detail || "Failed to submit request",
+                description: formatError(error),
                 variant: "destructive"
             });
         }
