@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { IntegrationsTab } from '../../settings/IntegrationsTab';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
+import { Globe } from 'lucide-react';
 
 /**
  * Integrations Page
@@ -50,7 +50,22 @@ export default function IntegrationsPage() {
             badge="admin"
             movedFrom="Settings > Integrations"
         >
-            <IntegrationsTab isSuperAdmin={isSuperAdmin} />
+            <Card>
+                <CardContent className="pt-6">
+                    <div className="text-center py-12">
+                        <Globe className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                            Integrations Management
+                        </h3>
+                        <p className="text-sm text-slate-500 mb-4">
+                            Integration management interface will be implemented in a future update.
+                        </p>
+                        <p className="text-xs text-slate-400">
+                            This page will manage payment gateways, email services, and other third-party integrations.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
         </ConfigPageTemplate>
     );
 }

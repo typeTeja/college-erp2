@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { AuditLogsTab } from '../../settings/AuditLogsTab';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
+import { History } from 'lucide-react';
 
 /**
  * Audit Logs Page
@@ -50,7 +50,22 @@ export default function AuditPage() {
             badge="admin"
             movedFrom="Settings > Audit Logs"
         >
-            <AuditLogsTab />
+            <Card>
+                <CardContent className="pt-6">
+                    <div className="text-center py-12">
+                        <History className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                            Audit Logs
+                        </h3>
+                        <p className="text-sm text-slate-500 mb-4">
+                            Audit log viewer will be implemented in a future update.
+                        </p>
+                        <p className="text-xs text-slate-400">
+                            This page will display system-wide audit trail of all user actions.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
         </ConfigPageTemplate>
     );
 }
