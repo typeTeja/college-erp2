@@ -287,7 +287,7 @@ class AdmissionService:
         4. Links to Academic Batch/Semester.
         5. Updates roles and status.
         """
-        from app.domains.academic.models import AcademicBatch, ProgramYear, BatchSemester
+        from app.domains.academic.models import AcademicBatch, ProgramYear, BatchSemester, AcademicYear
         
         application = session.get(Application, application_id)
         if not application:
@@ -297,11 +297,18 @@ class AdmissionService:
              return application
 
         # Logic for batch discovery (simplified)
+        # Logic for batch discovery
         current_year = datetime.now().year
+        academic_year = session.exec(select(AcademicYear).where(AcademicYear.name.like(f"{current_year}%"))).first()
+        if not academic_year:
+             # Fallback: Try to find a batch with name containing current year
+             # Or raise error that Academic Year is not defined
+             raise ValueError(f"Academic Year starting {current_year} not found")
+
         batch = session.exec(
             select(AcademicBatch)
             .where(AcademicBatch.program_id == application.program_id)
-            .where(AcademicBatch.joining_year == current_year)
+            .where(AcademicBatch.admission_year_id == academic_year.id)
         ).first()
         
         if not batch:

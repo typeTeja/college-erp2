@@ -22,6 +22,7 @@ from .schemas import (
 from .services import AuthService
 from .security import create_access_token, create_refresh_token, decode_token
 from .dependencies import get_current_user
+from app.core.rbac import RBACService
 from .models import AuthUser
 from .exceptions import (
     InvalidCredentialsError,
@@ -71,6 +72,7 @@ def login(
     
     # Get user roles
     user_roles = [role.name for role in user.roles]
+    user_permissions = list(RBACService.get_user_permissions(session, user.id))
     
     # Create user info
     user_info = AuthUserInfo(
@@ -80,7 +82,8 @@ def login(
         full_name=user.full_name,
         is_active=user.is_active,
         is_superuser=user.is_superuser,
-        roles=user_roles
+        roles=user_roles,
+        permissions=user_permissions
     )
     
     return Token(
@@ -151,7 +154,8 @@ def refresh_token(
         full_name=user.full_name,
         is_active=user.is_active,
         is_superuser=user.is_superuser,
-        roles=user_roles
+        roles=user_roles,
+        permissions=user_permissions
     )
     
     return Token(
@@ -176,6 +180,11 @@ def get_current_user_info(
     """
     user_roles = [role.name for role in current_user.roles]
     
+    # Use standard access but we need session for RBACService
+    from app.db.session import get_session
+    session = next(get_session())
+    user_permissions = list(RBACService.get_user_permissions(session, current_user.id))
+    
     return AuthUserInfo(
         id=current_user.id,
         email=current_user.email,
@@ -183,7 +192,8 @@ def get_current_user_info(
         full_name=current_user.full_name,
         is_active=current_user.is_active,
         is_superuser=current_user.is_superuser,
-        roles=user_roles
+        roles=user_roles,
+        permissions=user_permissions
     )
 
 

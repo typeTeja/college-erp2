@@ -11,6 +11,11 @@ export function hasPermission(
     requiredPermissions: string[] | undefined,
     userPermissions: string[]
 ): boolean {
+    // Super Admin bypass
+    if (userPermissions.includes('SUPER_ADMIN')) {
+        return true;
+    }
+
     if (!requiredPermissions || requiredPermissions.length === 0) {
         return true;
     }

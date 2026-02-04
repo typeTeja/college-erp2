@@ -33,11 +33,7 @@ class Settings(BaseSettings):
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def fix_database_url(cls, v: str) -> str:
-        if v and v.startswith("postgres://"):
-            return v.replace("postgres://", "postgresql://", 1)
-    @classmethod
-    def fix_database_url(cls, v: str) -> str:
-        if v and v.startswith("postgres://"):
+        if v and isinstance(v, str) and v.startswith("postgres://"):
             return v.replace("postgres://", "postgresql://", 1)
         return v
     
@@ -160,9 +156,9 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str = ""
     S3_SECRET_KEY: str = ""
     S3_REGION: str = "us-east-1"
-    S3_BUCKET: str = "college-erp-documents"  # Main documents bucket
-    S3_BUCKET_IMAGES: str = "college-erp-images"  # Images bucket
-    S3_BUCKET_TEMP: str = "college-erp-temp"  # Temporary files bucket
+    S3_BUCKET: str = "rcms-storage-documents"  # Main documents bucket
+    S3_BUCKET_IMAGES: str = "rcms-storage-images"  # Images bucket
+    S3_BUCKET_TEMP: str = "rcms-storage-temp"  # Temporary files bucket
     S3_FORCE_PATH_STYLE: bool = True  # Required for MinIO
     CDN_BASE_URL: str = ""  # Optional CDN URL
     MAX_UPLOAD_SIZE: int = 10485760  # 10MB in bytes

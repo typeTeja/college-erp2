@@ -9,6 +9,7 @@ interface User {
     email: string;
     full_name: string;
     roles: string[];
+    permissions: string[];
     preferences?: any;
 }
 

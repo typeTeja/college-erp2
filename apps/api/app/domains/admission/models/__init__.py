@@ -12,6 +12,13 @@ from .tentative import (
     TentativeAdmission, 
     ScholarshipCalculation
 )
+from .application_details import (
+    ApplicationParent,
+    ApplicationEducation,
+    ApplicationAddress,
+    ApplicationBankDetails,
+    ApplicationHealth
+)
 
 # Import enums from shared
 from app.shared.enums import (
@@ -36,6 +43,11 @@ __all__ = [
     "AdmissionSettings",
     "TentativeAdmission",
     "ScholarshipCalculation",
+    "ApplicationParent",
+    "ApplicationEducation",
+    "ApplicationAddress",
+    "ApplicationBankDetails",
+    "ApplicationHealth",
     # Enums
     "ApplicationStatus",
     "FeeMode",

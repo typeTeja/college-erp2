@@ -305,6 +305,15 @@ class DocumentType(str, Enum):
     TRANSFER_CERTIFICATE = "TRANSFER_CERTIFICATE"
     CASTE_CERTIFICATE = "CASTE_CERTIFICATE"
     INCOME_CERTIFICATE = "INCOME_CERTIFICATE"
+    CONDUCT_CERTIFICATE = "CONDUCT_CERTIFICATE"
+    BONAFIDE_CERTIFICATE = "BONAFIDE_CERTIFICATE"
+    EQUIVALENCY_CERTIFICATE = "EQUIVALENCY_CERTIFICATE"
+    MEDICAL_FITNESS_CERTIFICATE = "MEDICAL_FITNESS_CERTIFICATE"
+    STUDENT_SIGNATURE = "STUDENT_SIGNATURE"
+    PARENT_SIGNATURE = "PARENT_SIGNATURE"
+    ADDRESS_PROOF = "ADDRESS_PROOF"
+    SPORTS_CERTIFICATE = "SPORTS_CERTIFICATE"
+    NCC_CERTIFICATE = "NCC_CERTIFICATE"
     OTHER = "OTHER"
 
 
@@ -348,6 +357,82 @@ class ScholarshipCategory(str, Enum):
     ST = "ST"
     OBC = "OBC"
     EWS = "EWS"
+
+
+class Religion(str, Enum):
+    """Religious affiliations"""
+    HINDU = "HINDU"
+    MUSLIM = "MUSLIM"
+    CHRISTIAN = "CHRISTIAN"
+    SIKH = "SIKH"
+    BUDDHIST = "BUDDHIST"
+    JAIN = "JAIN"
+    PARSI = "PARSI"
+    OTHER = "OTHER"
+    PREFER_NOT_TO_SAY = "PREFER_NOT_TO_SAY"
+
+
+class CasteCategory(str, Enum):
+    """Caste categories for reservations"""
+    GENERAL = "GENERAL"
+    OC = "OC"  # Open Category
+    BC_A = "BC_A"
+    BC_B = "BC_B"
+    BC_C = "BC_C"
+    BC_D = "BC_D"
+    BC_E = "BC_E"
+    SC = "SC"  # Scheduled Caste
+    ST = "ST"  # Scheduled Tribe
+    EWS = "EWS"  # Economically Weaker Section
+
+
+class ParentRelation(str, Enum):
+    """Parent/Guardian relationship types"""
+    FATHER = "FATHER"
+    MOTHER = "MOTHER"
+    GUARDIAN = "GUARDIAN"
+    GRANDFATHER = "GRANDFATHER"
+    GRANDMOTHER = "GRANDMOTHER"
+    UNCLE = "UNCLE"
+    AUNT = "AUNT"
+    SIBLING = "SIBLING"
+    OTHER = "OTHER"
+
+
+class EducationLevel(str, Enum):
+    """Education qualification levels"""
+    SSC = "SSC"  # 10th
+    INTERMEDIATE = "INTERMEDIATE"  # 10+2
+    DIPLOMA = "DIPLOMA"
+    DEGREE = "DEGREE"
+    POST_GRADUATE = "POST_GRADUATE"
+
+
+class EducationBoard(str, Enum):
+    """Education boards/universities"""
+    CBSE = "CBSE"
+    ICSE = "ICSE"
+    STATE_BOARD = "STATE_BOARD"
+    IB = "IB"
+    NIOS = "NIOS"
+    UNIVERSITY = "UNIVERSITY"
+    OTHER = "OTHER"
+
+
+class ActivityLevel(str, Enum):
+    """Extra-curricular activity participation level"""
+    COLLEGE = "COLLEGE"
+    DISTRICT = "DISTRICT"
+    STATE = "STATE"
+    NATIONAL = "NATIONAL"
+    INTERNATIONAL = "INTERNATIONAL"
+
+
+class AddressType(str, Enum):
+    """Address types"""
+    PRESENT = "PRESENT"
+    PERMANENT = "PERMANENT"
+    COMMUNICATION = "COMMUNICATION"
 
 
 

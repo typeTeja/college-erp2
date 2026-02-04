@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 
 class ApplicationDocument(SQLModel, table=True):
     """Documents uploaded by applicants for verification"""
+    __tablename__ = "application_document"
+    
     id: Optional[int] = Field(default=None, primary_key=True)
     application_id: int = Field(foreign_key="application.id", index=True)
     document_type: DocumentType

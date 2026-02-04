@@ -94,7 +94,7 @@ export function AdminDashboard() {
                                             {admission.fullName}
                                         </td>
                                         <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                                            {admission.course.name}
+                                            {admission.course?.name || 'N/A'}
                                         </td>
                                         <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
                                             {admission.email}

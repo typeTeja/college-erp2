@@ -10,24 +10,27 @@ from sqlmodel import Session
 from typing import List, Optional
 
 from app.api.deps import get_session, get_current_user
-from app.domains.academic.services import AcademicService
+from app.domains.auth.models import AuthUser as User
+from app.domains.hr.schemas import DepartmentRead
+from app.domains.academic.exceptions import (
+    AcademicYearNotFoundError, BatchNotFoundError,
+    RegulationNotFoundError, SectionNotFoundError
+)
+from app.domains.hr.services import HRService
+from app.domains.academic.services import ProgramService, AcademicService
+from app.domains.academic.attendance_service import attendance_service
+from app.domains.academic.exam_service import exam_service
 from app.domains.academic.schemas import (
     AcademicYearCreate, AcademicYearRead,
     BatchCreate, BatchRead,
     RegulationCreate, RegulationRead,
     SectionCreate, SectionRead,
-    ProgramRead
+    ProgramRead,
+    AttendanceSessionCreate, AttendanceSessionRead,
+    AttendanceRecordRead, BulkAttendanceMark,
+    InternalExamCreate, InternalExamRead,
+    StudentInternalMarksCreate, StudentInternalMarksRead
 )
-from app.domains.hr.schemas import DepartmentRead
-from app.domains.auth.models import AuthUser as User
-from app.domains.academic.exceptions import (
-    AcademicYearNotFoundError, BatchNotFoundError,
-    RegulationNotFoundError, SectionNotFoundError
-)
-
-
-from app.domains.hr.services import HRService
-from app.domains.academic.services import ProgramService
 
 
 router = APIRouter()
@@ -40,7 +43,6 @@ router = APIRouter()
 @router.get("/programs", response_model=List[ProgramRead])
 def list_programs(
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
 ):
     """List all academic programs"""
     return ProgramService.get_programs(session)
@@ -186,3 +188,80 @@ def list_sections(
     service = AcademicService(session)
     sections = service.list_sections(batch_id=batch_id)
     return sections
+# ----------------------------------------------------------------------
+# Attendance Endpoints
+# ----------------------------------------------------------------------
+
+@router.post("/attendance/sessions", response_model=AttendanceSessionRead, status_code=status.HTTP_201_CREATED)
+def create_attendance_session(
+    data: AttendanceSessionCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new attendance session"""
+    return attendance_service.create_session(session, data)
+
+
+@router.post("/attendance/mark", response_model=List[AttendanceRecordRead])
+def mark_attendance(
+    data: BulkAttendanceMark,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Mark bulk attendance for a session"""
+    return attendance_service.mark_bulk_attendance(session, data)
+
+
+@router.get("/attendance/sessions/{session_id}/records", response_model=List[AttendanceRecordRead])
+def get_session_attendance(
+    session_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all attendance records for a session"""
+    return attendance_service.get_session_attendance(session, session_id)
+
+
+@router.get("/attendance/student/{student_id}/summary")
+def get_student_attendance(
+    student_id: int,
+    subject_id: Optional[int] = None,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get attendance summary for a student"""
+    return attendance_service.get_student_attendance_summary(session, student_id, subject_id)
+
+
+# ----------------------------------------------------------------------
+# Internal Exam Endpoints
+# ----------------------------------------------------------------------
+
+@router.post("/exams/internal", response_model=InternalExamRead, status_code=status.HTTP_201_CREATED)
+def create_internal_exam(
+    data: InternalExamCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new internal exam cycle"""
+    return exam_service.create_internal_exam(session, data)
+
+
+@router.post("/exams/internal/marks", response_model=StudentInternalMarksRead)
+def mark_exam_marks(
+    data: StudentInternalMarksCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Record marks for a student in an internal exam subject"""
+    return exam_service.mark_student_marks(session, data)
+
+
+@router.get("/exams/internal/{exam_id}")
+def get_internal_exam(
+    exam_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get full details of an internal exam"""
+    return exam_service.get_internal_exam_details(session, exam_id)

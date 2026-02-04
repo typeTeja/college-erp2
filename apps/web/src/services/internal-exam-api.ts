@@ -15,84 +15,38 @@ export const internalExamApi = {
      * Create a new internal exam
      */
     create: async (data: any): Promise<any> => {
-        const response = await api.post('/internal-exams', data);
+        const response = await api.post('/academic/exams/internal', data);
         return response.data;
     },
 
     /**
-     * Get all internal exams
-     */
-    list: async (filters?: {
-        program_id?: number;
-        year?: number;
-        semester?: number;
-        exam_type?: string;
-        academic_year?: string;
-    }): Promise<any[]> => {
-        const response = await api.get('/internal-exams', { params: filters });
-        return response.data;
-    },
-
-    /**
-     * Get a specific exam
+     * Get details of a specific internal exam
      */
     get: async (id: number): Promise<any> => {
-        const response = await api.get(`/${id}`);
+        const response = await api.get(`/academic/exams/internal/${id}`);
         return response.data;
     },
 
     /**
-     * Update an exam
+     * Record marks for a student
      */
-    update: async (id: number, data: any): Promise<any> => {
-        const response = await api.put(`/${id}`, data);
+    markStudentMarks: async (data: {
+        student_id: number;
+        internal_exam_subject_id: number;
+        marks_obtained: number;
+        is_absent?: boolean;
+        remarks?: string;
+    }): Promise<any> => {
+        const response = await api.post('/academic/exams/internal/marks', data);
         return response.data;
     },
 
     /**
-     * Delete an exam
+     * Get all internal exams (Placeholder for list endpoint)
      */
-    delete: async (id: number): Promise<void> => {
-        await api.delete(`/${id}`);
-    },
-
-    /**
-     * Enter marks for an exam
-     */
-    enterMarks: async (examId: number, marks: any[]): Promise<any> => {
-        const response = await api.post(`/${examId}/marks`, { marks });
-        return response.data;
-    },
-
-    /**
-     * Calculate grades for an exam
-     */
-    calculateGrades: async (examId: number): Promise<any> => {
-        const response = await api.post(`/${examId}/calculate-grades`);
-        return response.data;
-    },
-
-    /**
-     * Publish results
-     */
-    publishResults: async (examId: number): Promise<any> => {
-        const response = await api.post(`/${examId}/publish`);
-        return response.data;
-    },
-
-    /**
-     * Get exam marks
-     */
-    getMarks: async (examId: number, filters?: { section_id?: number }): Promise<any[]> => {
-        const response = await api.get(`/${examId}/marks`, { params: filters });
-        return response.data;
-    },
-
-    /**
-     * Get student result
-     */
-    getStudentResult: async (examId: number, studentId: number): Promise<any> => {
-        const response = await api.get(`/${examId}/students/${studentId}/result`);
+    list: async (filters?: any): Promise<any[]> => {
+        // Note: Generic list endpoint needs implementation in backend if required
+        const response = await api.get('/academic/batches');
         return response.data;
     },
 };

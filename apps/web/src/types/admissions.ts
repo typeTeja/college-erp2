@@ -1,16 +1,11 @@
 /**
- * Admission Domain Types - v1.0.0
+ * Admission Domain Types - v2.0.0
  * 
  * TypeScript types matching backend Admission domain contract.
+ * Includes comprehensive details for Step 2 Admission Form.
  * 
- * CONTRACT VERSION: v1.0.0
- * STATUS: FROZEN (2026-02-03)
- * 
- * Breaking changes policy:
- * - Enum additions: Safe (backward compatible)
- * - New optional fields: Safe
- * - Required field changes: Requires migration + deprecation
- * - Enum removals: 6-month deprecation period
+ * CONTRACT VERSION: v2.0.0
+ * STATUS: ACTIVE (2026-02-04)
  */
 
 // ============================================================================
@@ -56,6 +51,7 @@ export enum DocumentType {
   TRANSFER_CERTIFICATE = "TRANSFER_CERTIFICATE",
   CASTE_CERTIFICATE = "CASTE_CERTIFICATE",
   INCOME_CERTIFICATE = "INCOME_CERTIFICATE",
+  CONDUCT_CERTIFICATE = "CONDUCT_CERTIFICATE", // Added
   OTHER = "OTHER"
 }
 
@@ -80,37 +76,243 @@ export enum ActivityType {
   ADMISSION_REJECTED = "ADMISSION_REJECTED"
 }
 
+// [NEW] Enums for Step 2
+export enum Gender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+  OTHER = "OTHER"
+}
+
+export enum BloodGroup {
+  A_POS = "A_POS",
+  A_NEG = "A_NEG",
+  B_POS = "B_POS",
+  B_NEG = "B_NEG",
+  AB_POS = "AB_POS",
+  AB_NEG = "AB_NEG",
+  O_POS = "O_POS",
+  O_NEG = "O_NEG"
+}
+
+export enum Religion {
+  HINDU = "HINDU",
+  MUSLIM = "MUSLIM",
+  CHRISTIAN = "CHRISTIAN",
+  SIKH = "SIKH",
+  BUDDHIST = "BUDDHIST",
+  JAIN = "JAIN",
+  PARSI = "PARSI",
+  OTHER = "OTHER",
+  PREFER_NOT_TO_SAY = "PREFER_NOT_TO_SAY"
+}
+
+export enum CasteCategory {
+  GENERAL = "GENERAL",
+  OC = "OC",
+  BC_A = "BC_A",
+  BC_B = "BC_B",
+  BC_C = "BC_C",
+  BC_D = "BC_D",
+  BC_E = "BC_E",
+  SC = "SC",
+  ST = "ST",
+  EWS = "EWS"
+}
+
+export enum ParentRelation {
+  FATHER = "FATHER",
+  MOTHER = "MOTHER",
+  GUARDIAN = "GUARDIAN",
+  GRANDFATHER = "GRANDFATHER",
+  GRANDMOTHER = "GRANDMOTHER",
+  UNCLE = "UNCLE",
+  AUNT = "AUNT",
+  SIBLING = "SIBLING",
+  OTHER = "OTHER"
+}
+
+export enum EducationLevel {
+  SSC = "SSC",
+  INTERMEDIATE = "INTERMEDIATE",
+  DIPLOMA = "DIPLOMA",
+  DEGREE = "DEGREE",
+  POST_GRADUATE = "POST_GRADUATE"
+}
+
+export enum EducationBoard {
+  CBSE = "CBSE",
+  ICSE = "ICSE",
+  STATE_BOARD = "STATE_BOARD",
+  IB = "IB",
+  NIOS = "NIOS",
+  UNIVERSITY = "UNIVERSITY",
+  OTHER = "OTHER"
+}
+
+export enum ActivityLevel {
+  COLLEGE = "COLLEGE",
+  DISTRICT = "DISTRICT",
+  STATE = "STATE",
+  NATIONAL = "NATIONAL",
+  INTERNATIONAL = "INTERNATIONAL"
+}
+
+export enum AddressType {
+  PERMANENT = "PERMANENT",
+  CURRENT = "CURRENT",
+  GUARDIAN = "GUARDIAN"
+}
+
+
+// ============================================================================
+// Sub-Models (Nested Details)
+// ============================================================================
+
+export interface ApplicationAddress {
+  id?: number;
+  application_id?: number;
+  address_type: AddressType;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  district: string;
+  pincode: string; // 6 digits
+  is_same_as_permanent?: boolean;
+}
+
+export interface ApplicationParent {
+  id?: number;
+  application_id?: number;
+  relation: ParentRelation;
+  name: string;
+  gender?: Gender;
+  mobile: string;
+  email?: string;
+  occupation?: string;
+  annual_income?: number;
+  organization?: string;
+  is_primary_contact: boolean;
+}
+
+export interface ApplicationEducation {
+  id?: number;
+  application_id?: number;
+  level: EducationLevel;
+  institution_name: string;
+  institution_address?: string; // or code, based on schema, assume text for now
+  institution_code?: string;
+  board: EducationBoard;
+  board_other?: string;
+  hall_ticket_number?: string;
+  year_of_passing?: number;
+  total_marks?: number;
+  marks_secured?: number;
+  percentage: number;
+  grade?: string;
+}
+
+export interface ApplicationBankDetails {
+  id?: number;
+  application_id?: number;
+  account_holder_name: string;
+  bank_name: string;
+  branch_name: string;
+  account_number: string;
+  ifsc_code: string;
+  is_verified?: boolean;
+}
+
+export interface ApplicationHealth {
+  id?: number;
+  application_id?: number;
+  blood_group?: BloodGroup;
+  height_cm?: number;
+  weight_kg?: number;
+  disability_status?: boolean;
+  disability_details?: string;
+  has_chronic_illness?: boolean;
+  chronic_illness_details?: string;
+  allergies?: string;
+  current_medications?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  doctor_name?: string;
+  doctor_phone?: string;
+  vaccination_status?: string;
+  insurance_details?: string;
+}
+
 // ============================================================================
 // Request Schemas (Create/Update)
 // ============================================================================
 
 export interface ApplicationCreate {
-  name: string;                    // 1-200 chars
-  email: string;                   // Valid email
-  phone: string;                   // Exactly 10 digits (^\d{10}$)
-  gender: string;                  // 1-20 chars
-  program_id: number;              // > 0
-  state: string;                   // 1-100 chars
-  board: string;                   // 1-100 chars
-  group_of_study: string;          // 1-100 chars
-  fee_mode?: PaymentMode;          // Default: ONLINE
+  name: string;
+  email: string;
+  phone: string;
+  gender: Gender | string; // Supporting both for now
+  program_id: number;
+  state: string;
+  board: string;
+  group_of_study: string;
+  fee_mode?: PaymentMode;
 }
 
 export interface ApplicationUpdate {
-  aadhaar_number?: string;         // Exactly 12 digits (^\d{12}$)
-  father_name?: string;            // Max 200 chars
-  father_phone?: string;           // Exactly 10 digits
-  address?: string;                // Max 500 chars
-  previous_marks_percentage?: number; // 0-100, 2 decimals
+  aadhaar_number?: string;
+  father_name?: string;
+  father_phone?: string;
+  address?: string;
+  previous_marks_percentage?: number;
   applied_for_scholarship?: boolean;
   hostel_required?: boolean;
 }
 
+// Comprehensive Update Schema for Step 2
+export interface ApplicationCompleteSubmit {
+  // Personal
+  date_of_birth?: string; // ISO Date
+  gender?: Gender;
+  blood_group?: BloodGroup;
+  religion?: Religion;
+  caste_category?: CasteCategory;
+  nationality: string;
+  mother_tongue?: string;
+  identification_mark_1?: string;
+  identification_mark_2?: string;
+
+  // Previous Details (Legacy string fields)
+  aadhaar_number?: string;
+  father_name?: string;
+  father_phone?: string;
+
+  // Extra Curricular
+  extra_curricular_activities?: string;
+  activity_level?: ActivityLevel;
+  activity_sponsored_by?: string;
+  hobbies?: string;
+
+  // Nested Lists
+  parents: ApplicationParent[];
+  addresses: ApplicationAddress[];
+  education: ApplicationEducation[];
+  bank_details?: ApplicationBankDetails;
+  health_details?: ApplicationHealth;
+
+  // Flags
+  student_declaration_accepted: boolean;
+  parent_declaration_accepted: boolean;
+  hostel_required?: boolean;
+  transport_required?: boolean;
+  applied_for_scholarship?: boolean;
+}
+
 export interface ApplicationPaymentCreate {
   application_id: number;
-  amount: number;                  // > 0, 2 decimals
+  amount: number;
   payment_mode: PaymentMode;
-  transaction_id?: string;         // Max 100 chars
+  transaction_id?: string;
   payment_proof_url?: string;
 }
 
@@ -131,8 +333,8 @@ export interface ApplicationRead {
   group_of_study: string;
   status: ApplicationStatus;
   fee_mode: PaymentMode;
-  
-  // Optional full fields
+
+  // Basic Legacy Fields
   aadhaar_number?: string;
   father_name?: string;
   father_phone?: string;
@@ -140,22 +342,41 @@ export interface ApplicationRead {
   previous_marks_percentage?: number;
   applied_for_scholarship: boolean;
   hostel_required: boolean;
-  
+
+  // New Step 2 Fields
+  date_of_birth?: string;
+  blood_group?: BloodGroup;
+  religion?: Religion;
+  caste_category?: CasteCategory;
+  nationality?: string;
+  mother_tongue?: string;
+  identification_mark_1?: string;
+  identification_mark_2?: string;
+
+  // Nested Relationships
+  parents?: ApplicationParent[];
+  addresses?: ApplicationAddress[];
+  education?: ApplicationEducation[];
+  bank_details?: ApplicationBankDetails;
+  health_details?: ApplicationHealth;
+
   // Payment info
   payment_proof_url?: string;
   offline_payment_verified: boolean;
   offline_payment_verified_by?: number;
-  offline_payment_verified_at?: string; // ISO 8601
-  
+  offline_payment_verified_at?: string;
+
   // Metadata
   student_id?: number;
-  created_at: string;              // ISO 8601
-  updated_at: string;              // ISO 8601
-  deleted_at?: string;             // ISO 8601
-  
+  created_at: string;
+  updated_at: string;
+
   // Relationships
   documents?: ApplicationDocument[];
   payments?: ApplicationPaymentRead[];
+
+  student_declaration_accepted: boolean;
+  parent_declaration_accepted: boolean;
 }
 
 export interface ApplicationPaymentRead {
@@ -168,8 +389,8 @@ export interface ApplicationPaymentRead {
   payment_proof_url?: string;
   gateway_order_id?: string;
   gateway_payment_id?: string;
-  payment_date?: string;           // ISO 8601
-  created_at: string;              // ISO 8601
+  payment_date?: string;
+  created_at: string;
 }
 
 export interface ApplicationDocument {
@@ -182,8 +403,8 @@ export interface ApplicationDocument {
   status: DocumentStatus;
   rejection_reason?: string;
   verified_by?: number;
-  verified_at?: string;            // ISO 8601
-  uploaded_at: string;             // ISO 8601
+  verified_at?: string;
+  uploaded_at: string;
 }
 
 export interface ActivityLog {
@@ -194,8 +415,9 @@ export interface ActivityLog {
   extra_data?: Record<string, any>;
   performed_by?: number;
   ip_address?: string;
-  created_at: string;              // ISO 8601
+  created_at: string;
 }
+
 
 // ============================================================================
 // Special Request/Response Types
@@ -213,6 +435,7 @@ export interface QuickApplyRequest {
 }
 
 export interface QuickApplyResponse {
+  id: number;
   application_number: string;
   portal_username?: string;
   portal_password?: string;
@@ -246,19 +469,22 @@ export interface PaymentInitiateRequest {
 
 export interface PaymentInitiateResponse {
   status: string;
-  payment_url: string;
-  txnid: string;
+  payment_url?: string;
+  access_key?: string;
+  error?: string;
+  txnid?: string;
 }
 
+
 // ============================================================================
-// Legacy Compatibility (Deprecated - use new types above)
+// Legacy Compatibility
 // ============================================================================
 
 /** @deprecated Use ApplicationCreate instead */
-export interface QuickApplyData extends QuickApplyRequest {}
+export interface QuickApplyData extends QuickApplyRequest { }
 
 /** @deprecated Use ApplicationUpdate instead */
-export interface FullApplicationData extends ApplicationUpdate {}
+export interface FullApplicationData extends ApplicationUpdate { }
 
 /** @deprecated Use OfflinePaymentVerifyRequest instead */
 export interface OfflinePaymentVerify {
@@ -273,7 +499,7 @@ export interface DocumentVerify {
 }
 
 /** @deprecated Use ApplicationRead instead */
-export interface Application extends ApplicationRead {}
+export interface Application extends ApplicationRead { }
 
 /** @deprecated Use PaymentStatus instead */
 export enum ApplicationPaymentStatus {

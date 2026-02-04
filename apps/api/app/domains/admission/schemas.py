@@ -25,7 +25,16 @@ from app.shared.enums import (
     DocumentType,
     DocumentStatus,
     ActivityType,
-    TentativeAdmissionStatus
+    TentativeAdmissionStatus,
+    Religion,
+    CasteCategory,
+    ParentRelation,
+    EducationLevel,
+    EducationBoard,
+    ActivityLevel,
+    AddressType,
+    BloodGroup,
+    Gender
 )
 
 class ApplicationBase(BaseModel):
@@ -44,6 +53,7 @@ class ApplicationCreate(ApplicationBase):
 
 class ApplicationUpdate(BaseModel):
     """Schema for completing the Full Application (Stage 2)"""
+    # Basic Stage 2 fields
     aadhaar_number: Optional[str] = Field(None, pattern=r'^\d{12}$', description="12-digit Aadhaar number")
     father_name: Optional[str] = Field(None, min_length=1, max_length=200)
     father_phone: Optional[str] = Field(None, pattern=r'^\d{10}$', description="10-digit phone number")
@@ -51,7 +61,203 @@ class ApplicationUpdate(BaseModel):
     previous_marks_percentage: Optional[float] = Field(None, ge=0, le=100)
     applied_for_scholarship: Optional[bool] = None
     hostel_required: Optional[bool] = None
+    
+    # Extended Personal Details
+    date_of_birth: Optional[date] = None
+    blood_group: Optional[BloodGroup] = None
+    nationality: Optional[str] = Field(None, max_length=100)
+    religion: Optional[Religion] = None
+    caste_category: Optional[CasteCategory] = None
+    identification_mark_1: Optional[str] = Field(None, max_length=200)
+    identification_mark_2: Optional[str] = Field(None, max_length=200)
+    ssc_hall_ticket: Optional[str] = Field(None, max_length=100)
+    medium_of_study: Optional[str] = Field(None, max_length=100)
+    place_of_birth: Optional[str] = Field(None, max_length=200)
+    native_place: Optional[str] = Field(None, max_length=200)
+    native_state: Optional[str] = Field(None, max_length=100)
+    
+    # Extra-Curricular
+    extra_curricular_activities: Optional[str] = None
+    activity_level: Optional[ActivityLevel] = None
+    activity_sponsored_by: Optional[str] = Field(None, max_length=200)
+    hobbies: Optional[str] = None
+    
+    # Declarations
+    student_declaration_accepted: Optional[bool] = None
+    parent_declaration_accepted: Optional[bool] = None
+    declaration_date: Optional[date] = None
+    declaration_place: Optional[str] = Field(None, max_length=200)
+    
     status: Optional[ApplicationStatus] = None
+
+
+# ======================================================================
+# Nested Data Schemas for Application Details
+# ======================================================================
+
+class ApplicationParentCreate(BaseModel):
+    """Schema for creating parent/guardian information"""
+    relation: ParentRelation
+    name: str = Field(..., min_length=1, max_length=200)
+    gender: Optional[Gender] = None
+    mobile: str = Field(..., pattern=r'^\d{10}$')
+    email: Optional[EmailStr] = None
+    qualification: Optional[str] = Field(None, max_length=200)
+    occupation: Optional[str] = Field(None, max_length=200)
+    annual_income: Optional[float] = Field(None, ge=0)
+    bank_account_number: Optional[str] = None
+    bank_name: Optional[str] = None
+    bank_ifsc: Optional[str] = None
+    is_primary_contact: bool = False
+
+
+class ApplicationParentRead(ApplicationParentCreate):
+    """Schema for reading parent information"""
+    id: int
+    application_id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ApplicationEducationCreate(BaseModel):
+    """Schema for creating education history"""
+    level: EducationLevel
+    institution_name: str = Field(..., min_length=1, max_length=300)
+    institution_address: Optional[str] = None
+    institution_code: Optional[str] = Field(None, max_length=50)
+    board: EducationBoard
+    board_other: Optional[str] = Field(None, max_length=200)
+    hall_ticket_number: Optional[str] = Field(None, max_length=100)
+    year_of_passing: Optional[int] = Field(None, ge=1950, le=2100)
+    secured_marks: Optional[float] = Field(None, ge=0)
+    total_marks: Optional[float] = Field(None, ge=0)
+    percentage: Optional[float] = Field(None, ge=0, le=100)
+    cgpa: Optional[float] = Field(None, ge=0, le=10)
+
+
+class ApplicationEducationRead(ApplicationEducationCreate):
+    """Schema for reading education history"""
+    id: int
+    application_id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ApplicationAddressCreate(BaseModel):
+    """Schema for creating address information"""
+    address_type: AddressType
+    address_line: str = Field(..., min_length=1)
+    village_city: str = Field(..., min_length=1, max_length=200)
+    district: Optional[str] = Field(None, max_length=200)
+    state: str = Field(..., min_length=1, max_length=100)
+    country: str = Field(default="India", max_length=100)
+    pincode: str = Field(..., pattern=r'^\d{6}$')
+    telephone_residence: Optional[str] = None
+    telephone_office: Optional[str] = None
+
+
+class ApplicationAddressRead(ApplicationAddressCreate):
+    """Schema for reading address information"""
+    id: int
+    application_id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ApplicationBankDetailsCreate(BaseModel):
+    """Schema for creating bank details"""
+    account_number: str = Field(..., min_length=1, max_length=50)
+    account_holder_name: Optional[str] = Field(None, max_length=200)
+    bank_name: str = Field(..., min_length=1, max_length=200)
+    branch_name: Optional[str] = Field(None, max_length=200)
+    ifsc_code: str = Field(..., pattern=r'^[A-Z]{4}0[A-Z0-9]{6}$')
+
+
+class ApplicationBankDetailsRead(ApplicationBankDetailsCreate):
+    """Schema for reading bank details"""
+    id: int
+    application_id: int
+    is_verified: bool
+    verified_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ApplicationHealthCreate(BaseModel):
+    """Schema for creating health/medical fitness information"""
+    is_medically_fit: bool
+    practitioner_name: Optional[str] = Field(None, max_length=200)
+    practitioner_registration_number: Optional[str] = Field(None, max_length=100)
+    certificate_date: Optional[date] = None
+    certificate_place: Optional[str] = Field(None, max_length=200)
+
+
+class ApplicationHealthRead(ApplicationHealthCreate):
+    """Schema for reading health information"""
+    id: int
+    application_id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ApplicationCompleteUpdate(BaseModel):
+    """Comprehensive schema for completing full application with nested data"""
+    # All fields from ApplicationUpdate
+    aadhaar_number: Optional[str] = Field(None, pattern=r'^\d{12}$')
+    father_name: Optional[str] = Field(None, max_length=200)
+    father_phone: Optional[str] = Field(None, pattern=r'^\d{10}$')
+    address: Optional[str] = Field(None, max_length=500)
+    previous_marks_percentage: Optional[float] = Field(None, ge=0, le=100)
+    applied_for_scholarship: Optional[bool] = None
+    hostel_required: Optional[bool] = None
+    
+    # Extended Personal Details
+    date_of_birth: Optional[date] = None
+    blood_group: Optional[BloodGroup] = None
+    nationality: Optional[str] = Field(None, max_length=100)
+    religion: Optional[Religion] = None
+    caste_category: Optional[CasteCategory] = None
+    identification_mark_1: Optional[str] = Field(None, max_length=200)
+    identification_mark_2: Optional[str] = Field(None, max_length=200)
+    ssc_hall_ticket: Optional[str] = Field(None, max_length=100)
+    medium_of_study: Optional[str] = Field(None, max_length=100)
+    place_of_birth: Optional[str] = Field(None, max_length=200)
+    native_place: Optional[str] = Field(None, max_length=200)
+    native_state: Optional[str] = Field(None, max_length=100)
+    
+    # Extra-Curricular
+    extra_curricular_activities: Optional[str] = None
+    activity_level: Optional[ActivityLevel] = None
+    activity_sponsored_by: Optional[str] = Field(None, max_length=200)
+    hobbies: Optional[str] = None
+    
+    # Declarations
+    student_declaration_accepted: Optional[bool] = None
+    parent_declaration_accepted: Optional[bool] = None
+    declaration_date: Optional[date] = None
+    declaration_place: Optional[str] = Field(None, max_length=200)
+    
+    # Nested Data
+    parents: Optional[List[ApplicationParentCreate]] = []
+    education_history: Optional[List[ApplicationEducationCreate]] = []
+    addresses: Optional[List[ApplicationAddressCreate]] = []
+    bank_details: Optional[ApplicationBankDetailsCreate] = None
+    health_info: Optional[ApplicationHealthCreate] = None
 
 class ApplicationPaymentRead(BaseModel):
     id: int
@@ -136,6 +342,20 @@ class ApplicationRead(ApplicationBase):
     applied_for_scholarship: bool
     hostel_required: bool
     
+    # Extended Personal Details
+    date_of_birth: Optional[datetime] = None
+    blood_group: Optional[BloodGroup] = None
+    nationality: Optional[str] = None
+    religion: Optional[Religion] = None
+    caste_category: Optional[CasteCategory] = None
+    
+    # Nested relationships
+    parents: List[ApplicationParentRead] = []
+    education_history: List[ApplicationEducationRead] = []
+    addresses: List[ApplicationAddressRead] = []
+    bank_details: Optional[ApplicationBankDetailsRead] = None
+    health_info: Optional[ApplicationHealthRead] = None
+    
     payments: List[ApplicationPaymentRead] = []
     entrance_exam_score: Optional[EntranceExamScoreRead] = None
     documents: List[DocumentRead] = []
@@ -179,6 +399,12 @@ class PaymentInitiate(BaseModel):
     """Schema for initiating online payment"""
     amount: float
     return_url: str
+
+class PaymentInitiateResponse(BaseModel):
+    status: str
+    access_key: Optional[str] = None
+    payment_url: Optional[str] = None
+    error: Optional[str] = None
 
 # Enhanced Admission Workflow Schemas
 

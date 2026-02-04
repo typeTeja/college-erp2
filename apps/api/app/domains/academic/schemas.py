@@ -17,11 +17,11 @@ from datetime import datetime, date
 class ProgramBase(BaseModel):
     code: str
     name: str
-    short_name: Optional[str] = None
+    alias: Optional[str] = None
     program_type: str  # UG, PG, DIPLOMA, CERTIFICATE
-    department_id: int
+    department_id: Optional[int] = None
     duration_years: int
-    total_semesters: int
+    number_of_semesters: int
     status: str = "ACTIVE"  # ACTIVE, INACTIVE, ARCHIVED
 
 class ProgramCreate(ProgramBase):
@@ -138,23 +138,65 @@ class SectionRead(SectionBase):
 # Exam Schemas
 # ----------------------------------------------------------------------
 
+from app.shared.enums import ExamType, ExamStatus, ExamResultStatus
+
 class ExamBase(BaseModel):
     name: str
-    exam_type: str
-    batch_id: int
-    semester_no: int
+    exam_type: ExamType
+    academic_year: str
+    batch_semester_id: int
     start_date: date
     end_date: date
-
+    description: Optional[str] = None
 
 class ExamCreate(ExamBase):
     pass
 
-
 class ExamRead(ExamBase):
     id: int
-    status: str
+    status: ExamStatus
+    
+    class Config:
+        from_attributes = True
+
+class InternalExamBase(BaseModel):
+    name: str
+    exam_code: str
+    academic_year: str
+    batch_id: int
+    batch_semester_id: int
+    exam_type: ExamType = ExamType.MID_TERM
+    start_date: date
+    end_date: date
+    total_marks: int = 100
+    passing_marks: int = 40
+    weightage: float = 0.3
+
+class InternalExamCreate(InternalExamBase):
+    pass
+
+class InternalExamRead(InternalExamBase):
+    id: int
+    is_published: bool
+    is_active: bool
     created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class StudentInternalMarksBase(BaseModel):
+    student_id: int
+    internal_exam_subject_id: int
+    marks_obtained: Optional[float] = None
+    is_absent: bool = False
+    remarks: Optional[str] = None
+
+class StudentInternalMarksCreate(StudentInternalMarksBase):
+    pass
+
+class StudentInternalMarksRead(StudentInternalMarksBase):
+    id: int
+    is_verified: bool
     
     class Config:
         from_attributes = True
@@ -164,19 +206,72 @@ class ExamRead(ExamBase):
 # Attendance Schemas
 # ----------------------------------------------------------------------
 
+from app.shared.enums import SessionStatus, AttendanceStatus
+
+class AttendanceSessionBase(BaseModel):
+    subject_id: int
+    faculty_id: int
+    program_id: int
+    program_year_id: int
+    semester: int
+    section: Optional[str] = None
+    practical_batch_id: Optional[int] = None
+    session_date: date
+    start_time: str # Format "HH:MM"
+    end_time: str # Format "HH:MM"
+    status: SessionStatus = SessionStatus.SCHEDULED
+
+class AttendanceSessionCreate(AttendanceSessionBase):
+    pass
+
+class AttendanceSessionRead(AttendanceSessionBase):
+    id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
 class AttendanceRecordBase(BaseModel):
     student_id: int
     session_id: int
-    status: str  # PRESENT, ABSENT, LATE, EXCUSED
-
+    status: AttendanceStatus
+    remarks: Optional[str] = None
 
 class AttendanceRecordCreate(AttendanceRecordBase):
     pass
 
-
 class AttendanceRecordRead(AttendanceRecordBase):
     id: int
-    marked_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class BulkAttendanceMark(BaseModel):
+    session_id: int
+    attendance_data: List[AttendanceRecordCreate]
+
+# ----------------------------------------------------------------------
+# Timetable Schemas
+# ----------------------------------------------------------------------
+
+from app.shared.enums import DayOfWeek, SlotType
+
+class TimetableSlotBase(BaseModel):
+    day_of_week: DayOfWeek
+    start_time: str
+    end_time: str
+    slot_type: SlotType = SlotType.THEORY
+    batch_semester_id: int
+    subject_id: Optional[int] = None
+    faculty_id: Optional[int] = None
+    room_id: Optional[int] = None
+    section: Optional[str] = None
+
+class TimetableSlotCreate(TimetableSlotBase):
+    pass
+
+class TimetableSlotRead(TimetableSlotBase):
+    id: int
     
     class Config:
         from_attributes = True

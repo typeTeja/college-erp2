@@ -185,13 +185,9 @@ export const admissionApi = {
    * Initiate payment for an application
    */
   initiatePayment: async (
-    id: number,
-    amount: number
+    id: number
   ): Promise<PaymentInitiateResponse> => {
-    const response = await api.post(`/payment/initiate`, {
-      application_id: id,
-      amount: amount,
-    });
+    const response = await api.post(`${BASE_URL}/applications/${id}/payment/initiate`);
     return response.data;
   },
 
@@ -223,7 +219,7 @@ export const admissionApi = {
    * Get payment configuration
    */
   getPaymentConfig: async (): Promise<PaymentConfigResponse> => {
-    const response = await api.get(`${BASE_URL}/payment-config`);
+    const response = await api.get(`${BASE_URL}/payment/config`);
     return response.data;
   },
 

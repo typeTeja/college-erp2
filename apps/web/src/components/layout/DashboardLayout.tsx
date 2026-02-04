@@ -78,7 +78,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
     // Get user role and permissions
     const userRole = user?.roles?.[0]?.toUpperCase() || 'SUPER_ADMIN';
-    const userPermissions = user?.roles || [];
+    const userPermissions = [...(user?.permissions || []), ...(user?.roles || [])];
 
     if (!user) {
         return null;

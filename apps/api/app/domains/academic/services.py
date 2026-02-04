@@ -173,20 +173,20 @@ class ProgramService:
         
         # RELOAD with department for response schema
         return session.exec(
-            select(Program).where(Program.id == program.id).options(selectinload(Program.department))
+            select(Program).where(Program.id == program.id)
         ).one()
 
     @staticmethod
     def get_program(session: Session, program_id: int) -> Optional[Program]:
         return session.exec(
-            select(Program).where(Program.id == program_id).options(selectinload(Program.department))
+            select(Program).where(Program.id == program_id)
         ).first()
 
     @staticmethod
     def get_programs(session: Session, skip: int = 0, limit: int = 100, 
                      type: Optional[ProgramType] = None, 
                      status: Optional[ProgramStatus] = None) -> List[Program]:
-        query = select(Program).options(selectinload(Program.department))
+        query = select(Program)
         if type:
             query = query.where(Program.program_type == type)
         if status:

@@ -14,23 +14,22 @@ class PdfService:
     """Service for generating PDF documents and uploading to storage"""
 
     @staticmethod
-    def generate_receipt(
+    def generate_receipt_bytes(
         application_number: str,
         applicant_name: str,
         payment_id: str,
         amount: float,
         payment_date: datetime,
         program_name: Optional[str] = None
-    ) -> str:
+    ) -> bytes:
         """
-        Generate PDF Receipt for Application Fee
-        Returns: S3 URL or relative path to generated PDF
+        Generate PDF Receipt in-memory and return bytes
         """
         try:
-            filename = f"Receipt_{application_number}_{payment_id}.pdf"
-            temp_path = os.path.join(tempfile.gettempdir(), filename)
+            from io import BytesIO
+            buffer = BytesIO()
             
-            doc = SimpleDocTemplate(temp_path, pagesize=letter)
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
             elements = []
             styles = getSampleStyleSheet()
             
@@ -73,24 +72,43 @@ class PdfService:
             
             doc.build(elements)
             
-            # Upload to Storage (S3/MinIO)
-            with open(temp_path, "rb") as f:
-                content = f.read()
-                file_url = storage_service.upload_bytes(
-                    file_content=content,
-                    filename=filename,
-                    content_type="application/pdf",
-                    prefix="receipts"
-                )
-            
-            # Cleanup
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-            
-            return file_url
+            buffer.seek(0)
+            return buffer.getvalue()
             
         except Exception as e:
-            print(f"Error generating receipt PDF: {str(e)}")
+            print(f"Error generating receipt PDF bytes: {str(e)}")
+            return b""
+
+    @staticmethod
+    def generate_receipt(
+        application_number: str,
+        applicant_name: str,
+        payment_id: str,
+        amount: float,
+        payment_date: datetime,
+        program_name: Optional[str] = None
+    ) -> str:
+        """
+        Generate PDF Receipt for Application Fee
+        Returns: S3 URL or relative path to generated PDF
+        """
+        # ... (Existing implementation kept for backward compatibility if needed)
+        # We can implement it using generate_receipt_bytes to avoid duplication
+        
+        pdf_bytes = PdfService.generate_receipt_bytes(
+            application_number, applicant_name, payment_id, amount, payment_date, program_name
+        )
+        
+        if not pdf_bytes:
             return ""
+            
+        filename = f"Receipt_{application_number}_{payment_id}.pdf"
+        
+        return storage_service.upload_bytes(
+             file_content=pdf_bytes,
+             filename=filename,
+             content_type="application/pdf",
+             prefix="receipts"
+        )
 
 pdf_service = PdfService()

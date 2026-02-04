@@ -25,7 +25,7 @@ export default function QuickApplyPage() {
     const { data: programs } = useQuery<Program[]>({
         queryKey: ['programs'],
         queryFn: async () => {
-            const response = await api.get('/programs')
+            const response = await api.get('/academic/programs')
             return response.data
         }
     })
@@ -77,6 +77,33 @@ export default function QuickApplyPage() {
             console.log('Form Submit: Saving to session storage:', storageData)
             sessionStorage.setItem('quickApplyResponse', JSON.stringify(storageData))
 
+            // Payment Logic
+            if (paymentConfig?.fee_enabled && formData.payment_mode === 'ONLINE') {
+                console.log('Initiating Payment...');
+                try {
+                    const paymentResp = await admissionApi.initiatePayment(response.id); // Assuming response has ID
+                    if (paymentResp.status === 'success' && paymentResp.payment_url) {
+                        console.log('Redirecting to Payment Gateway:', paymentResp.payment_url);
+                        window.location.href = paymentResp.payment_url;
+                        return;
+                    } else {
+                        throw new Error(paymentResp.error || "Payment initiation failed");
+                    }
+                } catch (payErr: any) {
+                    console.error("Payment Error:", payErr);
+                    toast({
+                        title: "Payment Error",
+                        description: payErr.message || "Could not initiate payment. Please try again from dashboard.",
+                        variant: "destructive"
+                    });
+                    // Redirect to success/dashboard anyway? No, stay here or go to failure.
+                    // The application is created, so maybe redirect to dashboard/success with warning?
+                    // Let's redirect to success but they will see "Pending Payment" status
+                    router.push('/apply/success?status=payment_failed');
+                    return;
+                }
+            }
+
             toast({
                 title: "Application Submitted!",
                 description: response.message,
@@ -84,7 +111,7 @@ export default function QuickApplyPage() {
 
             console.log('Form Submit: Redirecting to success page')
 
-            // Redirect to success page
+            // Redirect to success page (for Offline or No Fee)
             router.push('/apply/success')
         } catch (error: any) {
             console.error('Quick Apply error:', error)

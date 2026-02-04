@@ -76,6 +76,7 @@ class AuthUserInfo(BaseModel):
     is_active: bool
     is_superuser: bool
     roles: List[str] = []
+    permissions: List[str] = []
     
     class Config:
         from_attributes = True

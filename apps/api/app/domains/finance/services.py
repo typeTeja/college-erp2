@@ -170,7 +170,7 @@ import logging
 from typing import Dict, Any, Optional
 from app.config.settings import settings
 from sqlmodel import Session, select
-from app.models.settings.system import SystemSetting
+from app.domains.system.models import SystemSetting
 
 logger = logging.getLogger(__name__)
 

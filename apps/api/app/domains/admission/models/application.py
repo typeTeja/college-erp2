@@ -4,7 +4,11 @@ from sqlmodel import SQLModel, Field, Relationship
 from app.shared.enums import (
     ApplicationPaymentStatus,
     ApplicationStatus,
-    FeeMode
+    FeeMode,
+    Religion,
+    CasteCategory,
+    ActivityLevel,
+    BloodGroup
 )
 
 if TYPE_CHECKING:
@@ -16,6 +20,13 @@ if TYPE_CHECKING:
     from .activity import ApplicationActivityLog
     from .entrance import EntranceExamScore, EntranceExamResult
     from .tentative import TentativeAdmission, ScholarshipCalculation
+    from .application_details import (
+        ApplicationParent,
+        ApplicationEducation,
+        ApplicationAddress,
+        ApplicationBankDetails,
+        ApplicationHealth
+    )
 
 class Application(SQLModel, table=True):
     """Student admission application model"""
@@ -40,6 +51,32 @@ class Application(SQLModel, table=True):
     previous_marks_percentage: Optional[float] = None
     applied_for_scholarship: bool = Field(default=False)
     hostel_required: bool = Field(default=False)
+    
+    # Personal Details (Extended)
+    date_of_birth: Optional[datetime] = None
+    blood_group: Optional[BloodGroup] = None
+    nationality: str = Field(default="Indian", max_length=100)
+    religion: Optional[Religion] = None
+    caste_category: Optional[CasteCategory] = None
+    identification_mark_1: Optional[str] = Field(default=None, max_length=200)
+    identification_mark_2: Optional[str] = Field(default=None, max_length=200)
+    ssc_hall_ticket: Optional[str] = Field(default=None, max_length=100)
+    medium_of_study: Optional[str] = Field(default=None, max_length=100)
+    place_of_birth: Optional[str] = Field(default=None, max_length=200)
+    native_place: Optional[str] = Field(default=None, max_length=200)
+    native_state: Optional[str] = Field(default=None, max_length=100)
+    
+    # Extra-Curricular
+    extra_curricular_activities: Optional[str] = None
+    activity_level: Optional[ActivityLevel] = None
+    activity_sponsored_by: Optional[str] = Field(default=None, max_length=200)
+    hobbies: Optional[str] = None
+    
+    # Declarations
+    student_declaration_accepted: bool = Field(default=False)
+    parent_declaration_accepted: bool = Field(default=False)
+    declaration_date: Optional[datetime] = None
+    declaration_place: Optional[str] = Field(default=None, max_length=200)
     
     # Photo
     photo_url: Optional[str] = None
@@ -128,3 +165,10 @@ class Application(SQLModel, table=True):
     entrance_result: Optional["EntranceExamResult"] = Relationship(back_populates="admission")
     tentative_admissions: List["TentativeAdmission"] = Relationship(back_populates="application")
     scholarship_calculation: Optional["ScholarshipCalculation"] = Relationship(back_populates="application")
+    
+    # New Relationships for Application Details
+    parents: List["ApplicationParent"] = Relationship(back_populates="application")
+    education_history: List["ApplicationEducation"] = Relationship(back_populates="application")
+    addresses: List["ApplicationAddress"] = Relationship(back_populates="application")
+    bank_details: Optional["ApplicationBankDetails"] = Relationship(back_populates="application")
+    health_info: Optional["ApplicationHealth"] = Relationship(back_populates="application")
