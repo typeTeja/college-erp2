@@ -98,37 +98,37 @@ const nextConfig = {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'institute' }],
                 destination: '/setup/institute',
-                permanent: false, // Temporary (302) for first 4 weeks
+                permanent: true, // Temporary (302) for first 4 weeks
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'departments' }],
                 destination: '/setup/departments',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'programs' }],
                 destination: '/setup/programs',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'academic-years' }],
                 destination: '/setup/academic-years',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'batches' }],
                 destination: '/setup/batches',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'designations' }],
                 destination: '/setup/designations',
-                permanent: false,
+                permanent: true,
             },
             
             // Domain Configuration redirects (Week 3)
@@ -137,51 +137,51 @@ const nextConfig = {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'regulations' }],
                 destination: '/config/academic/regulations',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'academic-structure' }],
                 destination: '/config/academic/structure',
-                permanent: false,
+                permanent: true,
             },
             // Finance Configuration
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'fee-heads' }],
                 destination: '/config/finance/fee-heads',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'scholarship-slabs' }],
                 destination: '/config/finance/scholarships',
-                permanent: false,
+                permanent: true,
             },
             // Admission Configuration
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'admission-settings' }],
                 destination: '/config/admission/settings',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'boards' }],
                 destination: '/config/admission/boards',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'reservations' }],
                 destination: '/config/admission/categories',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'lead-sources' }],
                 destination: '/config/admission/sources',
-                permanent: false,
+                permanent: true,
             },
             
             // System Administration redirects (Week 4)
@@ -189,13 +189,13 @@ const nextConfig = {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'integrations' }],
                 destination: '/system/integrations',
-                permanent: false,
+                permanent: true,
             },
             {
                 source: '/settings',
                 has: [{ type: 'query', key: 'tab', value: 'logs' }],
                 destination: '/system/audit',
-                permanent: false,
+                permanent: true,
             },
         ];
     },
