@@ -89,6 +89,49 @@ const nextConfig = {
         ],
         formats: ['image/avif', 'image/webp'],
     },
+
+    // Redirects for frontend architecture migration
+    async redirects() {
+        return [
+            // Institutional Setup redirects (Week 2)
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'institute' }],
+                destination: '/setup/institute',
+                permanent: false, // Temporary (302) for first 4 weeks
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'departments' }],
+                destination: '/setup/departments',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'programs' }],
+                destination: '/setup/programs',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'academic-years' }],
+                destination: '/setup/academic-years',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'batches' }],
+                destination: '/setup/batches',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'designations' }],
+                destination: '/setup/designations',
+                permanent: false,
+            },
+        ];
+    },
 };
 
 // Build-time validation (Layer 6)
