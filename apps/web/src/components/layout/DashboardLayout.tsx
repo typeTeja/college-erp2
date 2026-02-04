@@ -45,13 +45,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
                 {/* Announcement Banner */}
                 <AnnouncementBanner
-                    title="New Navigation & Dashboards Available!"
-                    message="We've redesigned the navigation and dashboards for a better experience. Check out the new features and improvements."
-                    ctaText="View What's New"
+                    title="Welcome to the New College ERP Experience!"
+                    message="We've completed the upgrade to the new navigation and dashboards. Everything you need is now faster and easier to find."
+                    ctaText="Take a Tour"
                     ctaLink="/docs/whats-new"
-                    variant="info"
+                    variant="success"
                     dismissible
-                    storageKey="announcement-new-nav-feb-2026"
+                    storageKey="announcement-launch-v1-feb-2026"
                 />
 
                 {/* Page Content */}

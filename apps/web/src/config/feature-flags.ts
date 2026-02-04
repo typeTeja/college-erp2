@@ -26,7 +26,7 @@ export const FEATURE_FLAGS = {
   FACULTY_DASHBOARD_V2: process.env.NEXT_PUBLIC_FACULTY_V2 === 'true',
   
   // Gradual rollout percentage (0-100)
-  ROLLOUT_PERCENTAGE: parseInt(process.env.NEXT_PUBLIC_ROLLOUT_PERCENT || '50', 10)
+  ROLLOUT_PERCENTAGE: parseInt(process.env.NEXT_PUBLIC_ROLLOUT_PERCENT || '100', 10)
 } as const;
 
 /**
