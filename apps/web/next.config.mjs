@@ -130,6 +130,59 @@ const nextConfig = {
                 destination: '/setup/designations',
                 permanent: false,
             },
+            
+            // Domain Configuration redirects (Week 3)
+            // Academic Configuration
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'regulations' }],
+                destination: '/config/academic/regulations',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'academic-structure' }],
+                destination: '/config/academic/structure',
+                permanent: false,
+            },
+            // Finance Configuration
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'fee-heads' }],
+                destination: '/config/finance/fee-heads',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'scholarship-slabs' }],
+                destination: '/config/finance/scholarships',
+                permanent: false,
+            },
+            // Admission Configuration
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'admission-settings' }],
+                destination: '/config/admission/settings',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'boards' }],
+                destination: '/config/admission/boards',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'reservations' }],
+                destination: '/config/admission/categories',
+                permanent: false,
+            },
+            {
+                source: '/settings',
+                has: [{ type: 'query', key: 'tab', value: 'lead-sources' }],
+                destination: '/config/admission/sources',
+                permanent: false,
+            },
         ];
     },
 };
