@@ -21,7 +21,9 @@ class Subject(SQLModel, table=True):
     description: Optional[str] = None
     
     # Relationships
+    department_id: Optional[int] = Field(default=None, foreign_key="department.id")
     faculty_id: Optional[int] = Field(default=None, foreign_key="faculty.id")
+    
     faculty: Optional["Faculty"] = Relationship(back_populates="subjects")
     
     enrollments: List["Enrollment"] = Relationship(back_populates="subject")

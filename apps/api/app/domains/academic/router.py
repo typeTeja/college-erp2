@@ -11,7 +11,7 @@ from typing import List, Optional
 
 from app.api.deps import get_session, get_current_user
 from app.domains.auth.models import AuthUser as User
-from app.domains.hr.schemas import DepartmentRead
+from app.domains.system.schemas import DepartmentRead
 from app.domains.academic.exceptions import (
     AcademicYearNotFoundError, BatchNotFoundError,
     RegulationNotFoundError, SectionNotFoundError

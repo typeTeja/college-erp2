@@ -138,10 +138,17 @@ class AdmissionService:
         
         initial_status = ApplicationStatus.APPLIED 
         
+        # Fetch Program to get Department ID
+        from app.domains.academic.models import Program
+        program = session.get(Program, program_id)
+        department_id = program.department_id if program else None
+
         application = Application(
             application_number=app_number,
             name=name, email=email, phone=phone, gender=gender,
-            program_id=program_id, state=state, board=board,
+            program_id=program_id,
+            department_id=department_id,
+            state=state, board=board,
             group_of_study=group_of_study,
             status=initial_status,
             quick_apply_completed_at=datetime.utcnow(),

@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { programService } from '@/utils/program-service';
+import { institutionalService } from '@/utils/institutional-service';
 import { Program, ProgramCreateData } from '@/types/program';
 import { ProgramType, ProgramStatus } from '@/types/academic-base';
 import { toast } from 'sonner';
@@ -25,9 +26,9 @@ export function ProgramMaster() {
     const [editingProgram, setEditingProgram] = useState<Program | null>(null);
 
     const { data: programs = [], isLoading } = programService.usePrograms();
+    const { data: departments = [] } = institutionalService.useDepartments();
     const createMutation = programService.useCreateProgram();
     const updateMutation = programService.useUpdateProgram();
-    // const deleteMutation = programService.useDeleteProgram(); // Assuming it exists in service
 
     const filteredPrograms = programs.filter(p => 
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -42,6 +43,7 @@ export function ProgramMaster() {
             code: formData.get('code') as string,
             alias: formData.get('alias') as string || null,
             program_type: formData.get('program_type') as ProgramType,
+            department_id: formData.get('department_id') ? parseInt(formData.get('department_id') as string) : null,
             duration_years: parseInt(formData.get('duration_years') as string),
             number_of_semesters: parseInt(formData.get('number_of_semesters') as string),
             status: formData.get('status') as ProgramStatus || ProgramStatus.ACTIVE,
@@ -68,6 +70,7 @@ export function ProgramMaster() {
 
     return (
         <div className="space-y-4">
+            {/* ... search input code ... */}
             <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                 <div className="relative w-72">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -104,6 +107,20 @@ export function ProgramMaster() {
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="code" className="text-right">Code</Label>
                                     <Input id="code" name="code" defaultValue={editingProgram?.code} className="col-span-3" required />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="department_id" className="text-right">Department</Label>
+                                    <select 
+                                        id="department_id" 
+                                        name="department_id" 
+                                        defaultValue={editingProgram?.department_id || ''}
+                                        className="col-span-3 flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select Department</option>
+                                        {departments.map((dept) => (
+                                            <option key={dept.id} value={dept.id}>{dept.department_name} ({dept.department_code})</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="program_type" className="text-right">Type</Label>
@@ -158,6 +175,7 @@ export function ProgramMaster() {
                             <TableRow>
                                 <TableHead>Program Name</TableHead>
                                 <TableHead>Code</TableHead>
+                                <TableHead>Department</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Duration</TableHead>
                                 <TableHead>Status</TableHead>
@@ -167,7 +185,7 @@ export function ProgramMaster() {
                         <TableBody>
                             {filteredPrograms.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                                    <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                                         No programs found.
                                     </TableCell>
                                 </TableRow>
@@ -176,6 +194,9 @@ export function ProgramMaster() {
                                     <TableRow key={program.id}>
                                         <TableCell className="font-medium text-slate-900">{program.name}</TableCell>
                                         <TableCell className="font-mono text-xs">{program.code}</TableCell>
+                                        <TableCell>
+                                            {departments.find(d => d.id === program.department_id)?.department_name || '-'}
+                                        </TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="bg-slate-50">
                                                 {program.program_type}

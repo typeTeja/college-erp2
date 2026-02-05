@@ -11,6 +11,7 @@ import { BulkBatchSetupRequest } from '@/types/bulk-setup';
 import { Program } from '@/types/program';
 import { Regulation } from '@/types/regulation';
 import { academicYearService } from '@/utils/academic-year-service';
+import { institutionalService } from '@/utils/institutional-service';
 import { api } from '@/utils/api';
 
 interface BulkSetupWizardProps {
@@ -29,6 +30,7 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
     const currentYear = new Date().getFullYear();
 
     const { data: academicYears = [] } = academicYearService.useAcademicYears();
+    const { data: departments = [] } = institutionalService.useDepartments();
 
     const [formData, setFormData] = useState<Partial<BulkBatchSetupRequest>>({
         joining_year: currentYear,
@@ -254,9 +256,14 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                     onChange={(e) => setFormData({ ...formData, program_id: parseInt(e.target.value), regulation_id: undefined })}
                                 >
                                     <option value="">Select a program</option>
-                                    {programs.map((p) => (
-                                        <option key={p.id} value={p.id}>{p.name} ({p.code})</option>
-                                    ))}
+                                    {programs.map((p) => {
+                                        const deptName = departments.find(d => d.id === p.department_id)?.department_name;
+                                        return (
+                                            <option key={p.id} value={p.id}>
+                                                {p.name} ({p.code}) {deptName ? `- ${deptName}` : ''}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
                             </div>
                             <div>

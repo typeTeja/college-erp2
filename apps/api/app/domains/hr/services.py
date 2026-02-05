@@ -24,12 +24,13 @@ from app.domains.hr.exceptions import (
 )
 
     # ----------------------------------------------------------------------
-    # Department Management
+    # Department Logic Moved to System Domain
     # ----------------------------------------------------------------------
 
-    # Department Logic Moved to System Domain
+class HRService:
+    def __init__(self, session: Session):
+        self.session = session
 
-    
     # ----------------------------------------------------------------------
     # Shift Management
     # ----------------------------------------------------------------------

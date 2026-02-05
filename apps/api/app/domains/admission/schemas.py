@@ -43,6 +43,7 @@ class ApplicationBase(BaseModel):
     phone: str = Field(..., pattern=r'^\d{10}$', description="10-digit phone number")
     gender: str = Field(..., pattern=r'^(MALE|FEMALE|OTHER)$')
     program_id: int = Field(..., gt=0)
+    department_id: Optional[int] = None
     state: str = Field(..., min_length=1, max_length=100)
     board: str = Field(..., min_length=1, max_length=100)
     group_of_study: str = Field(..., min_length=1, max_length=50)
@@ -415,6 +416,7 @@ class QuickApplyCreate(BaseModel):
     phone: str
     gender: str
     program_id: int
+    department_id: Optional[int] = None
     state: str
     board: str
     group_of_study: str

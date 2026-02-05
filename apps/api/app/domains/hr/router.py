@@ -13,6 +13,7 @@ from typing import List, Optional
 
 from app.api.deps import get_session, get_current_user
 from app.domains.hr.services import HRService
+from app.domains.hr.schemas import (
     DesignationCreate, DesignationUpdate, DesignationRead,
     StaffCreate, StaffUpdate, StaffRead,
     FacultyCreate, FacultyUpdate, FacultyRead,

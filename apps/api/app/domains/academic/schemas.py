@@ -118,6 +118,7 @@ class SubjectBase(BaseModel):
     name: str
     code: str
     description: Optional[str] = None
+    department_id: Optional[int] = None
     faculty_id: Optional[int] = None
     is_active: bool = True
 
@@ -280,6 +281,12 @@ class StudentSectionAssignmentBase(BaseModel):
 
 class StudentSectionAssignmentCreate(StudentSectionAssignmentBase):
     pass
+
+class StudentSectionAssignmentRead(StudentSectionAssignmentBase):
+    id: int
+    
+    class Config:
+        from_attributes = True
 
 # ----------------------------------------------------------------------
 # University Examination Schemas

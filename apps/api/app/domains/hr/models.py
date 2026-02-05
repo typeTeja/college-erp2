@@ -12,7 +12,7 @@ from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
-    from app.models.department import Department
+    from app.domains.system.models import Department
     from app.domains.auth.models import AuthUser as User
     from app.domains.academic.models import Subject
 

@@ -23,7 +23,7 @@ from .models import (
     StudentSemesterHistory, StudentPromotionLog, StudentRegulationMigration
 )
 from app.domains.academic.models import Program
-from app.domains.hr.models import Department
+from app.domains.system.models import Department
 from app.domains.academic.schemas import (
     ProgramCreate, AcademicYearCreate,
     BatchCreate, SectionCreate,

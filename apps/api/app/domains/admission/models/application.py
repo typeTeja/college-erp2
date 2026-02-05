@@ -39,6 +39,7 @@ class Application(SQLModel, table=True):
     phone: str = Field(index=True)
     gender: str
     program_id: int = Field(foreign_key="program.id", index=True)
+    department_id: Optional[int] = Field(default=None, foreign_key="department.id", index=True)
     state: str
     board: str
     group_of_study: str # MPC, BiPC, etc.
