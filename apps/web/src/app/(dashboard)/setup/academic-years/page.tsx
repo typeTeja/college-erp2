@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { AcademicYearTab } from '../../settings/MasterDataTabs';
+import { AcademicYearMaster } from '@/components/academics/AcademicYearMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -51,7 +51,7 @@ export default function AcademicYearsPage() {
             badge="setup"
             movedFrom="Settings > Academic Years"
         >
-            <AcademicYearTab />
+            <AcademicYearMaster />
         </ConfigPageTemplate>
     );
 }

@@ -381,5 +381,35 @@ class ImportLogRead(BaseModel):
     duplicate_count: int
     status: str
     
+    
+    class Config:
+        from_attributes = True
+
+
+# ----------------------------------------------------------------------
+# Core Master Schemas
+# ----------------------------------------------------------------------
+
+class DepartmentBase(BaseModel):
+    department_name: str
+    department_code: str
+    description: Optional[str] = None
+    hod_faculty_id: Optional[int] = None
+    is_active: bool = True
+
+class DepartmentCreate(DepartmentBase):
+    pass
+
+class DepartmentUpdate(BaseModel):
+    department_name: Optional[str] = None
+    department_code: Optional[str] = None
+    description: Optional[str] = None
+    hod_faculty_id: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class DepartmentRead(DepartmentBase):
+    id: int
+    created_at: datetime
+    
     class Config:
         from_attributes = True

@@ -24,11 +24,11 @@ from app.domains.system.models import (
     PermissionAuditLog,
     FileMetadata,
     ImportLog,
+    Department,
 )
 
 # HR Domain Models
 from app.domains.hr.models import (
-    Department,
     Designation,
     Staff,
     Faculty,

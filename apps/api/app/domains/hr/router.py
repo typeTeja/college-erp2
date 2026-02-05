@@ -13,7 +13,6 @@ from typing import List, Optional
 
 from app.api.deps import get_session, get_current_user
 from app.domains.hr.services import HRService
-from app.domains.hr.schemas import (
     DesignationCreate, DesignationUpdate, DesignationRead,
     StaffCreate, StaffUpdate, StaffRead,
     FacultyCreate, FacultyUpdate, FacultyRead,
@@ -21,12 +20,21 @@ from app.domains.hr.schemas import (
 )
 from app.domains.auth.models import AuthUser as User
 from app.domains.hr.exceptions import (
-    DesignationNotFoundError, StaffNotFoundError, FacultyNotFoundError,
+    DesignationNotFoundError, 
+    StaffNotFoundError, FacultyNotFoundError,
     DuplicateEmailError, DuplicateMobileError
 )
 
 
 router = APIRouter()
+
+
+
+# ----------------------------------------------------------------------
+# Department Endpoints
+# ----------------------------------------------------------------------
+
+# Endpoints Moved to System Domain
 
 
 # ----------------------------------------------------------------------

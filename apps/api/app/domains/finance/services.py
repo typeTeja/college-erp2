@@ -21,7 +21,7 @@ from fastapi import HTTPException
 
 from .models import (
     FeeStructure, StudentFee, StudentFeeInstallment,
-    FeePayment, FeeConcession, FeeFine
+    FeePayment, FeeConcession, FeeFine, FeeHead
 )
 from app.shared.enums import PaymentStatus
 from app.domains.student.models import Student
@@ -94,6 +94,60 @@ class FeeService:
         
         # In actual project, this should call generate_installments
         return student_fee
+
+    # ----------------------------------------------------------------------
+    # Fee Head Management
+    # ----------------------------------------------------------------------
+    
+    @staticmethod
+    def list_fee_heads(session: Session, is_active: Optional[bool] = None) -> List[FeeHead]:
+        """List all fee heads"""
+        stmt = select(FeeHead)
+        if is_active is not None:
+            stmt = stmt.where(FeeHead.is_active == is_active)
+        return list(session.exec(stmt).all())
+    
+    @staticmethod
+    def create_fee_head(session: Session, data: dict) -> FeeHead:
+        """Create a new fee head"""
+        # Check duplicate
+        existing = session.exec(select(FeeHead).where(FeeHead.code == data["code"])).first()
+        if existing:
+            raise HTTPException(status_code=400, detail=f"Fee Head with code {data['code']} already exists")
+            
+        fee_head = FeeHead(**data)
+        session.add(fee_head)
+        session.commit()
+        session.refresh(fee_head)
+        return fee_head
+    
+    @staticmethod
+    def update_fee_head(session: Session, id: int, data: dict) -> FeeHead:
+        """Update a fee head"""
+        fee_head = session.get(FeeHead, id)
+        if not fee_head:
+            raise HTTPException(status_code=404, detail="Fee Head not found")
+            
+        for key, value in data.items():
+            setattr(fee_head, key, value)
+            
+        fee_head.updated_at = datetime.utcnow()
+        session.add(fee_head)
+        session.commit()
+        session.refresh(fee_head)
+        return fee_head
+    
+    @staticmethod
+    def delete_fee_head(session: Session, id: int) -> bool:
+        """Delete a fee head (soft delete)"""
+        fee_head = session.get(FeeHead, id)
+        if not fee_head:
+            raise HTTPException(status_code=404, detail="Fee Head not found")
+            
+        # Hard delete for now as per simple CRUD
+        session.delete(fee_head)
+        session.commit()
+        return True
 
 fee_service = FeeService()
 

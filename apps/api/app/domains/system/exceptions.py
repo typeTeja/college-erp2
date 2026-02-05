@@ -53,3 +53,13 @@ class FileNotFoundError(SystemDomainError):
 class ImportError(SystemDomainError):
     """Raised when data import fails"""
     pass
+
+
+class DepartmentNotFoundError(SystemDomainError):
+    """Raised when a department is not found"""
+    pass
+
+
+class DepartmentAlreadyExistsError(SystemDomainError):
+    """Raised when a department already exists"""
+    pass

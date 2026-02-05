@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { BoardTab } from '../../../settings/MasterDataTabs';
+import { BoardMaster } from '@/components/admission/BoardMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function BoardsPage() {
             badge="config"
             movedFrom="Settings > Boards/Universities"
         >
-            <BoardTab />
+            <BoardMaster />
         </ConfigPageTemplate>
     );
 }

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTimeSlots, useTimetableSchedule, useCreateTimetableEntry } from "@/hooks/use-timetable";
-import { getAcademicBatches, getBatchSemesters } from "@/utils/master-data-service";
+import { batchService } from "@/utils/batch-service";
+import { academicYearService } from "@/utils/academic-year-service";
 import { DayOfWeek, ClassSchedule, CreateScheduleDTO, TimeSlot } from "@/types/timetable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,12 @@ export function TimetableBuilder() {
     const { toast } = useToast();
     const queryClient = useQueryClient();
 
+    // Get Active Academic Year
+    const { data: currentYear } = academicYearService.useCurrentYear();
+
     // Selection State
-    const [academicYearId, setAcademicYearId] = useState<number>(1); // Default to current
-    const [batchId, setBatchId] = useState<number | null>(null);
-    const [batchSemesterId, setBatchSemesterId] = useState<number | null>(null);
+    const [selectedBatchId, setSelectedBatchId] = useState<number | null>(null);
+    const [selectedBatchSemesterId, setSelectedBatchSemesterId] = useState<number | null>(null);
     const [sectionId, setSectionId] = useState<number | undefined>(undefined);
 
     // Modal State
@@ -35,26 +38,19 @@ export function TimetableBuilder() {
     const [roomId, setRoomId] = useState("");
 
     // Queries
-    const { data: batches } = useQuery({
-        queryKey: ["academic-batches", "active"],
-        queryFn: () => getAcademicBatches(undefined, true),
-    });
+    const { data: batches = [] } = batchService.useBatches();
 
-    const { data: semesters } = useQuery({
-        queryKey: ["batch-semesters", batchId],
-        queryFn: () => getBatchSemesters(batchId!),
-        enabled: !!batchId,
-    });
+    const { data: semesters = [] } = batchService.useBatchSemesters(selectedBatchId!);
 
     const { data: slots } = useTimeSlots();
 
-    const { data: schedule, isLoading: scheduleLoading } = useTimetableSchedule(academicYearId, batchSemesterId, sectionId);
+    const { data: schedule, isLoading: scheduleLoading } = useTimetableSchedule(currentYear?.id || 0, selectedBatchSemesterId, sectionId);
 
     // Mutations
     const createEntryMutation = useCreateTimetableEntry();
 
     const handleCellClick = (day: DayOfWeek, periodId: number) => {
-        if (!batchSemesterId) {
+        if (!selectedBatchSemesterId) {
             toast({ title: "Select Batch Semester", description: "Please select a batch and semester first", variant: "destructive" });
             return;
         }
@@ -64,11 +60,11 @@ export function TimetableBuilder() {
     };
 
     const handleSave = () => {
-        if (!selectedDay || !selectedPeriod || !batchSemesterId) return;
+        if (!selectedDay || !selectedPeriod || !selectedBatchSemesterId) return;
 
         const payload: CreateScheduleDTO = {
-            academic_year_id: academicYearId,
-            batch_semester_id: batchSemesterId,
+            academic_year_id: currentYear?.id || 0,
+            batch_semester_id: selectedBatchSemesterId,
             section_id: sectionId,
             day_of_week: selectedDay,
             period_id: selectedPeriod,
@@ -115,13 +111,13 @@ export function TimetableBuilder() {
                         {/* Batch Selector */}
                         <div className="w-[200px]">
                             <Label>Academic Batch</Label>
-                            <Select value={batchId?.toString()} onValueChange={(v) => { setBatchId(Number(v)); setBatchSemesterId(null); }}>
+                            <Select value={selectedBatchId?.toString()} onValueChange={(v) => { setSelectedBatchId(Number(v)); setSelectedBatchSemesterId(null); }}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Batch" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {batches?.map(b => (
-                                        <SelectItem key={b.id} value={b.id.toString()}>{b.name} ({b.code})</SelectItem>
+                                        <SelectItem key={b.id} value={b.id.toString()}>{b.batch_name} ({b.batch_code})</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -131,9 +127,9 @@ export function TimetableBuilder() {
                         <div className="w-[200px]">
                             <Label>Semester</Label>
                             <Select
-                                value={batchSemesterId?.toString() || ""}
-                                onValueChange={(v) => setBatchSemesterId(Number(v))}
-                                disabled={!batchId}
+                                value={selectedBatchSemesterId?.toString() || ""}
+                                onValueChange={(v) => setSelectedBatchSemesterId(Number(v))}
+                                disabled={!selectedBatchId}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Semester" />
@@ -141,7 +137,7 @@ export function TimetableBuilder() {
                                 <SelectContent>
                                     {semesters?.map(s => (
                                         <SelectItem key={s.id} value={s.id.toString()}>
-                                            Sem {s.semester_no} ({s.semester_name})
+                                            Sem {s.semester_number}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -149,7 +145,7 @@ export function TimetableBuilder() {
                         </div>
                     </div>
 
-                    {!batchSemesterId ? (
+                    {!selectedBatchSemesterId ? (
                         <div className="text-center py-10 border rounded-lg bg-slate-50 text-slate-500">
                             Please select a Batch and Semester to view/edit timetable.
                         </div>

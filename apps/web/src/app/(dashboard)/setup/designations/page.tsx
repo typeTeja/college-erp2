@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { DesignationTab } from '../../settings/MasterDataTabs';
+import { DesignationMaster } from '@/components/academics/DesignationMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function DesignationsPage() {
             badge="setup"
             movedFrom="Settings > Designations"
         >
-            <DesignationTab />
+            <DesignationMaster />
         </ConfigPageTemplate>
     );
 }

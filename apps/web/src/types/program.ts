@@ -1,52 +1,25 @@
-export enum ProgramType {
-    UG = "UG",
-    PG = "PG",
-    DIPLOMA = "DIPLOMA",
-    CERTIFICATE = "CERTIFICATE",
-    PHD = "PHD"
-}
-
-export enum ProgramStatus {
-    DRAFT = "DRAFT",
-    ACTIVE = "ACTIVE",
-    ARCHIVED = "ARCHIVED"
-}
-
-// Semester interface removed (use BatchSemester from academic-batch.ts)
-
-export interface ProgramYear {
-    id: number;
-    name: string;
-    year_number: number;
-    is_active: boolean;
-    // semesters removed - viewed through Batch or Regulation
-}
+import { ProgramType, ProgramStatus } from './academic-base';
 
 export interface Program {
-    id: number;
-    code: string;
-    name: string;
-    program_type: ProgramType;
-    status: ProgramStatus;
-    duration_years: number;
-    description?: string;
-    department_id: number;
-    department_name: string;
-    eligibility_criteria?: string;
-    program_outcomes?: string;
-    total_credits: number;
-    is_active: boolean;
-    years?: ProgramYear[];
+  id: number;
+  code: string;
+  name: string;
+  alias?: string | null;
+  program_type: ProgramType;
+  department_id: number | null;
+  duration_years: number;
+  number_of_semesters: number;
+  status: ProgramStatus;
+  created_at: string;
 }
 
 export interface ProgramCreateData {
-    code: string;
-    name: string;
-    program_type: ProgramType;
-    duration_years: number;
-    department_id: number;
-    description?: string;
-    eligibility_criteria?: string;
-    program_outcomes?: string;
-    total_credits?: number;
+  code: string;
+  name: string;
+  alias?: string | null;
+  program_type: ProgramType;
+  department_id?: number | null;
+  duration_years: number;
+  number_of_semesters: number;
+  status?: ProgramStatus;
 }

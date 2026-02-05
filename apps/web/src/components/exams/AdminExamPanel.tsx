@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { examService } from '@/utils/exam-service';
-import { getAcademicBatches, getBatchSemesters } from '@/utils/master-data-service';
+import { batchService } from '@/utils/batch-service';
+import { academicYearService } from '@/utils/academic-year-service';
 import { CreateExamDTO, ExamType } from '@/types/exam';
 import { toast } from "sonner";
 import { formatError } from '@/utils/error-handler';
@@ -17,11 +18,14 @@ export function AdminExamPanel() {
     const queryClient = useQueryClient();
 
     // Selection State
-    const [batchId, setBatchId] = useState<number | null>(null);
+    const [selectedBatchId, setSelectedBatchId] = useState<number | null>(null);
+
+    // Get Active Academic Year
+    const { data: currentYear } = academicYearService.useCurrentYear();
 
     const [newExam, setNewExam] = useState<Partial<CreateExamDTO>>({
         name: '',
-        academic_year: '2024-2025', // Should ideally come from active academic year
+        academic_year: currentYear?.year || '',
         batch_semester_id: undefined,
         exam_type: ExamType.MID_TERM,
         start_date: '',
@@ -29,16 +33,9 @@ export function AdminExamPanel() {
     });
 
     // Queries
-    const { data: batches } = useQuery({
-        queryKey: ["academic-batches", "active"],
-        queryFn: () => getAcademicBatches(undefined, true),
-    });
+    const { data: batches = [] } = batchService.useBatches();
 
-    const { data: semesters } = useQuery({
-        queryKey: ["batch-semesters", batchId],
-        queryFn: () => getBatchSemesters(batchId!),
-        enabled: !!batchId,
-    });
+    const { data: semesters = [] } = batchService.useBatchSemesters(selectedBatchId!);
 
     const { data: exams, isLoading } = useQuery({
         queryKey: ['exams'],
@@ -86,13 +83,13 @@ export function AdminExamPanel() {
                         {/* Selection Controls */}
                         <div className="space-y-2">
                             <Label>Academic Batch</Label>
-                            <Select value={batchId?.toString()} onValueChange={(v) => { setBatchId(Number(v)); setNewExam({ ...newExam, batch_semester_id: undefined }); }}>
+                            <Select value={selectedBatchId?.toString()} onValueChange={(v) => { setSelectedBatchId(Number(v)); setNewExam({ ...newExam, batch_semester_id: undefined }); }}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Batch" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {batches?.map(b => (
-                                        <SelectItem key={b.id} value={b.id.toString()}>{b.name} ({b.code})</SelectItem>
+                                        <SelectItem key={b.id} value={b.id.toString()}>{b.batch_name} ({b.batch_code})</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -103,7 +100,7 @@ export function AdminExamPanel() {
                             <Select
                                 value={newExam.batch_semester_id?.toString() || ""}
                                 onValueChange={(v) => setNewExam({ ...newExam, batch_semester_id: Number(v) })}
-                                disabled={!batchId}
+                                disabled={!selectedBatchId}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Semester" />
@@ -111,7 +108,7 @@ export function AdminExamPanel() {
                                 <SelectContent>
                                     {semesters?.map(s => (
                                         <SelectItem key={s.id} value={s.id.toString()}>
-                                            Sem {s.semester_no} ({s.semester_name})
+                                            Sem {s.semester_number}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

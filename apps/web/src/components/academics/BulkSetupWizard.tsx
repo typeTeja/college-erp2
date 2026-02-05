@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BulkBatchSetupRequest } from '@/types/bulk-setup';
-import { bulkSetupService } from '@/utils/bulk-setup-service';
 import { Program } from '@/types/program';
 import { Regulation } from '@/types/regulation';
+import { academicYearService } from '@/utils/academic-year-service';
+import { api } from '@/utils/api';
 
 interface BulkSetupWizardProps {
     programs: Program[];
@@ -23,8 +24,11 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState<WizardStep>('program');
     const [loading, setLoading] = useState(false);
+    const [creationStep, setCreationStep] = useState<string>('');
 
     const currentYear = new Date().getFullYear();
+
+    const { data: academicYears = [] } = academicYearService.useAcademicYears();
 
     const [formData, setFormData] = useState<Partial<BulkBatchSetupRequest>>({
         joining_year: currentYear,
@@ -34,33 +38,24 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
         lab_capacity: 40,
     });
 
-    // Ensure labs_per_section is never null/undefined/NaN
-    const ensureLabsValue = (value: number | undefined | null): number => {
-        if (value === null || value === undefined || isNaN(value)) return 0;
-        return value;
-    };
-
     const selectedProgram = programs.find(p => p.id === formData.program_id);
     const selectedRegulation = regulations.find(r => r.id === formData.regulation_id);
-    // Show all regulations - backend will validate compatibility
-    const filteredRegulations = regulations;
+    const filteredRegulations = regulations.filter(r => !formData.program_id || r.program_id === formData.program_id);
 
     // Calculate statistics
     const calculateStats = () => {
         if (!selectedProgram) return null;
 
         const years = selectedProgram.duration_years;
-        const semesters = years * 2; // Always 2 semesters per year
+        const semesters = selectedProgram.number_of_semesters || years * 2;
         const sectionsPerSemester = formData.sections_per_semester || 0;
         const totalSections = semesters * sectionsPerSemester;
-        const labsPerSemester = ensureLabsValue(formData.labs_per_semester);
+        const labsPerSemester = formData.labs_per_semester || 0;
         const totalLabs = semesters * labsPerSemester;
 
-        // Batch intake (per year/semester)
         const batchIntakeCapacity = sectionsPerSemester * (formData.section_capacity || 0);
         const labIntakeCapacity = labsPerSemester * (formData.lab_capacity || 0);
 
-        // Cumulative totals (across all semesters)
         const totalSectionCapacity = totalSections * (formData.section_capacity || 0);
         const totalLabCapacity = totalLabs * (formData.lab_capacity || 0);
 
@@ -115,67 +110,123 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
         }
 
         setLoading(true);
+        setCreationStep('Initializing setup...');
+
         try {
-            // Ensure labs_per_semester is a number, not null/undefined
-            const payload = {
-                ...formData,
-                labs_per_semester: ensureLabsValue(formData.labs_per_semester),
-            } as BulkBatchSetupRequest;
+            // 1. Create the Batch
+            setCreationStep('Creating batch...');
+            const batchName = `${formData.joining_year}-${formData.joining_year + (selectedProgram?.duration_years || 0)} ${selectedProgram?.code}`;
+            const batchCode = `${selectedProgram?.code}-${formData.joining_year}`;
+            
+            const admissionYear = academicYears.find(ay => ay.year.includes(formData.joining_year!.toString()));
+            if (!admissionYear) {
+                throw new Error(`Academic year record for ${formData.joining_year} not found. Please setup academic years first.`);
+            }
 
-            const result = await bulkSetupService.createBulkBatch(payload);
+            const batchResponse = await api.post<any>('/academic/batches', {
+                batch_name: batchName,
+                batch_code: batchCode,
+                program_id: formData.program_id,
+                regulation_id: formData.regulation_id,
+                joining_year: formData.joining_year,
+                start_year: formData.joining_year,
+                end_year: formData.joining_year + (selectedProgram?.duration_years || 0)
+            });
+            const batch = batchResponse.data;
 
-            toast.success(
-                <div>
-                    <div className="font-semibold">{result.message}</div>
-                    <div className="text-sm mt-1">
-                        Created {result.years_created} years, {result.semesters_created} semesters,
-                        {result.sections_created} sections, and {result.labs_created} labs
-                    </div>
-                </div>
-            );
+            // 2. Create Semesters
+            const totalSemesters = selectedProgram?.number_of_semesters || 8;
+            setCreationStep(`Creating ${totalSemesters} semesters...`);
+            
+            for (let i = 1; i <= totalSemesters; i++) {
+                const yearOffset = Math.floor((i - 1) / 2);
+                const targetYear = formData.joining_year! + yearOffset;
+                const semYear = academicYears.find(ay => ay.year.includes(targetYear.toString()));
+                
+                if (!semYear) {
+                    throw new Error(`Academic year for semester ${i} (${targetYear}) not found.`);
+                }
 
-            router.push('/settings?tab=academic-structure');
+                setCreationStep(`Creating Semester ${i}...`);
+                const semResponse = await api.post<any>('/academic/batch-semesters', {
+                    batch_id: batch.id,
+                    semester_number: i,
+                    academic_year_id: semYear.id,
+                    start_date: new Date(targetYear, i % 2 !== 0 ? 6 : 0, 1).toISOString(),
+                    end_date: new Date(targetYear + (i % 2 === 0 ? 0 : 1), i % 2 !== 0 ? 11 : 5, 30).toISOString()
+                });
+                const semester = semResponse.data;
+
+                // 3. Create Sections
+                if (formData.sections_per_semester) {
+                    setCreationStep(`Creating sections for Sem ${i}...`);
+                    for (let s = 1; s <= formData.sections_per_semester; s++) {
+                        const sectionName = `Section ${String.fromCharCode(64 + s)}`;
+                        await api.post('/academic/sections', {
+                            name: sectionName,
+                            batch_id: batch.id,
+                            semester_no: i,
+                            capacity: formData.section_capacity || 60
+                        });
+                    }
+                }
+
+                // 4. Create Practical Batches
+                if (formData.labs_per_semester) {
+                    setCreationStep(`Creating labs for Sem ${i}...`);
+                    for (let l = 1; l <= formData.labs_per_semester; l++) {
+                        const labName = `L${l}`;
+                        await api.post('/academic/practical-batches', {
+                            name: labName,
+                            batch_id: batch.id,
+                            batch_semester_id: semester.id,
+                            capacity: formData.lab_capacity || 30,
+                            code: `${batchCode}-S${i}-L${l}`
+                        });
+                    }
+                }
+            }
+
+            toast.success('Sequential batch setup completed successfully');
+            router.push('/setup/batches');
         } catch (error: any) {
-            toast.error(error.response?.data?.detail || 'Failed to create batch');
+            console.error('Batch setup sequence failed:', error);
+            const detail = error.response?.data?.detail;
+            toast.error(typeof detail === 'string' ? detail : error.message || 'Failed to complete sequential setup');
         } finally {
             setLoading(false);
+            setCreationStep('');
         }
     };
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            {/* Progress Steps */}
             <div className="mb-8">
                 <div className="flex items-center justify-between">
                     {(['program', 'regulation', 'configuration', 'review'] as WizardStep[]).map((step, index) => (
                         <div key={step} className="flex items-center flex-1">
                             <div className="flex flex-col items-center flex-1">
                                 <div
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${currentStep === step
-                                        ? 'bg-blue-600 text-white'
-                                        : index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep)
-                                            ? 'bg-green-600 text-white'
-                                            : 'bg-gray-200 text-gray-600'
-                                        }`}
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
+                                        currentStep === step ? 'bg-blue-600 text-white' : 
+                                        index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600 text-white' : 
+                                        'bg-gray-200 text-gray-600'
+                                    }`}
                                 >
                                     {index + 1}
                                 </div>
                                 <div className="text-sm mt-2 font-medium capitalize">{step}</div>
                             </div>
                             {index < 3 && (
-                                <div
-                                    className={`h-1 flex-1 mx-2 transition-colors ${index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep)
-                                        ? 'bg-green-600'
-                                        : 'bg-gray-200'
-                                        }`}
-                                />
+                                <div className={`h-1 flex-1 mx-2 transition-colors ${
+                                    index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600' : 'bg-gray-200'
+                                }`} />
                             )}
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Step Content */}
             <Card>
                 <CardHeader>
                     <CardTitle>
@@ -192,7 +243,6 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {/* Step 1: Program Selection */}
                     {currentStep === 'program' && (
                         <div className="space-y-4">
                             <div>
@@ -204,46 +254,23 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                     onChange={(e) => setFormData({ ...formData, program_id: parseInt(e.target.value), regulation_id: undefined })}
                                 >
                                     <option value="">Select a program</option>
-                                    {programs.map((program) => (
-                                        <option key={program.id} value={program.id}>
-                                            {program.name} ({program.code}) - {program.duration_years} years
-                                        </option>
+                                    {programs.map((p) => (
+                                        <option key={p.id} value={p.id}>{p.name} ({p.code})</option>
                                     ))}
                                 </select>
                             </div>
-
                             <div>
                                 <Label htmlFor="joining_year">Joining Year *</Label>
                                 <Input
                                     id="joining_year"
                                     type="number"
-                                    min={currentYear - 1}
-                                    max={currentYear + 2}
-                                    value={formData.joining_year || currentYear}
+                                    value={formData.joining_year}
                                     onChange={(e) => setFormData({ ...formData, joining_year: parseInt(e.target.value) })}
                                 />
-                                <p className="text-sm text-gray-500 mt-1">
-                                    Students joining in this year
-                                </p>
                             </div>
-
-                            {selectedProgram && formData.joining_year && (
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <h4 className="font-semibold text-blue-900 mb-2">Batch Preview</h4>
-                                    <p className="text-sm text-blue-800">
-                                        Batch Code: <span className="font-mono font-semibold">
-                                            {formData.joining_year}-{formData.joining_year + selectedProgram.duration_years}
-                                        </span>
-                                    </p>
-                                    <p className="text-sm text-blue-800 mt-1">
-                                        Duration: {selectedProgram.duration_years} years ({selectedProgram.duration_years * 2} semesters)
-                                    </p>
-                                </div>
-                            )}
                         </div>
                     )}
 
-                    {/* Step 2: Regulation Selection */}
                     {currentStep === 'regulation' && (
                         <div className="space-y-4">
                             <div>
@@ -255,270 +282,94 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                     onChange={(e) => setFormData({ ...formData, regulation_id: parseInt(e.target.value) })}
                                 >
                                     <option value="">Select a regulation</option>
-                                    {filteredRegulations.map((regulation) => (
-                                        <option key={regulation.id} value={regulation.id}>
-                                            {regulation.regulation_name} ({regulation.regulation_code})
-                                            {regulation.is_locked && ' 🔒'}
-                                        </option>
+                                    {filteredRegulations.map((r) => (
+                                        <option key={r.id} value={r.id}>{r.name}</option>
                                     ))}
                                 </select>
-                                <p className="text-sm text-gray-500 mt-1">
-                                    {filteredRegulations.length === 0
-                                        ? 'No regulations available. Please create a regulation first.'
-                                        : 'Select the regulation to bind to this batch'}
-                                </p>
                             </div>
-
-                            {selectedRegulation && (
-                                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                                    <h4 className="font-semibold text-purple-900 mb-2">Regulation Details</h4>
-                                    <p className="text-sm text-purple-800">
-                                        Code: <span className="font-mono">{selectedRegulation.regulation_code}</span>
-                                    </p>
-                                    <p className="text-sm text-purple-800 mt-1">
-                                        Name: {selectedRegulation.regulation_name}
-                                    </p>
-                                    {selectedRegulation.is_locked && (
-                                        <p className="text-sm text-purple-800 mt-1">
-                                            🔒 This regulation is locked (already in use)
-                                        </p>
-                                    )}
-                                </div>
-                            )}
                         </div>
                     )}
 
-                    {/* Step 3: Configuration */}
                     {currentStep === 'configuration' && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="sections_per_semester">Sections per Semester *</Label>
-                                    <Input
-                                        id="sections_per_semester"
-                                        type="number"
-                                        min={1}
-                                        max={10}
-                                        value={formData.sections_per_semester || ''}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value);
-                                            setFormData({ ...formData, sections_per_semester: isNaN(val) ? 0 : val });
-                                        }}
-                                    />
-                                    <p className="text-sm text-gray-500 mt-1">e.g., 2 for Section A, B</p>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="section_capacity">Section Capacity *</Label>
-                                    <Input
-                                        id="section_capacity"
-                                        type="number"
-                                        min={10}
-                                        max={200}
-                                        value={formData.section_capacity || ''}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value);
-                                            setFormData({ ...formData, section_capacity: isNaN(val) ? 0 : val });
-                                        }}
-                                    />
-                                    <p className="text-sm text-gray-500 mt-1">Max students per section</p>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="labs_per_semester">Lab Groups per Semester</Label>
-                                    <Input
-                                        id="labs_per_semester"
-                                        type="number"
-                                        min={0}
-                                        max={20}
-                                        value={formData.labs_per_semester === 0 ? 0 : (formData.labs_per_semester || '')}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value);
-                                            setFormData({ ...formData, labs_per_semester: isNaN(val) ? 0 : val });
-                                        }}
-                                    />
-                                    <p className="text-sm text-gray-500 mt-1">Total lab groups for the semester (0 for no labs)</p>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="lab_capacity">Lab Capacity</Label>
-                                    <Input
-                                        id="lab_capacity"
-                                        type="number"
-                                        min={5}
-                                        max={50}
-                                        value={formData.lab_capacity || ''}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value);
-                                            setFormData({ ...formData, lab_capacity: isNaN(val) ? 0 : val });
-                                        }}
-                                        disabled={!formData.labs_per_semester}
-                                    />
-                                    <p className="text-sm text-gray-500 mt-1">Max students per lab</p>
-                                </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="sections">Sections per Semester</Label>
+                                <Input
+                                    id="sections"
+                                    type="number"
+                                    value={formData.sections_per_semester}
+                                    onChange={(e) => setFormData({ ...formData, sections_per_semester: parseInt(e.target.value) })}
+                                />
                             </div>
-
-                            {stats && (
-                                <div className="space-y-4">
-                                    {/* Structure Summary */}
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                        <h4 className="font-semibold text-green-900 mb-3">📊 Structure Summary</h4>
-                                        <div className="grid grid-cols-2 gap-3 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-green-800">Program Years:</span>
-                                                <span className="font-semibold text-green-900">{stats.years}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-green-800">Semesters:</span>
-                                                <span className="font-semibold text-green-900">{stats.semesters}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-green-800">Total Sections:</span>
-                                                <span className="font-semibold text-green-900">{stats.totalSections}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-green-800">Total Lab Groups:</span>
-                                                <span className="font-semibold text-green-900">{stats.totalLabs}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Per Semester Breakdown */}
-                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                        <h4 className="font-semibold text-blue-900 mb-3">📚 Per Semester</h4>
-                                        <div className="grid grid-cols-2 gap-3 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-blue-800">Sections/Semester:</span>
-                                                <span className="font-semibold text-blue-900">{stats.sectionsPerSemester}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-blue-800">Intake Capacity:</span>
-                                                <span className="font-semibold text-blue-900">{stats.batchIntakeCapacity} students</span>
-                                            </div>
-                                            {stats.totalLabs > 0 && (
-                                                <>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-blue-800">Labs/Semester:</span>
-                                                        <span className="font-semibold text-blue-900">{stats.labsPerSemester}</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-blue-800">Lab Capacity:</span>
-                                                        <span className="font-semibold text-blue-900">{stats.labIntakeCapacity} students</span>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Cumulative Totals */}
-                                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                                        <h4 className="font-semibold text-purple-900 mb-2">🎯 Cumulative Totals</h4>
-                                        <p className="text-xs text-purple-700 mb-3">Total capacity across all {stats.semesters} semesters</p>
-                                        <div className="grid grid-cols-2 gap-3 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-purple-800">Section Slots:</span>
-                                                <span className="font-semibold text-purple-900">{stats.totalSectionCapacity} students</span>
-                                            </div>
-                                            {stats.totalLabs > 0 && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-purple-800">Lab Slots:</span>
-                                                    <span className="font-semibold text-purple-900">{stats.totalLabCapacity} students</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            <div>
+                                <Label htmlFor="capacity">Section Capacity</Label>
+                                <Input
+                                    id="capacity"
+                                    type="number"
+                                    value={formData.section_capacity}
+                                    onChange={(e) => setFormData({ ...formData, section_capacity: parseInt(e.target.value) })}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="labs">Lab Groups per Semester</Label>
+                                <Input
+                                    id="labs"
+                                    type="number"
+                                    value={formData.labs_per_semester === 0 ? 0 : (formData.labs_per_semester || '')}
+                                    onChange={(e) => setFormData({ ...formData, labs_per_semester: parseInt(e.target.value) || 0 })}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="lab_capacity">Lab Capacity</Label>
+                                <Input
+                                    id="lab_capacity"
+                                    type="number"
+                                    value={formData.lab_capacity}
+                                    onChange={(e) => setFormData({ ...formData, lab_capacity: parseInt(e.target.value) })}
+                                    disabled={!formData.labs_per_semester}
+                                />
+                            </div>
                         </div>
                     )}
 
-                    {/* Step 4: Review */}
-                    {currentStep === 'review' && (
+                    {currentStep === 'review' && stats && (
                         <div className="space-y-4">
-                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
-                                <div>
-                                    <h4 className="font-semibold text-gray-700 mb-1">Program</h4>
-                                    <p className="text-gray-900">{selectedProgram?.name} ({selectedProgram?.code})</p>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-700 mb-1">Batch</h4>
-                                    <p className="text-gray-900">
-                                        {formData.joining_year}-{formData.joining_year! + selectedProgram!.duration_years}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-700 mb-1">Regulation</h4>
-                                    <p className="text-gray-900">{selectedRegulation?.regulation_name} ({selectedRegulation?.regulation_code})</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-300">
-                                    <div>
-                                        <h4 className="font-semibold text-gray-700 mb-1">Sections/Semester</h4>
-                                        <p className="text-gray-900">{formData.sections_per_semester}</p>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-gray-700 mb-1">Section Capacity</h4>
-                                        <p className="text-gray-900">{formData.section_capacity} students</p>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-gray-700 mb-1">Labs/Semester</h4>
-                                        <p className="text-gray-900">{formData.labs_per_semester || 'None'}</p>
-                                    </div>
-                                    {formData.labs_per_semester! > 0 && (
-                                        <div>
-                                            <h4 className="font-semibold text-gray-700 mb-1">Lab Capacity</h4>
-                                            <p className="text-gray-900">{formData.lab_capacity} students</p>
-                                        </div>
-                                    )}
-                                </div>
+                            <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+                                <div className="flex justify-between"><span>Program:</span><span className="font-medium">{selectedProgram?.name}</span></div>
+                                <div className="flex justify-between"><span>Regulation:</span><span className="font-medium">{selectedRegulation?.name}</span></div>
+                                <div className="flex justify-between"><span>Batch Year:</span><span className="font-medium">{formData.joining_year}</span></div>
+                                <div className="flex justify-between border-t pt-2"><span>Total Semesters:</span><span className="font-medium">{stats.semesters}</span></div>
+                                <div className="flex justify-between"><span>Sections/Sem:</span><span className="font-medium">{stats.sectionsPerSemester}</span></div>
+                                <div className="flex justify-between"><span>Total Sections:</span><span className="font-medium">{stats.totalSections}</span></div>
                             </div>
-
-                            {stats && (
-                                <div className="bg-blue-50 border-2 border-blue-400 rounded-lg p-4">
-                                    <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
-                                        <span className="text-2xl mr-2">🚀</span>
-                                        Ready to Create
-                                    </h4>
-                                    <p className="text-blue-800 text-sm">
-                                        This will create <span className="font-bold">{stats.years} years</span>,{' '}
-                                        <span className="font-bold">{stats.semesters} semesters</span>,{' '}
-                                        <span className="font-bold">{stats.totalSections} sections</span>, and{' '}
-                                        <span className="font-bold">{stats.totalLabs} lab groups</span> in a single operation.
-                                    </p>
-                                    <p className="text-blue-700 text-sm mt-2 font-medium">
-                                        Batch Intake: <span className="font-bold">{stats.batchIntakeCapacity} students/semester</span>
-                                    </p>
-                                    <p className="text-blue-600 text-xs mt-1">
-                                        Total: {stats.years + stats.semesters + stats.totalSections + stats.totalLabs} records will be created!
-                                    </p>
-                                </div>
-                            )}
+                            <div className="bg-blue-50 p-4 border border-blue-200 rounded-lg">
+                                <h4 className="font-semibold text-blue-900 mb-1 flex items-center">🚀 Atomic Creation Summary</h4>
+                                <p className="text-xs text-blue-800">Sequential execution will create {stats.semesters} semesters and {stats.totalSections} sections + {stats.totalLabs} lab groups.</p>
+                            </div>
                         </div>
                     )}
 
-                    {/* Navigation Buttons */}
                     <div className="flex justify-between pt-6 border-t">
-                        <Button
-                            variant="outline"
-                            onClick={handleBack}
-                            disabled={currentStep === 'program' || loading}
-                        >
-                            Back
-                        </Button>
-
+                        <Button variant="outline" onClick={handleBack} disabled={currentStep === 'program' || loading}>Back</Button>
                         {currentStep !== 'review' ? (
-                            <Button onClick={handleNext} className="bg-blue-600 hover:bg-blue-700">
-                                Next
-                            </Button>
+                            <Button onClick={handleNext}>Next</Button>
                         ) : (
-                            <Button
-                                onClick={handleSubmit}
-                                disabled={loading}
-                                className="bg-green-600 hover:bg-green-700"
-                            >
-                                {loading ? 'Creating...' : 'Create Batch'}
+                            <Button onClick={handleSubmit} disabled={loading} className="bg-green-600 hover:bg-green-700 min-w-[120px]">
+                                {loading ? (
+                                    <div className="flex items-center">
+                                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                        Creating...
+                                    </div>
+                                ) : 'Create Batch'}
                             </Button>
                         )}
                     </div>
+
+                    {loading && creationStep && (
+                        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded animate-pulse text-center">
+                            <p className="text-sm text-blue-700 font-medium">{creationStep}</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

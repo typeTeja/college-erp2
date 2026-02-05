@@ -13,7 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { getAcademicBatches, getBatchSemesters, getBatchSubjects } from '@/utils/master-data-service';
+import { batchService } from '@/utils/batch-service';
+import { subjectService } from '@/utils/subject-service';
+import { sectionService } from '@/utils/section-service';
 import { CreateSessionDTO } from '@/types/attendance';
 import { BatchSemester, BatchSubject, Section, PracticalBatch } from '@/types/academic-batch';
 import { toast } from 'sonner';
@@ -28,20 +30,38 @@ export function CreateSessionDialog({ open, onClose, onSubmit }: CreateSessionDi
     const [loading, setLoading] = useState(false);
 
     // State for Selection Flow
-    const [batches, setBatches] = useState<any[]>([]);
     const [selectedBatchId, setSelectedBatchId] = useState<string>("");
-    const [semesters, setSemesters] = useState<BatchSemester[]>([]);
     const [selectedSemesterId, setSelectedSemesterId] = useState<string>("");
-
-    const [subjects, setSubjects] = useState<BatchSubject[]>([]);
     const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
-
-    // Derived Options based on Subject Type
-    const [sections, setSections] = useState<Section[]>([]);
     const [selectedSectionId, setSelectedSectionId] = useState<string>("");
-
-    const [labBatches, setLabBatches] = useState<PracticalBatch[]>([]);
     const [selectedLabBatchId, setSelectedLabBatchId] = useState<string>("");
+
+    // Queries
+    const { data: batches = [] } = batchService.useBatches();
+    const { data: semesters = [] } = batchService.useBatchSemesters(parseInt(selectedBatchId));
+
+    // Find semester object for its semester_no
+    const selectedSemester = semesters.find(s => s.id.toString() === selectedSemesterId);
+
+    // Get subjects for the regulation associated with the batch
+    const { data: subjects = [] } = subjectService.useRegulationSubjects(
+        batches.find(b => b.id.toString() === selectedBatchId)?.regulation_id || 0
+    );
+
+    // Filter subjects by semester number
+    const semesterSubjects = selectedSemester
+        ? subjects.filter(s => s.semester_number === selectedSemester.semester_number)
+        : [];
+
+    const { data: sections = [] } = sectionService.useSections(
+        parseInt(selectedBatchId),
+        selectedSemester?.semester_number
+    );
+
+    const { data: labBatches = [] } = sectionService.usePracticalBatches(
+        parseInt(selectedBatchId),
+        selectedSemester?.semester_number
+    );
 
     // Session Details
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -49,80 +69,7 @@ export function CreateSessionDialog({ open, onClose, onSubmit }: CreateSessionDi
     const [endTime, setEndTime] = useState("10:00");
     const [topic, setTopic] = useState("");
 
-    // Load Batches on Open
-    useEffect(() => {
-        if (open) {
-            loadBatches();
-        }
-    }, [open]);
-
-    // Load Semesters when Batch Selected
-    useEffect(() => {
-        if (selectedBatchId) {
-            loadSemesters(parseInt(selectedBatchId));
-        } else {
-            setSemesters([]);
-        }
-    }, [selectedBatchId]);
-
-    // Load Subjects & Structure when Semester Selected
-    useEffect(() => {
-        if (selectedBatchId && selectedSemesterId) {
-            loadSubjectsAndStructure(parseInt(selectedBatchId), parseInt(selectedSemesterId));
-        } else {
-            setSubjects([]);
-            setSections([]);
-            setLabBatches([]);
-        }
-    }, [selectedSemesterId]);
-
-    const loadBatches = async () => {
-        try {
-            const data = await getAcademicBatches(undefined, true);
-            setBatches(data);
-        } catch (error) {
-            toast.error("Failed to load batches");
-        }
-    };
-
-    const loadSemesters = async (batchId: number) => {
-        try {
-            const data = await getBatchSemesters(batchId);
-            setSemesters(data);
-        } catch (error) {
-            toast.error("Failed to load semesters");
-        }
-    };
-
-    const loadSubjectsAndStructure = async (batchId: number, semesterId: number) => {
-        try {
-            // Find semester object to get sections/labs (assuming they are included or we fetch structure)
-            const semester = semesters.find(s => s.id === semesterId);
-            if (semester) {
-                // In a real app we might need to fetch sections separately if not hydrated
-                // Assuming master-data-service returns them in semester object as per previous UI work
-                // But wait, getBatchSemesters might be lightweight.
-                // Let's assume for now we need to rely on what's available.
-                // Actually, previous AcademicStructureTab fetched structure which included sections.
-                // Let's rely on getBatchSemesters returning them or fetch if needed.
-                // Edit: master-data-service getBatchSemesters returns BatchSemester[] which has optional sections?: Section[]
-                setSections(semester.sections || []);
-                setLabBatches(semester.practical_batches || []);
-            }
-
-            // Fetch Subjects
-            // We need semester_no.
-            const sem = semesters.find(s => s.id === semesterId);
-            if (sem) {
-                const subjs = await getBatchSubjects(batchId, sem.semester_no);
-                setSubjects(subjs);
-            }
-        } catch (error) {
-            toast.error("Failed to load subjects");
-        }
-    };
-
-    const getSelectedSubject = () => subjects.find(s => s.id.toString() === selectedSubjectId);
+    const getSelectedSubject = () => semesterSubjects.find(s => s.id.toString() === selectedSubjectId);
 
     const handleSubmit = async () => {
         if (!selectedSubjectId || !date || !startTime || !endTime) {
@@ -211,7 +158,7 @@ export function CreateSessionDialog({ open, onClose, onSubmit }: CreateSessionDi
                                 </SelectTrigger>
                                 <SelectContent>
                                     {semesters.map(s => (
-                                        <SelectItem key={s.id} value={s.id.toString()}>{s.semester_name}</SelectItem>
+                                        <SelectItem key={s.id} value={s.id.toString()}>Semester {s.semester_number}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -226,9 +173,9 @@ export function CreateSessionDialog({ open, onClose, onSubmit }: CreateSessionDi
                                 <SelectValue placeholder="Choose Subject" />
                             </SelectTrigger>
                             <SelectContent>
-                                {subjects.map(s => (
+                                {semesterSubjects.map(s => (
                                     <SelectItem key={s.id} value={s.id.toString()}>
-                                        {s.subject_name} ({s.subject_type})
+                                        {s.name} ({s.subject_type})
                                     </SelectItem>
                                 ))}
                             </SelectContent>

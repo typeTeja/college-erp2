@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 from datetime import date
 from sqlmodel import Session, select, func
 
-from app.domains.hr.models import Designation, Staff, Faculty, Department, Shift
+from app.domains.hr.models import Designation, Staff, Faculty, Shift
 from app.domains.hr.schemas import (
     DesignationCreate, DesignationUpdate,
     StaffCreate, StaffUpdate,
@@ -23,22 +23,12 @@ from app.domains.hr.exceptions import (
     DuplicateEmailError, DuplicateMobileError
 )
 
-
-class HRService:
-    """Service for People & HR operations"""
-    
-    def __init__(self, session: Session):
-        self.session = session
-    
     # ----------------------------------------------------------------------
     # Department Management
     # ----------------------------------------------------------------------
-    
-    def list_departments(self) -> List[Department]:
-        """List all departments"""
-        from app.domains.hr.models import Department
-        statement = select(Department).where(Department.is_active == True)
-        return list(self.session.exec(statement).all())
+
+    # Department Logic Moved to System Domain
+
     
     # ----------------------------------------------------------------------
     # Shift Management

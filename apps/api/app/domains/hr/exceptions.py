@@ -15,6 +15,11 @@ class DesignationNotFoundError(HRDomainError):
     pass
 
 
+class DepartmentNotFoundError(HRDomainError):
+    """Raised when a department is not found"""
+    pass
+
+
 class StaffNotFoundError(HRDomainError):
     """Raised when a staff member is not found"""
     pass

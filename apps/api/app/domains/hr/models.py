@@ -25,19 +25,7 @@ if TYPE_CHECKING:
 # Core Models
 # ----------------------------------------------------------------------
 
-class Department(SQLModel, table=True):
-    """Department Management (e.g., Computer Science, Mechanical)"""
-    __tablename__ = "department"
-    
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(unique=True, index=True)
-    code: str = Field(unique=True, index=True)
-    alias: Optional[str] = None
-    
-    is_active: bool = Field(default=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
+# Department moved to app.domains.system.models.Department
 
 class Shift(SQLModel, table=True):
     """Work Shift (e.g., Morning, Evening, General)"""

@@ -63,3 +63,13 @@ class BatchAlreadyExistsError(AcademicDomainError):
 class InvalidPromotionError(AcademicDomainError):
     """Raised when student promotion is invalid"""
     pass
+
+
+class HierarchyValidationError(AcademicDomainError):
+    """Raised when academic hierarchy integrity is violated"""
+    pass
+
+
+class AcademicYearOverlapError(AcademicDomainError):
+    """Raised when academic year dates overlap with existing years"""
+    pass

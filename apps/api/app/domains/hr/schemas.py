@@ -12,22 +12,12 @@ from typing import Optional, List
 from datetime import datetime, date
 
 
+
 # ----------------------------------------------------------------------
 # Department Schemas
 # ----------------------------------------------------------------------
 
-class DepartmentBase(BaseModel):
-    name: str
-    code: str
-    alias: Optional[str] = None
-    is_active: bool = True
-
-class DepartmentRead(DepartmentBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+# Department moved to app.domains.system.schemas
 
 
 # ----------------------------------------------------------------------

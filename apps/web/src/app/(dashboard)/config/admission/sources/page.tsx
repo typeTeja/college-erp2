@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { LeadSourceTab } from '../../../settings/MasterDataTabs';
+import { LeadSourceMaster } from '@/components/admission/LeadSourceMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function SourcesPage() {
             badge="config"
             movedFrom="Settings > Lead Sources"
         >
-            <LeadSourceTab />
+            <LeadSourceMaster />
         </ConfigPageTemplate>
     );
 }

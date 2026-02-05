@@ -1,32 +1,83 @@
-import { api } from './api';
-import { Regulation, RegulationCreate } from '@/types/regulation';
+import { api } from "@/utils/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Regulation, RegulationCreateData } from "@/types/regulation";
 
-// Base Regulation Operations
-export const getRegulations = async (programId?: number, isLocked?: boolean): Promise<Regulation[]> => {
-    const params: Record<string, any> = {};
-    if (programId) params.program_id = programId;
-    if (isLocked !== undefined) params.is_locked = isLocked;
+export const regulationService = {
+    // Queries
+    useRegulations: (programId?: number) => {
+        return useQuery({
+            queryKey: ["academic", "regulations", programId],
+            queryFn: async () => {
+                const response = await api.get<Regulation[]>("/academic/regulations", {
+                    params: { program_id: programId }
+                });
+                return response.data;
+            }
+        });
+    },
 
-    const response = await api.get('/regulations/', { params });
-    return response.data;
-};
+    useRegulation: (id: number) => {
+        return useQuery({
+            queryKey: ["academic", "regulation", id],
+            queryFn: async () => {
+                const response = await api.get<Regulation>(`/academic/regulations/${id}`);
+                return response.data;
+            },
+            enabled: !!id
+        });
+    },
 
-export const createRegulation = async (data: RegulationCreate): Promise<Regulation> => {
-    const response = await api.post('/regulations/', data);
-    return response.data;
-};
+    // Mutations
+    useCreateRegulation: () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (data: RegulationCreateData) => {
+                const response = await api.post<Regulation>("/academic/regulations", data);
+                return response.data;
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["academic", "regulations"] });
+            }
+        });
+    },
 
-export const updateRegulation = async (id: number, data: Partial<RegulationCreate> & { version: number }): Promise<Regulation> => {
-    const { version, ...updateData } = data;
-    const response = await api.patch(`/regulations/${id}?version=${version}`, updateData);
-    return response.data;
-};
+    useUpdateRegulation: () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async ({ id, data }: { id: number; data: Partial<RegulationCreateData> }) => {
+                const response = await api.put<Regulation>(`/academic/regulations/${id}`, data);
+                return response.data;
+            },
+            onSuccess: (data) => {
+                queryClient.invalidateQueries({ queryKey: ["academic", "regulations"] });
+                queryClient.invalidateQueries({ queryKey: ["academic", "regulation", data.id] });
+            }
+        });
+    },
 
-export const deleteRegulation = async (id: number): Promise<void> => {
-    await api.delete(`/regulations/${id}`);
-};
+    useDeleteRegulation: () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (id: number) => {
+                await api.delete(`/academic/regulations/${id}`);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["academic", "regulations"] });
+            }
+        });
+    },
 
-export const lockRegulation = async (id: number): Promise<Regulation> => {
-    const response = await api.post(`/regulations/${id}/lock`);
-    return response.data;
+    useLockRegulation: () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (id: number) => {
+                const response = await api.post<Regulation>(`/academic/regulations/${id}/lock`);
+                return response.data;
+            },
+            onSuccess: (data) => {
+                queryClient.invalidateQueries({ queryKey: ["academic", "regulations"] });
+                queryClient.invalidateQueries({ queryKey: ["academic", "regulation", data.id] });
+            }
+        });
+    }
 };

@@ -604,3 +604,60 @@ class EntranceExamResultRead(EntranceExamResultBase):
     
     class Config:
         from_attributes = True
+
+
+# ======================================================================
+# Master Data Schemas (Board, Source, Category)
+# ======================================================================
+
+class BoardBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    code: str = Field(..., min_length=1, max_length=50, pattern=r'^[A-Z0-9_]+$')
+    description: Optional[str] = Field(None, max_length=500)
+
+class BoardCreate(BoardBase):
+    pass
+
+class BoardRead(BoardBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class LeadSourceBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    code: str = Field(..., min_length=1, max_length=50, pattern=r'^[A-Z0-9_]+$')
+
+class LeadSourceCreate(LeadSourceBase):
+    pass
+
+class LeadSourceRead(LeadSourceBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ReservationCategoryBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    code: str = Field(..., min_length=1, max_length=50, pattern=r'^[A-Z0-9_]+$')
+    description: Optional[str] = Field(None, max_length=500)
+
+class ReservationCategoryCreate(ReservationCategoryBase):
+    pass
+
+class ReservationCategoryRead(ReservationCategoryBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True

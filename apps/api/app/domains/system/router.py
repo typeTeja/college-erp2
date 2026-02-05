@@ -21,12 +21,14 @@ from app.domains.system.schemas import (
     RoleCreate, RoleUpdate, RoleRead,
     PermissionCreate, PermissionRead,
     SystemSettingCreate, SystemSettingUpdate, SystemSettingRead,
-    AuditLogRead
+    AuditLogRead,
+    DepartmentCreate, DepartmentUpdate, DepartmentRead
 )
 from app.domains.auth.models import AuthUser as User
 from app.domains.system.exceptions import (
     UserNotFoundError, RoleNotFoundError, SettingNotFoundError,
-    UserAlreadyExistsError
+    UserAlreadyExistsError,
+    DepartmentNotFoundError, DepartmentAlreadyExistsError
 )
 
 
@@ -151,3 +153,76 @@ def list_audit_logs(
     service = SystemService(session)
     logs = service.list_audit_logs(user_id=user_id, module=module, skip=skip, limit=limit)
     return logs
+
+
+# ----------------------------------------------------------------------
+# Department Endpoints (Core Master)
+# ----------------------------------------------------------------------
+
+@router.get("/departments", response_model=List[DepartmentRead])
+def list_departments(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """List all departments"""
+    service = SystemService(session)
+    return service.list_departments()
+
+@router.get("/departments/{department_id}", response_model=DepartmentRead)
+def get_department(
+    department_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get department by ID"""
+    service = SystemService(session)
+    try:
+        department = service.get_department(department_id)
+        return department
+    except DepartmentNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/departments", response_model=DepartmentRead, status_code=status.HTTP_201_CREATED)
+def create_department(
+    data: DepartmentCreate,
+    session: Session = Depends(get_session),
+    # Only Admin/Principal should create departments - forcing strict permission check could be done here or in service
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new department"""
+    service = SystemService(session)
+    try:
+        department = service.create_department(data)
+        return department
+    except DepartmentAlreadyExistsError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.patch("/departments/{department_id}", response_model=DepartmentRead)
+def update_department(
+    department_id: int,
+    data: DepartmentUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Update a department"""
+    service = SystemService(session)
+    try:
+        department = service.update_department(department_id, data)
+        return department
+    except DepartmentNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DepartmentAlreadyExistsError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.delete("/departments/{department_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_department(
+    department_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a department"""
+    service = SystemService(session)
+    try:
+        service.delete_department(department_id)
+    except DepartmentNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))

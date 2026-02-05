@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { DepartmentsTab } from '../../settings/MasterDataTabs';
+import { DepartmentMaster } from '@/components/academics/DepartmentMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function DepartmentsPage() {
             badge="setup"
             movedFrom="Settings > Departments"
         >
-            <DepartmentsTab />
+            <DepartmentMaster />
         </ConfigPageTemplate>
     );
 }

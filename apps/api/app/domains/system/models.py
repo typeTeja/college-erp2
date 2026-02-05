@@ -151,6 +151,26 @@ class ImportLog(SQLModel, table=True):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     total_rows: int = 0
     imported_count: int = 0
-    failed_count: int = 0
     duplicate_count: int = 0
     status: str = "PENDING"  # PREVIEW, SUCCESS, PARTIAL, FAILED
+
+
+# ----------------------------------------------------------------------
+# Core Masters
+# ----------------------------------------------------------------------
+
+class Department(SQLModel, table=True):
+    """
+    Department Management (Core System Master)
+    Represents academic & operational ownership, independent of HR.
+    """
+    __tablename__ = "department"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    department_name: str = Field(unique=True, index=True, description="Official name of the department")
+    department_code: str = Field(unique=True, index=True, description="Short code e.g., CSE, MECH")
+    description: Optional[str] = None
+    hod_faculty_id: Optional[int] = Field(default=None, index=True, description="Head of Department (Faculty ID)")
+    
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)

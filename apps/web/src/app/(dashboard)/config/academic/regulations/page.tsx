@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { RegulationsTab } from '../../../settings/RegulationsTab';
+import { RegulationMaster } from '@/components/academics/RegulationMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function RegulationsPage() {
             badge="config"
             movedFrom="Settings > Regulations"
         >
-            <RegulationsTab />
+            <RegulationMaster />
         </ConfigPageTemplate>
     );
 }

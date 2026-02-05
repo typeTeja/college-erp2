@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { ReservationCategoryTab } from '../../../settings/MasterDataTabs';
+import { ReservationCategoryMaster } from '@/components/admission/ReservationCategoryMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function CategoriesPage() {
             badge="config"
             movedFrom="Settings > Reservation Categories"
         >
-            <ReservationCategoryTab />
+            <ReservationCategoryMaster />
         </ConfigPageTemplate>
     );
 }

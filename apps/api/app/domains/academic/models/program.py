@@ -3,11 +3,13 @@ from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from app.shared.enums import ProgramType, ProgramStatus
 
+
 if TYPE_CHECKING:
     from .batch import AcademicBatch
     from .regulation import Regulation
     from app.domains.student.models import Student
     from app.domains.finance.models.fee_management import FeeStructure
+    from app.domains.system.models import Department
 
 class Program(SQLModel, table=True):
     """
@@ -25,7 +27,7 @@ class Program(SQLModel, table=True):
     
     # Details
     program_type: ProgramType = Field(default=ProgramType.UG)
-    # department_id: Optional[int] = None # Department model missing
+    department_id: Optional[int] = Field(default=None, foreign_key="department.id")
     
     # Duration
     duration_years: int = Field(default=4, ge=1, le=6)
@@ -44,3 +46,4 @@ class Program(SQLModel, table=True):
     regulations: List["Regulation"] = Relationship(back_populates="program")
     students: List["Student"] = Relationship(back_populates="program")
     fee_structures: List["FeeStructure"] = Relationship(back_populates="program")
+    # department: Optional["Department"] = Relationship()

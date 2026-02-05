@@ -17,7 +17,7 @@ import secrets
 
 from app.domains.system.models import (
     SystemSetting, InstituteInfo, AuditLog, PermissionAuditLog,
-    FileMetadata, ImportLog
+    FileMetadata, ImportLog, Department
 )
 from app.domains.auth.models import (
     AuthUser as User,
@@ -31,11 +31,13 @@ from app.domains.system.schemas import (
     RoleCreate, RoleUpdate,
     PermissionCreate,
     SystemSettingCreate, SystemSettingUpdate,
-    AuditLogCreate
+    AuditLogCreate,
+    DepartmentCreate, DepartmentUpdate
 )
 from app.domains.system.exceptions import (
     UserNotFoundError, RoleNotFoundError, PermissionNotFoundError,
-    UserAlreadyExistsError, SettingNotFoundError
+    UserAlreadyExistsError, SettingNotFoundError,
+    DepartmentNotFoundError, DepartmentAlreadyExistsError
 )
 from app.core.security import get_password_hash, verify_password
 
@@ -322,4 +324,75 @@ class SystemService:
         
         statement = statement.order_by(AuditLog.timestamp.desc()).offset(skip).limit(limit)
         
+        
         return list(self.session.exec(statement).all())
+    
+    # ----------------------------------------------------------------------
+    # Department Management (Core Master)
+    # ----------------------------------------------------------------------
+    
+    def get_department(self, department_id: int) -> Department:
+        """Get department by ID"""
+        department = self.session.get(Department, department_id)
+        if not department:
+            raise DepartmentNotFoundError(f"Department with ID {department_id} not found")
+        return department
+    
+    def get_department_by_code(self, code: str) -> Optional[Department]:
+        """Get department by code"""
+        statement = select(Department).where(Department.department_code == code)
+        return self.session.exec(statement).first()
+        
+    def list_departments(self) -> List[Department]:
+        """List all departments"""
+        statement = select(Department)
+        return list(self.session.exec(statement).all())
+        
+    def create_department(self, data: DepartmentCreate) -> Department:
+        """Create a new department"""
+        if self.get_department_by_code(data.department_code):
+            raise DepartmentAlreadyExistsError(f"Department with code {data.department_code} already exists")
+            
+        department = Department(
+            department_name=data.department_name,
+            department_code=data.department_code,
+            description=data.description,
+            hod_faculty_id=data.hod_faculty_id,
+            is_active=data.is_active
+        )
+        
+        self.session.add(department)
+        self.session.commit()
+        self.session.refresh(department)
+        return department
+        
+    def update_department(self, department_id: int, data: DepartmentUpdate) -> Department:
+        """Update a department"""
+        department = self.get_department(department_id)
+        
+        if data.department_name is not None:
+            department.department_name = data.department_name
+        if data.department_code is not None:
+            # Check unique code if changing
+            if data.department_code != department.department_code:
+                if self.get_department_by_code(data.department_code):
+                     raise DepartmentAlreadyExistsError(f"Department with code {data.department_code} already exists")
+            department.department_code = data.department_code
+            
+        if data.description is not None:
+            department.description = data.description
+        if data.hod_faculty_id is not None:
+            department.hod_faculty_id = data.hod_faculty_id
+        if data.is_active is not None:
+            department.is_active = data.is_active
+            
+        self.session.add(department)
+        self.session.commit()
+        self.session.refresh(department)
+        return department
+        
+    def delete_department(self, department_id: int) -> None:
+        """Delete a department"""
+        department = self.get_department(department_id)
+        self.session.delete(department)
+        self.session.commit()

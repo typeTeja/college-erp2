@@ -26,10 +26,12 @@ from .schemas import (
     AdmissionSettingsRead, AdmissionSettingsUpdate,
     OfflinePaymentVerify, OfflineApplicationCreate,
     PaymentInitiate, PaymentInitiateResponse,
-    PaymentConfigResponse, ApplicationRecentRead, ProgramShort
+    PaymentConfigResponse, ApplicationRecentRead, ProgramShort,
+    BoardCreate, BoardRead, LeadSourceCreate, LeadSourceRead,
+    ReservationCategoryCreate, ReservationCategoryRead
 )
 from app.domains.admission.services import log_activity
-from .services import AdmissionService, EntranceExamService, MeritService, log_activity
+from .services import AdmissionService, EntranceExamService, MeritService, log_activity, master_data_service
 from app.services.storage_service import storage_service
 from app.middleware.rate_limit import limiter
 from typing import List, Optional
@@ -657,3 +659,133 @@ async def get_receipt_url(
     return {
         "url": f"{settings.API_V1_STR}/admissions/v2/public/receipt/{application_number}/download"
     }
+
+
+# ======================================================================
+# Master Data Endpoints
+# ======================================================================
+
+# --- Board ---
+@router.get("/boards", response_model=List[BoardRead])
+def list_boards(
+    active_only: bool = True,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    return master_data_service.list_boards(session, active_only)
+
+@router.post("/boards", response_model=BoardRead)
+def create_board(
+    data: BoardCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    try:
+        return master_data_service.create_board(session, data.dict())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.patch("/boards/{id}", response_model=BoardRead)
+def update_board(
+    id: int,
+    data: dict, # Simplified for now
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    try:
+        return master_data_service.update_board(session, id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.delete("/boards/{id}", status_code=204)
+def delete_board(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    if not master_data_service.delete_board(session, id):
+        raise HTTPException(status_code=404, detail="Board not found")
+
+
+# --- Lead Source ---
+@router.get("/lead-sources", response_model=List[LeadSourceRead])
+def list_lead_sources(
+    active_only: bool = True,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    return master_data_service.list_lead_sources(session, active_only)
+
+@router.post("/lead-sources", response_model=LeadSourceRead)
+def create_lead_source(
+    data: LeadSourceCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    try:
+        return master_data_service.create_lead_source(session, data.dict())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.patch("/lead-sources/{id}", response_model=LeadSourceRead)
+def update_lead_source(
+    id: int,
+    data: dict,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    try:
+        return master_data_service.update_lead_source(session, id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.delete("/lead-sources/{id}", status_code=204)
+def delete_lead_source(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    if not master_data_service.delete_lead_source(session, id):
+        raise HTTPException(status_code=404, detail="Lead Source not found")
+
+
+# --- Reservation Category ---
+@router.get("/reservation-categories", response_model=List[ReservationCategoryRead])
+def list_reservation_categories(
+    active_only: bool = True,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    return master_data_service.list_reservation_categories(session, active_only)
+
+@router.post("/reservation-categories", response_model=ReservationCategoryRead)
+def create_reservation_category(
+    data: ReservationCategoryCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    try:
+        return master_data_service.create_reservation_category(session, data.dict())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.patch("/reservation-categories/{id}", response_model=ReservationCategoryRead)
+def update_reservation_category(
+    id: int,
+    data: dict,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    try:
+        return master_data_service.update_reservation_category(session, id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.delete("/reservation-categories/{id}", status_code=204)
+def delete_reservation_category(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    if not master_data_service.delete_reservation_category(session, id):
+        raise HTTPException(status_code=404, detail="Category not found")

@@ -1,14 +1,15 @@
 import { api } from "@/utils/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Program, ProgramCreateData, ProgramType, ProgramStatus } from "@/types/program";
+import { Program, ProgramCreateData } from "@/types/program";
+import { ProgramType, ProgramStatus } from "@/types/academic-base";
 
 export const programService = {
     // Queries
     usePrograms: (type?: ProgramType, status?: ProgramStatus) => {
         return useQuery({
-            queryKey: ["programs", type, status],
+            queryKey: ["academic", "programs", type, status],
             queryFn: async () => {
-                const response = await api.get<Program[]>("/programs/", {
+                const response = await api.get<Program[]>("/academic/programs", {
                     params: { type, status }
                 });
                 return response.data;
@@ -18,9 +19,9 @@ export const programService = {
 
     useProgram: (id: number) => {
         return useQuery({
-            queryKey: ["program", id],
+            queryKey: ["academic", "program", id],
             queryFn: async () => {
-                const response = await api.get<Program>(`/programs/${id}`);
+                const response = await api.get<Program>(`/academic/programs/${id}`);
                 return response.data;
             },
             enabled: !!id
@@ -32,24 +33,25 @@ export const programService = {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (data: ProgramCreateData) => {
-                const response = await api.post<Program>("/programs/", data);
+                const response = await api.post<Program>("/academic/programs", data);
                 return response.data;
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ["programs"] });
+                queryClient.invalidateQueries({ queryKey: ["academic", "programs"] });
             }
         });
     },
 
-    useUpdateStructure: () => {
+    useUpdateProgram: () => {
         const queryClient = useQueryClient();
         return useMutation({
-            mutationFn: async ({ id, data }: { id: number; data: any }) => {
-                const response = await api.put<Program>(`/programs/${id}/structure`, data);
+            mutationFn: async ({ id, data }: { id: number; data: Partial<ProgramCreateData> }) => {
+                const response = await api.put<Program>(`/academic/programs/${id}`, data);
                 return response.data;
             },
             onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ["program", data.id] });
+                queryClient.invalidateQueries({ queryKey: ["academic", "programs"] });
+                queryClient.invalidateQueries({ queryKey: ["academic", "program", data.id] });
             }
         });
     },
@@ -58,10 +60,10 @@ export const programService = {
         const queryClient = useQueryClient();
         return useMutation({
             mutationFn: async (id: number) => {
-                await api.delete(`/programs/${id}`);
+                await api.delete(`/academic/programs/${id}`);
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ["programs"] });
+                queryClient.invalidateQueries({ queryKey: ["academic", "programs"] });
             }
         });
     }

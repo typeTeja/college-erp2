@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { FeeHeadTab } from '../../../settings/MasterDataTabs';
+import { FeeHeadMaster } from '@/components/finance/FeeHeadMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function FeeHeadsPage() {
             badge="config"
             movedFrom="Settings > Fee Heads"
         >
-            <FeeHeadTab />
+            <FeeHeadMaster />
         </ConfigPageTemplate>
     );
 }

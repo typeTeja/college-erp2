@@ -19,6 +19,7 @@ from .models import (
     EntranceTestConfig, EntranceExamResult,
     ScholarshipCalculation, TentativeAdmission, TentativeAdmissionStatus
 )
+from .models.masters import Board, LeadSource, ReservationCategory
 from app.models import User, Role
 from app.config.settings import settings
 from app.services.pdf_service import pdf_service
@@ -436,5 +437,147 @@ class MeritService:
         """
         Generates tentative admission structure based on scholarship.
         """
-        # Logic to create TentativeAdmission
-        pass
+
+# ======================================================================
+# Master Data Service
+# ======================================================================
+
+class MasterDataService:
+    """Service for managing Admission Master Data (Boards, Sources, Categories)"""
+
+    # --- Board ---
+    
+    @staticmethod
+    def list_boards(session: Session, active_only: bool = True) -> List[Board]:
+        stmt = select(Board)
+        if active_only:
+            stmt = stmt.where(Board.is_active == True)
+        return list(session.exec(stmt).all())
+
+    @staticmethod
+    def create_board(session: Session, data: dict) -> Board:
+        existing = session.exec(select(Board).where(Board.code == data["code"])).first()
+        if existing:
+            raise ValueError(f"Board with code {data['code']} already exists")
+        
+        board = Board(**data)
+        session.add(board)
+        session.commit()
+        session.refresh(board)
+        return board
+
+    @staticmethod
+    def update_board(session: Session, id: int, data: dict) -> Board:
+        board = session.get(Board, id)
+        if not board:
+            raise ValueError("Board not found")
+        
+        for key, value in data.items():
+            setattr(board, key, value)
+        
+        board.updated_at = datetime.utcnow()
+        session.add(board)
+        session.commit()
+        session.refresh(board)
+        return board
+
+    @staticmethod
+    def delete_board(session: Session, id: int) -> bool:
+        board = session.get(Board, id)
+        if not board:
+            return False
+        session.delete(board)
+        session.commit()
+        return True
+
+    # --- Lead Source ---
+    
+    @staticmethod
+    def list_lead_sources(session: Session, active_only: bool = True) -> List[LeadSource]:
+        stmt = select(LeadSource)
+        if active_only:
+            stmt = stmt.where(LeadSource.is_active == True)
+        return list(session.exec(stmt).all())
+
+    @staticmethod
+    def create_lead_source(session: Session, data: dict) -> LeadSource:
+        existing = session.exec(select(LeadSource).where(LeadSource.code == data["code"])).first()
+        if existing:
+            raise ValueError(f"Lead Source with code {data['code']} already exists")
+        
+        source = LeadSource(**data)
+        session.add(source)
+        session.commit()
+        session.refresh(source)
+        return source
+
+    @staticmethod
+    def update_lead_source(session: Session, id: int, data: dict) -> LeadSource:
+        source = session.get(LeadSource, id)
+        if not source:
+            raise ValueError("Lead Source not found")
+        
+        for key, value in data.items():
+            setattr(source, key, value)
+        
+        source.updated_at = datetime.utcnow()
+        session.add(source)
+        session.commit()
+        session.refresh(source)
+        return source
+        
+    @staticmethod
+    def delete_lead_source(session: Session, id: int) -> bool:
+        source = session.get(LeadSource, id)
+        if not source:
+            return False
+        session.delete(source)
+        session.commit()
+        return True
+
+    # --- Reservation Category ---
+    
+    @staticmethod
+    def list_reservation_categories(session: Session, active_only: bool = True) -> List[ReservationCategory]:
+        stmt = select(ReservationCategory)
+        if active_only:
+            stmt = stmt.where(ReservationCategory.is_active == True)
+        return list(session.exec(stmt).all())
+
+    @staticmethod
+    def create_reservation_category(session: Session, data: dict) -> ReservationCategory:
+        existing = session.exec(select(ReservationCategory).where(ReservationCategory.code == data["code"])).first()
+        if existing:
+            raise ValueError(f"Category with code {data['code']} already exists")
+        
+        category = ReservationCategory(**data)
+        session.add(category)
+        session.commit()
+        session.refresh(category)
+        return category
+
+    @staticmethod
+    def update_reservation_category(session: Session, id: int, data: dict) -> ReservationCategory:
+        category = session.get(ReservationCategory, id)
+        if not category:
+            raise ValueError("Category not found")
+        
+        for key, value in data.items():
+            setattr(category, key, value)
+        
+        category.updated_at = datetime.utcnow()
+        session.add(category)
+        session.commit()
+        session.refresh(category)
+        return category
+        
+    @staticmethod
+    def delete_reservation_category(session: Session, id: int) -> bool:
+        category = session.get(ReservationCategory, id)
+        if not category:
+            return False
+        session.delete(category)
+        session.commit()
+        return True
+
+master_data_service = MasterDataService()

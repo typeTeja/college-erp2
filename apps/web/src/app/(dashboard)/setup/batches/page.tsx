@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { AcademicBatchTab } from '../../settings/MasterDataTabs';
+import { BatchMaster } from '@/components/academics/BatchMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -51,7 +51,7 @@ export default function BatchesPage() {
             badge="setup"
             movedFrom="Settings > Academic Batches"
         >
-            <AcademicBatchTab />
+            <BatchMaster />
         </ConfigPageTemplate>
     );
 }

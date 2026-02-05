@@ -209,22 +209,22 @@ export interface FeeHead {
 
 export const getFeeHeads = async (isActive?: boolean): Promise<FeeHead[]> => {
     const params = isActive !== undefined ? { is_active: isActive } : {};
-    const response = await api.get('/master/fee-heads', { params });
+    const response = await api.get('/finance/fee-heads', { params });
     return response.data;
 };
 
 export const createFeeHead = async (data: Partial<FeeHead>): Promise<FeeHead> => {
-    const response = await api.post('/master/fee-heads', data);
+    const response = await api.post('/finance/fee-heads', data);
     return response.data;
 };
 
 export const updateFeeHead = async (id: number, data: Partial<FeeHead>): Promise<FeeHead> => {
-    const response = await api.patch(`/master/fee-heads/${id}`, data);
+    const response = await api.patch(`/finance/fee-heads/${id}`, data);
     return response.data;
 };
 
 export const deleteFeeHead = async (id: number): Promise<void> => {
-    await api.delete(`/master/fee-heads/${id}`);
+    await api.delete(`/finance/fee-heads/${id}`);
 };
 
 // ============================================================================
@@ -332,22 +332,22 @@ export interface Board {
 
 export const getBoards = async (isActive?: boolean): Promise<Board[]> => {
     const params = isActive !== undefined ? { is_active: isActive } : {};
-    const response = await api.get('/master/boards', { params });
+    const response = await api.get('/admissions/boards', { params });
     return response.data;
 };
 
 export const createBoard = async (data: Partial<Board>): Promise<Board> => {
-    const response = await api.post('/master/boards', data);
+    const response = await api.post('/admissions/boards', data);
     return response.data;
 };
 
 export const updateBoard = async (id: number, data: Partial<Board>): Promise<Board> => {
-    const response = await api.patch(`/master/boards/${id}`, data);
+    const response = await api.patch(`/admissions/boards/${id}`, data);
     return response.data;
 };
 
 export const deleteBoard = async (id: number): Promise<void> => {
-    await api.delete(`/master/boards/${id}`);
+    await api.delete(`/admissions/boards/${id}`);
 };
 
 // ============================================================================
@@ -430,6 +430,7 @@ export interface ReservationCategory {
     id: number;
     name: string;
     code: string;
+    description?: string;
     full_name?: string;
     reservation_percentage: number;
     fee_concession_percentage: number;
@@ -442,22 +443,22 @@ export interface ReservationCategory {
 
 export const getReservationCategories = async (isActive?: boolean): Promise<ReservationCategory[]> => {
     const params = isActive !== undefined ? { is_active: isActive } : {};
-    const response = await api.get('/master/reservation-categories', { params });
+    const response = await api.get('/admissions/reservation-categories', { params });
     return response.data;
 };
 
 export const createReservationCategory = async (data: Partial<ReservationCategory>): Promise<ReservationCategory> => {
-    const response = await api.post('/master/reservation-categories', data);
+    const response = await api.post('/admissions/reservation-categories', data);
     return response.data;
 };
 
 export const updateReservationCategory = async (id: number, data: Partial<ReservationCategory>): Promise<ReservationCategory> => {
-    const response = await api.patch(`/master/reservation-categories/${id}`, data);
+    const response = await api.patch(`/admissions/reservation-categories/${id}`, data);
     return response.data;
 };
 
 export const deleteReservationCategory = async (id: number): Promise<void> => {
-    await api.delete(`/master/reservation-categories/${id}`);
+    await api.delete(`/admissions/reservation-categories/${id}`);
 };
 
 // ============================================================================
@@ -477,22 +478,22 @@ export interface LeadSource {
 
 export const getLeadSources = async (isActive?: boolean): Promise<LeadSource[]> => {
     const params = isActive !== undefined ? { is_active: isActive } : {};
-    const response = await api.get('/master/lead-sources', { params });
+    const response = await api.get('/admissions/lead-sources', { params });
     return response.data;
 };
 
 export const createLeadSource = async (data: Partial<LeadSource>): Promise<LeadSource> => {
-    const response = await api.post('/master/lead-sources', data);
+    const response = await api.post('/admissions/lead-sources', data);
     return response.data;
 };
 
 export const updateLeadSource = async (id: number, data: Partial<LeadSource>): Promise<LeadSource> => {
-    const response = await api.patch(`/master/lead-sources/${id}`, data);
+    const response = await api.patch(`/admissions/lead-sources/${id}`, data);
     return response.data;
 };
 
 export const deleteLeadSource = async (id: number): Promise<void> => {
-    await api.delete(`/master/lead-sources/${id}`);
+    await api.delete(`/admissions/lead-sources/${id}`);
 };
 
 // ============================================================================

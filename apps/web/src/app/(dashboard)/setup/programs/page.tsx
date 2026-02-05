@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { ProgramsTab } from '../../settings/MasterDataTabs';
+import { ProgramMaster } from '@/components/academics/ProgramMaster';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -51,7 +51,7 @@ export default function ProgramsPage() {
             badge="setup"
             movedFrom="Settings > Programs/Courses"
         >
-            <ProgramsTab />
+            <ProgramMaster />
         </ConfigPageTemplate>
     );
 }
