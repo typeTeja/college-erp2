@@ -6,7 +6,7 @@
 
 import { createContext, useContext, useMemo, useEffect } from 'react';
 import { filterNavigation } from '@/utils/permissions';
-import { NAVIGATION_CONFIG } from '@/config/navigation';
+import { NAVIGATION_CONFIG } from '@/config/navigation-v2';
 import { useNavPreferences } from '@/hooks/use-nav-preferences';
 import type { NavigationConfig } from '@/types/navigation';
 

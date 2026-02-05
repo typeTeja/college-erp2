@@ -21,7 +21,7 @@ from email.mime.multipart import MIMEMultipart
 from sqlmodel import Session, select
 
 from app.db.session import engine
-from app.domains.system.models.system import SystemSetting
+from app.domains.system.models import SystemSetting
 
 class EmailSettings(BaseSettings):
     """Email configuration"""
@@ -110,6 +110,32 @@ class EmailService:
             print(f"Failed to send email: {str(e)}")
             return False
 
+    def send_portal_credentials(
+        self,
+        to_email: str,
+        name: str,
+        username: str,
+        password: str,
+        portal_url: str = ""
+    ) -> bool:
+        """Send portal credentials to applicant"""
+        from .templates import PORTAL_CREDENTIALS_EMAIL_SUBJECT, PORTAL_CREDENTIALS_EMAIL_TEMPLATE
+        from datetime import datetime
+        
+        html_content = PORTAL_CREDENTIALS_EMAIL_TEMPLATE.format(
+            name=name,
+            username=username,
+            password=password,
+            portal_url=portal_url,
+            year=datetime.now().year
+        )
+        
+        return self.send_email(
+            to_email=to_email,
+            subject=PORTAL_CREDENTIALS_EMAIL_SUBJECT,
+            html_content=html_content
+        )
+
 email_service = EmailService()
 
 
@@ -165,5 +191,23 @@ class SMSService:
         except Exception as e:
             print(f"Failed to send SMS: {str(e)}")
             return False
+
+    def send_portal_credentials(
+        self,
+        mobile: str,
+        name: str,
+        username: str,
+        password: str,
+        portal_url: str = ""
+    ) -> bool:
+        """Send portal credentials via SMS"""
+        from .templates import PORTAL_CREDENTIALS_SMS_TEMPLATE
+        message = PORTAL_CREDENTIALS_SMS_TEMPLATE.format(
+            name=name,
+            username=username,
+            password=password,
+            portal_url=portal_url
+        )
+        return self.send_sms(mobile, message)
 
 sms_service = SMSService()

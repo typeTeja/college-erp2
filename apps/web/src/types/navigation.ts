@@ -13,6 +13,7 @@ export interface NavItem {
     shortcut?: string;
     aliases?: string[];
     requiredPermissions?: string[];
+    description?: string;
 }
 
 export interface NavGroup {
@@ -23,6 +24,8 @@ export interface NavGroup {
     defaultExpanded?: boolean;
     order: number;
     requiredPermissions?: string[];
+    tier?: number;
+    badge?: string;
 }
 
 export interface NavigationConfig {

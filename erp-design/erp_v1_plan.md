@@ -1,9 +1,3 @@
-### **TOTAL DOCUMENT STRUCTURE (Parts 1–10)**
-
-I will generate **each part fully**, sequentially, with no missing sections.
-
----
-
 # **✅ PART INDEX (what you will receive)**
 
 ### **PART 1 — Executive Summary & System Overview**
@@ -36,7 +30,7 @@ I will generate **each part fully**, sequentially, with no missing sections.
 
 * Full ER diagram
 
-* Complete MySQL schema (all modules)
+* Complete Postgresql schema (all modules)
 
 * DB naming conventions
 
@@ -371,7 +365,7 @@ This SRS document is organized into sections aligned with IEEE-830 standards:
 
 * API specifications
 
-* Database schema (Prisma \+ MySQL)
+* Database schema (posgressql)
 
 * Integration details (OCR, Easebuzz etc.)
 
@@ -2120,6 +2114,8 @@ Each semester includes:
 * Batch A
 
 * Batch B
+
+* Batch C
 
 ---
 

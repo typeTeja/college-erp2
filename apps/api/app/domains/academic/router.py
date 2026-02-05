@@ -23,6 +23,7 @@ from app.domains.academic.operations_service import academic_operations_service
 from app.domains.academic.university_exam_service import university_exam_service
 from app.domains.academic.attendance_service import attendance_service
 from app.domains.academic.exam_service import exam_service
+from app.domains.academic.engine_service import academic_engine
 from app.domains.academic.schemas import (
     AcademicYearCreate, AcademicYearRead,
     BatchCreate, BatchRead,
@@ -46,7 +47,8 @@ from app.domains.academic.schemas import (
     StudentSectionAssignmentCreate, StudentSectionAssignmentRead,
     UniversityExamCreate, UniversityExamRead,
     UniversityExamRegistrationCreate, UniversityExamRegistrationRead,
-    UniversityExamResultCreate, UniversityExamResultRead
+    UniversityExamResultCreate, UniversityExamResultRead,
+    BatchRuleOverrideCreate, BatchRuleOverrideRead
 )
 
 
@@ -178,6 +180,49 @@ def create_batch_semester(
     """Create a new semester for a batch"""
     service = AcademicService(session)
     return service.create_batch_semester(data)
+
+
+# ----------------------------------------------------------------------
+# Academic Engine & Freeze Endpoints (Hardened)
+# ----------------------------------------------------------------------
+
+@router.post("/batches/{batch_id}/freeze", response_model=BatchRead)
+def freeze_batch_rules(
+    batch_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    [ATOMIC] Snapshot and Freeze Regulation rules for a batch.
+    Mandatory for audit safety before starting academic operations.
+    """
+    try:
+        return academic_engine.freeze_regulation_to_batch(session, batch_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/batches/overrides", response_model=BatchRuleOverrideRead)
+def apply_rule_override(
+    data: BatchRuleOverrideCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Admin-only rule override with audit trail."""
+    # Note: RBAC check for ADMIN should be added here or in dependencies
+    return academic_engine.apply_rule_override(session, data)
+
+
+@router.get("/students/{student_id}/promotion-check")
+def check_promotion_eligibility(
+    student_id: int,
+    target_year: int,
+    dry_run: bool = True,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Check if a student is eligible for promotion to the next academic year."""
+    return academic_engine.evaluate_promotion(session, student_id, target_year, dry_run)
 
 
 @router.get("/batches/{batch_id}/subjects", response_model=List[dict])

@@ -21,7 +21,7 @@ from fastapi import HTTPException
 
 from .models import (
     FeeStructure, StudentFee, StudentFeeInstallment,
-    FeePayment, FeeConcession, FeeFine, FeeHead
+    FeePayment, FeeConcession, FeeFine, FeeHead, ScholarshipSlab
 )
 from app.shared.enums import PaymentStatus
 from app.domains.student.models import Student
@@ -146,6 +146,60 @@ class FeeService:
             
         # Hard delete for now as per simple CRUD
         session.delete(fee_head)
+        session.commit()
+        return True
+
+    # ----------------------------------------------------------------------
+    # Scholarship Slab Management
+    # ----------------------------------------------------------------------
+    
+    @staticmethod
+    def list_scholarship_slabs(session: Session, is_active: Optional[bool] = None) -> List[ScholarshipSlab]:
+        """List all scholarship slabs"""
+        stmt = select(ScholarshipSlab)
+        if is_active is not None:
+            stmt = stmt.where(ScholarshipSlab.is_active == is_active)
+        return list(session.exec(stmt).all())
+    
+    @staticmethod
+    def create_scholarship_slab(session: Session, data: dict) -> ScholarshipSlab:
+        """Create a new scholarship slab"""
+        # Check duplicate code
+        existing = session.exec(select(ScholarshipSlab).where(ScholarshipSlab.code == data["code"])).first()
+        if existing:
+            raise HTTPException(status_code=400, detail=f"Scholarship slab with code {data['code']} already exists")
+            
+        slab = ScholarshipSlab(**data)
+        session.add(slab)
+        session.commit()
+        session.refresh(slab)
+        return slab
+    
+    @staticmethod
+    def update_scholarship_slab(session: Session, id: int, data: dict) -> ScholarshipSlab:
+        """Update a scholarship slab"""
+        slab = session.get(ScholarshipSlab, id)
+        if not slab:
+            raise HTTPException(status_code=404, detail="Scholarship slab not found")
+            
+        for key, value in data.items():
+            if hasattr(slab, key):
+                setattr(slab, key, value)
+            
+        slab.updated_at = datetime.utcnow()
+        session.add(slab)
+        session.commit()
+        session.refresh(slab)
+        return slab
+    
+    @staticmethod
+    def delete_scholarship_slab(session: Session, id: int) -> bool:
+        """Delete a scholarship slab"""
+        slab = session.get(ScholarshipSlab, id)
+        if not slab:
+            raise HTTPException(status_code=404, detail="Scholarship slab not found")
+            
+        session.delete(slab)
         session.commit()
         return True
 

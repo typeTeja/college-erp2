@@ -561,8 +561,26 @@ async def payment_success(
         # Trigger Account Creation
         application = session.get(Application, int(udf1))
         if application and not application.portal_user_id:
-             AdmissionService.create_portal_account_after_payment(session, application)
-             # Send SMS/Email with creds
+             portal_username, portal_password, _ = AdmissionService.create_portal_account_after_payment(session, application)
+             
+             # Send SMS/Email with creds if new account created with password
+             if portal_password:
+                 background_tasks.add_task(
+                     AdmissionService.send_credentials_email,
+                     email=application.email,
+                     username=portal_username,
+                     password=portal_password,
+                     name=application.name,
+                     portal_url=settings.PORTAL_BASE_URL
+                 )
+                 background_tasks.add_task(
+                     AdmissionService.send_credentials_sms,
+                     phone=application.phone,
+                     username=portal_username,
+                     password=portal_password,
+                     name=application.name,
+                     portal_url=settings.PORTAL_BASE_URL
+                 )
              
     # Redirect to Frontend Success Page
     from fastapi.responses import RedirectResponse
@@ -659,6 +677,28 @@ async def get_receipt_url(
     return {
         "url": f"{settings.API_V1_STR}/admissions/v2/public/receipt/{application_number}/download"
     }
+
+
+@router.get("/settings", response_model=AdmissionSettingsRead)
+def get_admission_settings(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Get global admission settings"""
+    return AdmissionService.get_admission_settings(session)
+
+@router.patch("/settings", response_model=AdmissionSettingsRead)
+def update_admission_settings(
+    data: AdmissionSettingsUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Update global admission settings"""
+    return AdmissionService.update_admission_settings(
+        session=session,
+        data=data.dict(exclude_unset=True),
+        updated_by=current_user.id
+    )
 
 
 # ======================================================================

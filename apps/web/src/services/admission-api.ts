@@ -269,7 +269,7 @@ export const admissionApi = {
     auto_create_student_account?: boolean;
     portal_base_url?: string;
   }): Promise<{ message: string }> => {
-    const response = await api.put(`${BASE_URL}/settings`, data);
+    const response = await api.patch(`${BASE_URL}/settings`, data);
     return response.data;
   },
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { ScholarshipSlabTab } from '../../../settings/ScholarshipSlabTab';
+import ScholarshipSlabTab from '@/components/finance/scholarships/ScholarshipSlabTab';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 

@@ -69,6 +69,7 @@ class BatchBase(BaseModel):
     joining_year: int
     start_year: int
     end_year: int
+    regulation_code: Optional[str] = None
 
 
 class BatchCreate(BatchBase):
@@ -81,6 +82,8 @@ class BatchRead(BatchBase):
     total_students: int
     status: str
     is_active: bool
+    frozen_at: Optional[datetime] = None
+    freeze_checksum: Optional[str] = None
     created_at: datetime
     
     class Config:
@@ -193,6 +196,8 @@ class RegulationSubjectBase(BaseModel):
     max_marks: int = 100
     internal_max: int = 40
     external_max: int = 60
+    counts_for_hall_ticket: bool = True
+    counts_for_promotion: bool = True
 
 class RegulationSubjectCreate(RegulationSubjectBase):
     pass
@@ -212,6 +217,8 @@ class RegulationBase(BaseModel):
     internal_pass_percentage: float = 0.0
     external_pass_percentage: float = 35.0
     total_pass_percentage: float = 40.0
+    regulation_version: str = "v1"
+    effective_from_year: Optional[int] = None
 
 class RegulationCreate(RegulationBase):
     pass
@@ -560,5 +567,28 @@ class TimetableSlotCreate(TimetableSlotBase):
 class TimetableSlotRead(TimetableSlotBase):
     id: int
     
+    class Config:
+        from_attributes = True
+
+# ----------------------------------------------------------------------
+# Audit & Override Schemas
+# ----------------------------------------------------------------------
+
+class BatchRuleOverrideBase(BaseModel):
+    batch_id: int
+    rule_type: str
+    old_value: str
+    new_value: str
+    reason: str
+    document_ref: Optional[str] = None
+
+class BatchRuleOverrideCreate(BatchRuleOverrideBase):
+    approved_by_id: int
+
+class BatchRuleOverrideRead(BatchRuleOverrideBase):
+    id: int
+    approved_by_id: int
+    approved_at: datetime
+
     class Config:
         from_attributes = True

@@ -93,6 +93,22 @@ class AdmissionService:
         return settings_obj
 
     @staticmethod
+    def update_admission_settings(session: Session, data: dict, updated_by: Optional[int] = None) -> AdmissionSettings:
+        settings_obj = AdmissionService.get_admission_settings(session)
+        for key, value in data.items():
+            if hasattr(settings_obj, key):
+                setattr(settings_obj, key, value)
+        
+        settings_obj.updated_at = datetime.utcnow()
+        if updated_by:
+            settings_obj.updated_by = updated_by
+            
+        session.add(settings_obj)
+        session.commit()
+        session.refresh(settings_obj)
+        return settings_obj
+
+    @staticmethod
     def generate_application_number(session: Session) -> str:
         year = datetime.now().year
         last_app = session.exec(
@@ -275,12 +291,23 @@ class AdmissionService:
         return count
 
     @staticmethod
-    async def send_credentials_sms(phone: str, username: str, password: str, name: str = "", application_number: str = ""):
+    async def send_credentials_sms(phone: str, username: str, password: str, name: str = "", portal_url: str = ""):
         try:
             from app.domains.communication.services import sms_service
             sms_service.send_portal_credentials(
                 mobile=phone, name=name, username=username,
-                password=password, application_number=application_number
+                password=password, portal_url=portal_url
+            )
+        except Exception:
+            pass
+
+    @staticmethod
+    async def send_credentials_email(email: str, username: str, password: str, name: str = "", portal_url: str = ""):
+        try:
+            from app.domains.communication.services import email_service
+            email_service.send_portal_credentials(
+                to_email=email, name=name, username=username,
+                password=password, portal_url=portal_url
             )
         except Exception:
             pass

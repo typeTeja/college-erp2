@@ -14,6 +14,10 @@ export interface Regulation {
   external_pass_percentage: number;
   total_pass_percentage: number;
   is_locked: boolean;
+  regulation_version?: string;
+  is_deprecated?: boolean;
+  effective_from_year?: number;
+  subjects?: any[];
   created_at: string;
 }
 

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional, List
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
-from app.shared.enums import BatchStatus, SemesterStatus
+from app.shared.enums import BatchStatus, SemesterStatus, RegulationStatus, ProgramType, SubjectType, EvaluationType, PromotionRuleType
 
 if TYPE_CHECKING:
     from .program import Program
@@ -40,6 +40,12 @@ class AcademicBatch(SQLModel, table=True):
     status: BatchStatus = Field(default=BatchStatus.ACTIVE)
     is_active: bool = Field(default=True)
     
+    # Audit & Freeze Metadata (Hardening)
+    regulation_code: Optional[str] = Field(default=None, max_length=20)
+    frozen_at: Optional[datetime] = None
+    frozen_by_id: Optional[int] = Field(default=None, foreign_key="users.id")
+    freeze_checksum: Optional[str] = Field(default=None, max_length=64)
+    
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -49,6 +55,7 @@ class AcademicBatch(SQLModel, table=True):
     program: "Program" = Relationship(back_populates="batches")
     regulation: "Regulation" = Relationship(back_populates="batches")
     semesters: List["BatchSemester"] = Relationship(back_populates="batch")
+    promotion_rules: List["BatchPromotionRule"] = Relationship(back_populates="batch")
     students: List["Student"] = Relationship(back_populates="batch")
     
     # internal_exams: List["InternalExam"] = Relationship(back_populates="batch")
@@ -67,6 +74,10 @@ class BatchSemester(SQLModel, table=True):
     
     status: SemesterStatus = Field(default=SemesterStatus.UPCOMING)
     is_current: bool = Field(default=False)
+    
+    # Frozen Rules (Snapshot from RegulationSemester)
+    total_credits: float = Field(default=0.0)
+    min_credits: float = Field(default=0.0)
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -92,11 +103,57 @@ class BatchSubject(SQLModel, table=True):
     
     # Faculty Assignment (Course Coordinator)
     faculty_id: Optional[int] = Field(default=None, foreign_key="faculty.id")
-    
     is_active: bool = Field(default=True)
+    
+    # Frozen Rules (Snapshot from RegulationSubject)
+    credits: float = Field(default=3.0)
+    subject_type: SubjectType = Field(default=SubjectType.THEORY)
+    evaluation_type: EvaluationType = Field(default=EvaluationType.THEORY_ONLY)
+    
+    max_marks: int = Field(default=100)
+    internal_max: int = Field(default=40)
+    external_max: int = Field(default=60)
+    
+    counts_for_hall_ticket: bool = Field(default=True)
+    counts_for_promotion: bool = Field(default=True)
     
     # Relationships
     batch_semester: BatchSemester = Relationship(back_populates="subjects")
     # subject: "Subject" = Relationship()
     # regulation_subject: "RegulationSubject" = Relationship()
     # internal_exam_subjects: List["InternalExamSubject"] = Relationship(back_populates="batch_subject")
+
+class BatchRuleOverride(SQLModel, table=True):
+    """Audit table for administrative overrides of frozen rules"""
+    __tablename__ = "batch_rule_overrides"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    batch_id: int = Field(foreign_key="academic_batches.id", index=True)
+    
+    rule_type: str = Field(max_length=50) # SUBJECT, PROMOTION, CREDIT
+    old_value: str
+    new_value: str
+    
+    reason: str
+    document_ref: Optional[str] = None # File path or reference
+    
+    approved_by_id: int = Field(foreign_key="users.id")
+    approved_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BatchPromotionRule(SQLModel, table=True):
+    """Frozen copy of RegulationPromotionRule for a specific batch"""
+    __tablename__ = "batch_promotion_rules"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    batch_id: int = Field(foreign_key="academic_batches.id", index=True)
+    
+    from_year: int
+    to_year: int
+    
+    rule_type: str # Snapshot from PromotionRuleType
+    min_credits_required: Optional[float] = None
+    min_credit_percentage_required: Optional[float] = None
+    max_backlogs_allowed: Optional[int] = None
+    
+    # Relationships
+    batch: AcademicBatch = Relationship(back_populates="promotion_rules")

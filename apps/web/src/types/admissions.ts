@@ -450,6 +450,31 @@ export interface PaymentConfigResponse {
   payment_gateway: string;
 }
 
+export interface AdmissionSettings {
+  id: number;
+  application_fee_enabled: boolean;
+  application_fee_amount: number;
+  online_payment_enabled: boolean;
+  offline_payment_enabled: boolean;
+  payment_gateway: string;
+  send_credentials_email: boolean;
+  send_credentials_sms: boolean;
+  auto_create_student_account: boolean;
+  portal_base_url: string;
+  updated_at: string;
+}
+
+export interface AdmissionSettingsUpdate {
+  application_fee_enabled?: boolean;
+  application_fee_amount?: number;
+  online_payment_enabled?: boolean;
+  offline_payment_enabled?: boolean;
+  send_credentials_email?: boolean;
+  send_credentials_sms?: boolean;
+  auto_create_student_account?: boolean;
+  portal_base_url?: string;
+}
+
 export interface OfflinePaymentVerifyRequest {
   verified: boolean;
   payment_proof_url?: string;

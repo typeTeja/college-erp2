@@ -69,10 +69,17 @@ export interface NavigationGroupV2 {
     requiredRoles?: string[];
 }
 
+const COMMON_MOBILE_NAV = [
+    { id: 'dashboard', label: 'Home', path: '/', icon: LayoutDashboard },
+    { id: 'academics', label: 'Academics', path: '/academics', icon: GraduationCap },
+    { id: 'people', label: 'People', path: '/students', icon: Users },
+    { id: 'more', label: 'Menu', path: '/menu', icon: Menu }
+];
+
 /**
  * Navigation V2 Configuration
  */
-export const NAVIGATION_CONFIG_V2: Record<string, { groups: NavigationGroupV2[] }> = {
+export const NAVIGATION_CONFIG_V2: Record<string, NavigationConfig> = {
     SUPER_ADMIN: {
         groups: [
             // TIER 1: DAILY OPERATIONS
@@ -459,12 +466,14 @@ export const NAVIGATION_CONFIG_V2: Record<string, { groups: NavigationGroupV2[] 
                     }
                 ]
             }
-        ]
+        ],
+        mobileBottomNav: COMMON_MOBILE_NAV
     },
 
     // PRINCIPAL: Same as SUPER_ADMIN but without System Administration
     PRINCIPAL: {
-        groups: [] // Will be populated from SUPER_ADMIN, excluding tier 5
+        groups: [], // Will be populated from SUPER_ADMIN, excluding tier 5
+        mobileBottomNav: COMMON_MOBILE_NAV
     },
 
     // FACULTY: Simplified view
@@ -512,7 +521,8 @@ export const NAVIGATION_CONFIG_V2: Record<string, { groups: NavigationGroupV2[] 
                     }
                 ]
             }
-        ]
+        ],
+        mobileBottomNav: COMMON_MOBILE_NAV
     },
 
     // STUDENT: Minimal view
@@ -575,7 +585,8 @@ export const NAVIGATION_CONFIG_V2: Record<string, { groups: NavigationGroupV2[] 
                     }
                 ]
             }
-        ]
+        ],
+        mobileBottomNav: COMMON_MOBILE_NAV
     },
 
     // PARENT: Minimal view
@@ -596,9 +607,13 @@ export const NAVIGATION_CONFIG_V2: Record<string, { groups: NavigationGroupV2[] 
                     }
                 ]
             }
-        ]
+        ],
+        mobileBottomNav: COMMON_MOBILE_NAV
     }
 };
+
+// ADMIN: Same as SUPER_ADMIN
+NAVIGATION_CONFIG_V2.ADMIN = NAVIGATION_CONFIG_V2.SUPER_ADMIN;
 
 /**
  * Populate PRINCIPAL navigation (same as SUPER_ADMIN minus tier 5)
@@ -606,6 +621,8 @@ export const NAVIGATION_CONFIG_V2: Record<string, { groups: NavigationGroupV2[] 
 NAVIGATION_CONFIG_V2.PRINCIPAL.groups = NAVIGATION_CONFIG_V2.SUPER_ADMIN.groups.filter(
     group => group.tier !== 5
 );
+
+export const NAVIGATION_CONFIG = NAVIGATION_CONFIG_V2;
 
 /**
  * Get badge label for display

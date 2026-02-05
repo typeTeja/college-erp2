@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import { AcademicStructureTab } from '../../../settings/AcademicStructureTab';
+import AcademicStructureTab from '@/components/academics/AcademicStructureTab';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 

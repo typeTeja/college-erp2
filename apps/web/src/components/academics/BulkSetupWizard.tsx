@@ -13,13 +13,22 @@ import { Regulation } from '@/types/regulation';
 import { academicYearService } from '@/utils/academic-year-service';
 import { institutionalService } from '@/utils/institutional-service';
 import { api } from '@/utils/api';
+import { Lock, AlertCircle, ShieldCheck } from 'lucide-react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui/table';
 
 interface BulkSetupWizardProps {
     programs: Program[];
     regulations: Regulation[];
 }
 
-type WizardStep = 'program' | 'regulation' | 'configuration' | 'review';
+type WizardStep = 'program' | 'regulation' | 'configuration' | 'freeze' | 'review';
 
 export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps) {
     const router = useRouter();
@@ -95,14 +104,16 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                 toast.error('Please configure sections');
                 return;
             }
+            setCurrentStep('freeze');
+        } else if (currentStep === 'freeze') {
             setCurrentStep('review');
         }
     };
 
     const handleBack = () => {
         if (currentStep === 'regulation') setCurrentStep('program');
-        else if (currentStep === 'configuration') setCurrentStep('regulation');
-        else if (currentStep === 'review') setCurrentStep('configuration');
+        else if (currentStep === 'freeze') setCurrentStep('configuration');
+        else if (currentStep === 'review') setCurrentStep('freeze');
     };
 
     const handleSubmit = async () => {
@@ -119,7 +130,7 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
             setCreationStep('Creating batch...');
             const batchName = `${formData.joining_year}-${formData.joining_year + (selectedProgram?.duration_years || 0)} ${selectedProgram?.code}`;
             const batchCode = `${selectedProgram?.code}-${formData.joining_year}`;
-            
+
             const admissionYear = academicYears.find(ay => ay.year.includes(formData.joining_year!.toString()));
             if (!admissionYear) {
                 throw new Error(`Academic year record for ${formData.joining_year} not found. Please setup academic years first.`);
@@ -139,12 +150,12 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
             // 2. Create Semesters
             const totalSemesters = selectedProgram?.number_of_semesters || 8;
             setCreationStep(`Creating ${totalSemesters} semesters...`);
-            
+
             for (let i = 1; i <= totalSemesters; i++) {
                 const yearOffset = Math.floor((i - 1) / 2);
                 const targetYear = formData.joining_year! + yearOffset;
                 const semYear = academicYears.find(ay => ay.year.includes(targetYear.toString()));
-                
+
                 if (!semYear) {
                     throw new Error(`Academic year for semester ${i} (${targetYear}) not found.`);
                 }
@@ -189,6 +200,10 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                 }
             }
 
+            // 5. Hardened Rule Freeze (NEW)
+            setCreationStep('Calculating rule checksum & freezing rules...');
+            await api.post(`/academic/batches/${batch.id}/freeze`);
+
             toast.success('Sequential batch setup completed successfully');
             router.push('/setup/batches');
         } catch (error: any) {
@@ -205,24 +220,22 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
         <div className="max-w-4xl mx-auto p-6">
             <div className="mb-8">
                 <div className="flex items-center justify-between">
-                    {(['program', 'regulation', 'configuration', 'review'] as WizardStep[]).map((step, index) => (
+                    {(['program', 'regulation', 'configuration', 'freeze', 'review'] as WizardStep[]).map((step, index) => (
                         <div key={step} className="flex items-center flex-1">
                             <div className="flex flex-col items-center flex-1">
                                 <div
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
-                                        currentStep === step ? 'bg-blue-600 text-white' : 
-                                        index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600 text-white' : 
-                                        'bg-gray-200 text-gray-600'
-                                    }`}
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${currentStep === step ? 'bg-blue-600 text-white' :
+                                        index < (['program', 'regulation', 'configuration', 'freeze', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600 text-white' :
+                                            'bg-gray-200 text-gray-600'
+                                        }`}
                                 >
                                     {index + 1}
                                 </div>
                                 <div className="text-sm mt-2 font-medium capitalize">{step}</div>
                             </div>
-                            {index < 3 && (
-                                <div className={`h-1 flex-1 mx-2 transition-colors ${
-                                    index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600' : 'bg-gray-200'
-                                }`} />
+                            {index < 4 && (
+                                <div className={`h-1 flex-1 mx-2 transition-colors ${index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600' : 'bg-gray-200'
+                                    }`} />
                             )}
                         </div>
                     ))}
@@ -235,12 +248,14 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                         {currentStep === 'program' && '1. Select Program & Year'}
                         {currentStep === 'regulation' && '2. Choose Regulation'}
                         {currentStep === 'configuration' && '3. Configure Structure'}
-                        {currentStep === 'review' && '4. Review & Create'}
+                        {currentStep === 'freeze' && '4. Regulation Freeze Preview'}
+                        {currentStep === 'review' && '5. Review & Create'}
                     </CardTitle>
                     <CardDescription>
                         {currentStep === 'program' && 'Choose the program and joining year for this batch'}
                         {currentStep === 'regulation' && 'Select the regulation to bind to this batch'}
                         {currentStep === 'configuration' && 'Configure sections and lab groups'}
+                        {currentStep === 'freeze' && 'Mandatory review of immutable academic rules'}
                         {currentStep === 'review' && 'Review your configuration before creating'}
                     </CardDescription>
                 </CardHeader>
@@ -335,6 +350,51 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                     onChange={(e) => setFormData({ ...formData, lab_capacity: parseInt(e.target.value) })}
                                     disabled={!formData.labs_per_semester}
                                 />
+                            </div>
+                        </div>
+                    )}
+
+                    {currentStep === 'freeze' && (
+                        <div className="space-y-4">
+                            <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                                <h4 className="text-amber-800 font-semibold flex items-center gap-2">
+                                    <Lock className="h-4 w-4" /> Immutable Rule Freeze
+                                </h4>
+                                <p className="text-xs text-amber-700 mt-1">
+                                    Continuing will create a **one-way commit** of the following rules from Regulation <strong>{selectedRegulation?.name}</strong>. Once frozen, these rules cannot be changed even if the global regulation is updated.
+                                </p>
+                            </div>
+
+                            <div className="border rounded-lg overflow-hidden">
+                                <Table>
+                                    <TableHeader className="bg-slate-50">
+                                        <TableRow>
+                                            <TableHead>Category</TableHead>
+                                            <TableHead>Details</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell className="font-medium">Total Credits</TableCell>
+                                            <TableCell>{selectedRegulation?.total_credits || 'N/A'}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell className="font-medium">Subjects</TableCell>
+                                            <TableCell>{(selectedRegulation as any)?.subjects?.length || 0} subjects will be snapshotted</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell className="font-medium">Promotion Rules</TableCell>
+                                            <TableCell>Credit-based detention will be enforced</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            <div className="flex items-center space-x-2 p-2">
+                                <input type="checkbox" id="confirm-freeze" className="rounded border-gray-300" />
+                                <Label htmlFor="confirm-freeze" className="text-xs text-slate-600">
+                                    I understand that these academic rules will be frozen and immutable for this cohort.
+                                </Label>
                             </div>
                         </div>
                     )}

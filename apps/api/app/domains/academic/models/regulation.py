@@ -38,6 +38,11 @@ class Regulation(SQLModel, table=True):
     locked_at: Optional[datetime] = None
     locked_by: Optional[int] = Field(default=None, foreign_key="users.id")
     
+    # Audit & Versioning
+    regulation_version: str = Field(default="v1", max_length=10) # e.g. "v1", "v1.1"
+    is_deprecated: bool = Field(default=False)
+    effective_from_year: Optional[int] = Field(default=None) # e.g. 2024
+    
     # Optimistic locking
     version: int = Field(default=1)
     
@@ -74,6 +79,10 @@ class RegulationSubject(SQLModel, table=True):
     max_marks: int = Field(default=100)
     internal_max: int = Field(default=40)
     external_max: int = Field(default=60)
+    
+    # Eligibility Flags
+    counts_for_hall_ticket: bool = Field(default=True)
+    counts_for_promotion: bool = Field(default=True)
     
     # Relationships
     regulation: Regulation = Relationship(back_populates="subjects")
