@@ -397,6 +397,14 @@ export const NAVIGATION_CONFIG_V2: Record<string, NavigationConfig> = {
                         description: 'Degree programs'
                     },
                     {
+                        id: 'subjects',
+                        label: 'Subjects',
+                        path: '/setup/subjects',
+                        icon: BookOpen,
+                        badge: 'setup',
+                        description: 'Central subject catalog'
+                    },
+                    {
                         id: 'academic-years',
                         label: 'Academic Years',
                         path: '/setup/academic-years',

@@ -23,3 +23,6 @@ npm run start
 
 
 pkill -9 -f "uvicorn app.main:app" || echo "Killed server"
+
+
+taskkill /F /IM uvicorn.exe /T ; taskkill /F /IM python.exe /T

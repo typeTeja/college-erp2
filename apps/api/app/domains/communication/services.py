@@ -96,6 +96,9 @@ class EmailService:
                 msg.attach(MIMEText(text_content, 'plain'))
             msg.attach(MIMEText(html_content, 'html'))
             
+            if to_email == "tejavihaan@gmail.com":
+                print(f"DEBUG EMAIL CONTENT ({to_email}):\n{html_content}")
+
             if not config["smtp.user"] or not config["smtp.password"]:
                 # Console logging for dev
                 print(f"DEBUG: Email to {to_email} | Subject: {subject}")

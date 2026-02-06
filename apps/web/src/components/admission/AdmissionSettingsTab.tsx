@@ -17,27 +17,36 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
-import { useAdmissionSettings, useUpdateAdmissionSettings } from '@/hooks/useAdmissions';
+import { useAdmissionSettings, useUpdateAdmissionSettings } from '@/hooks/use-admissions';
 import { AdmissionSettingsUpdate } from '@/types/admissions';
 
 export function AdmissionSettingsTab() {
     const { data: settings, isLoading, isError } = useAdmissionSettings();
     const updateMutation = useUpdateAdmissionSettings();
 
-    const [formState, setFormState] = useState<AdmissionSettingsUpdate>({});
+    const [formState, setFormState] = useState<AdmissionSettingsUpdate>({
+        application_fee_enabled: false,
+        application_fee_amount: 0,
+        online_payment_enabled: false,
+        offline_payment_enabled: false,
+        send_credentials_email: false,
+        send_credentials_sms: false,
+        auto_create_student_account: false,
+        portal_base_url: '',
+    });
     const [isDirty, setIsDirty] = useState(false);
 
     useEffect(() => {
         if (settings) {
             setFormState({
-                application_fee_enabled: settings.application_fee_enabled,
-                application_fee_amount: settings.application_fee_amount,
-                online_payment_enabled: settings.online_payment_enabled,
-                offline_payment_enabled: settings.offline_payment_enabled,
-                send_credentials_email: settings.send_credentials_email,
-                send_credentials_sms: settings.send_credentials_sms,
-                auto_create_student_account: settings.auto_create_student_account,
-                portal_base_url: settings.portal_base_url,
+                application_fee_enabled: settings.application_fee_enabled ?? false,
+                application_fee_amount: settings.application_fee_amount ?? 0,
+                online_payment_enabled: settings.online_payment_enabled ?? false,
+                offline_payment_enabled: settings.offline_payment_enabled ?? false,
+                send_credentials_email: settings.send_credentials_email ?? false,
+                send_credentials_sms: settings.send_credentials_sms ?? false,
+                auto_create_student_account: settings.auto_create_student_account ?? false,
+                portal_base_url: settings.portal_base_url ?? '',
             });
         }
     }, [settings]);
@@ -115,7 +124,7 @@ export function AdmissionSettingsTab() {
                                 <Input
                                     id="fee_amount"
                                     type="number"
-                                    value={formState.application_fee_amount}
+                                    value={formState.application_fee_amount ?? 0}
                                     onChange={handleInputChange('application_fee_amount')}
                                     className="pl-7"
                                 />
@@ -218,7 +227,7 @@ export function AdmissionSettingsTab() {
                         <Input
                             id="portal_url"
                             type="url"
-                            value={formState.portal_base_url}
+                            value={formState.portal_base_url ?? ''}
                             onChange={handleInputChange('portal_base_url')}
                             placeholder="https://portal.yourcollege.edu"
                         />
@@ -234,14 +243,14 @@ export function AdmissionSettingsTab() {
                     onClick={() => {
                         if (settings) {
                             setFormState({
-                                application_fee_enabled: settings.application_fee_enabled,
-                                application_fee_amount: settings.application_fee_amount,
-                                online_payment_enabled: settings.online_payment_enabled,
-                                offline_payment_enabled: settings.offline_payment_enabled,
-                                send_credentials_email: settings.send_credentials_email,
-                                send_credentials_sms: settings.send_credentials_sms,
-                                auto_create_student_account: settings.auto_create_student_account,
-                                portal_base_url: settings.portal_base_url,
+                                application_fee_enabled: settings.application_fee_enabled ?? false,
+                                application_fee_amount: settings.application_fee_amount ?? 0,
+                                online_payment_enabled: settings.online_payment_enabled ?? false,
+                                offline_payment_enabled: settings.offline_payment_enabled ?? false,
+                                send_credentials_email: settings.send_credentials_email ?? false,
+                                send_credentials_sms: settings.send_credentials_sms ?? false,
+                                auto_create_student_account: settings.auto_create_student_account ?? false,
+                                portal_base_url: settings.portal_base_url ?? '',
                             });
                             setIsDirty(false);
                         }

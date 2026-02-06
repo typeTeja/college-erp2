@@ -321,11 +321,19 @@ class ActivityLogRead(BaseModel):
     class Config:
         from_attributes = True
 
+class ProgramShort(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
 class ApplicationRead(ApplicationBase):
     id: int
     application_number: str
     status: ApplicationStatus
     fee_mode: FeeMode
+    program: Optional[ProgramShort] = None
     payment_status: Optional[str] = "pending"
     payment_proof_url: Optional[str] = None
     offline_payment_verified: bool
@@ -374,9 +382,6 @@ class EntranceExamScoreCreate(BaseModel):
     total_marks: float = 100.0
     exam_date: Optional[datetime] = None
 
-class ProgramShort(BaseModel):
-    id: int
-    name: str
 
 class ApplicationRecentRead(BaseModel):
     id: int
@@ -429,15 +434,9 @@ class QuickApplyResponse(BaseModel):
     portal_password: Optional[str] = None  # Only sent once
     message: str
     
-class ApplicationCompleteUpdate(BaseModel):
-    """Stage 2: Complete Application - Full form fields"""
-    aadhaar_number: Optional[str] = None
-    father_name: Optional[str] = None
-    father_phone: Optional[str] = None
-    address: Optional[str] = None
-    previous_marks_percentage: Optional[float] = None
-    applied_for_scholarship: bool = False
-    hostel_required: bool = False
+    class Config:
+        from_attributes = True
+    
 
 class AdmissionSettingsRead(BaseModel):
     """Read admission settings"""

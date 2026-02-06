@@ -1,6 +1,9 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from datetime import datetime
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from app.domains.auth.models import AuthUser
 
 class AdmissionSettings(SQLModel, table=True):
     """Global admission settings for configuring application workflow"""
@@ -38,3 +41,6 @@ class AdmissionSettings(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     updated_by: Optional[int] = Field(default=None, foreign_key="users.id")
+    
+    # Relationships
+    updater: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "AdmissionSettings.updated_by"})

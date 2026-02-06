@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.domains.academic.models import Program
     from app.domains.student.models import Student
     from app.domains.finance.models import ScholarshipSlab
+    from app.domains.auth.models import AuthUser
     from .payment import ApplicationPayment
     from .document import ApplicationDocument
     from .activity import ApplicationActivityLog
@@ -82,8 +83,10 @@ class Application(SQLModel, table=True):
     # Photo
     photo_url: Optional[str] = None
     
+    # Feature Flags
+    
     # Student Portal Access (for progressive application completion)
-    portal_user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
+    # portal_user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
     portal_password_hash: Optional[str] = None  # Hashed password for student portal
     portal_first_login: Optional[datetime] = None
     portal_last_login: Optional[datetime] = None
@@ -92,6 +95,11 @@ class Application(SQLModel, table=True):
     quick_apply_completed_at: Optional[datetime] = None
     full_form_started_at: Optional[datetime] = None
     full_form_completed_at: Optional[datetime] = None
+    
+    # ...
+
+    # ...
+    
     
     # Payment tracking
     application_fee: float = Field(default=500.0)
@@ -157,6 +165,13 @@ class Application(SQLModel, table=True):
     # Links
     student_id: Optional[int] = Field(default=None, foreign_key="student.id", index=True)
     
+    # Feature Flags
+    
+    # Student Portal Access (for progressive application completion)
+    portal_user_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
+    portal_password_hash: Optional[str] = None  # Hashed password for student portal
+    # ...
+    
     # Relationships
     program: "Program" = Relationship()
     payments: List["ApplicationPayment"] = Relationship(back_populates="application")
@@ -167,6 +182,12 @@ class Application(SQLModel, table=True):
     tentative_admissions: List["TentativeAdmission"] = Relationship(back_populates="application")
     scholarship_calculation: Optional["ScholarshipCalculation"] = Relationship(back_populates="application")
     
+    # User Relationships (Explicit definition to avoid AmbiguousForeignKeysError)
+    portal_user: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "Application.portal_user_id"})
+    verifier: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "Application.verified_by"})
+    offline_verifier: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "Application.offline_payment_verified_by"})
+    deleter: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "Application.deleted_by"})
+
     # New Relationships for Application Details
     parents: List["ApplicationParent"] = Relationship(back_populates="application")
     education_history: List["ApplicationEducation"] = Relationship(back_populates="application")

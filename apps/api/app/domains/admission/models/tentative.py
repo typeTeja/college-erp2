@@ -5,6 +5,7 @@ from app.shared.enums import TentativeAdmissionStatus
 
 if TYPE_CHECKING:
     from .application import Application
+    from app.domains.auth.models import AuthUser
 
 class TentativeAdmission(SQLModel, table=True):
     """Tentative admission with fee structure"""
@@ -83,3 +84,4 @@ class ScholarshipCalculation(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
     application: "Application" = Relationship(back_populates="scholarship_calculation")
+    calculator: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "ScholarshipCalculation.calculated_by"})

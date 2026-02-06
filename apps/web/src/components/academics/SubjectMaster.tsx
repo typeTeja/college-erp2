@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-    Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-    Dialog, DialogContent, DialogDescription, DialogFooter, 
-    DialogHeader, DialogTitle, DialogTrigger 
+import {
+    Dialog, DialogContent, DialogDescription, DialogFooter,
+    DialogHeader, DialogTitle, DialogTrigger
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select';
 import { Plus, Edit, Trash2, Search, BookOpen, Filter } from 'lucide-react';
 import { subjectService } from '@/utils/subject-service';
 import { Subject, SubjectCreateData } from '@/types/subject';
@@ -25,14 +28,18 @@ export function SubjectMaster() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
 
+    // Form state for Select components
+    const [subjectType, setSubjectType] = useState<SubjectType>(SubjectType.THEORY);
+    const [evaluationType, setEvaluationType] = useState<EvaluationType>(EvaluationType.THEORY_ONLY);
+
     const { data: subjects = [], isLoading } = subjectService.useSubjects();
     const createMutation = subjectService.useCreateSubject();
     const updateMutation = subjectService.useUpdateSubject();
     const deleteMutation = subjectService.useDeleteSubject();
 
     const filteredSubjects = subjects.filter(s => {
-        const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            s.code.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.code.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = selectedType === 'ALL' || s.subject_type === selectedType;
         return matchesSearch && matchesType;
     });
@@ -40,13 +47,13 @@ export function SubjectMaster() {
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        
+
         const data: SubjectCreateData = {
             name: formData.get('name') as string,
             code: formData.get('code') as string,
-            short_name: formData.get('short_name') as string || null,
-            subject_type: formData.get('subject_type') as SubjectType,
-            evaluation_type: formData.get('evaluation_type') as EvaluationType,
+            short_name: (formData.get('short_name') as string) || null,
+            subject_type: subjectType,
+            evaluation_type: evaluationType,
         };
 
         try {
@@ -84,8 +91,8 @@ export function SubjectMaster() {
                 <div className="flex flex-1 gap-4">
                     <div className="relative w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input 
-                            placeholder="Search subjects..." 
+                        <Input
+                            placeholder="Search subjects..."
                             className="pl-9"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -93,75 +100,110 @@ export function SubjectMaster() {
                     </div>
                     <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4 text-slate-400" />
-                        <select 
-                            className="flex h-10 w-48 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        <Select
                             value={selectedType}
-                            onChange={(e) => setSelectedType(e.target.value as SubjectType | 'ALL')}
+                            onValueChange={(v) => setSelectedType(v as SubjectType | 'ALL')}
                         >
-                            <option value="ALL">All Types</option>
-                            {Object.values(SubjectType).map(type => (
-                                <option key={type} value={type}>{type}</option>
-                            ))}
-                        </select>
+                            <SelectTrigger className="w-48">
+                                <SelectValue placeholder="All Types" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">All Types</SelectItem>
+                                {Object.values(SubjectType).map(type => (
+                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
-                
+
                 <Dialog open={isCreateOpen} onOpenChange={(open) => {
                     setIsCreateOpen(open);
                     if (!open) setEditingSubject(null);
+                    if (open && editingSubject) {
+                        setSubjectType(editingSubject.subject_type);
+                        setEvaluationType(editingSubject.evaluation_type);
+                    } else if (open) {
+                        setSubjectType(SubjectType.THEORY);
+                        setEvaluationType(EvaluationType.THEORY_ONLY);
+                    }
                 }}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Button className="bg-blue-600 hover:bg-blue-700 shadow-sm transition-all active:scale-95">
                             <Plus className="h-4 w-4 mr-2" />
                             Add Subject
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-[425px] border-none shadow-2xl bg-white/95 backdrop-blur-sm">
                         <form onSubmit={handleSave}>
                             <DialogHeader>
-                                <DialogTitle>{editingSubject ? 'Edit Subject' : 'Add New Subject'}</DialogTitle>
-                                <DialogDescription>
-                                    Enter subject details for the central course catalog.
+                                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                    {editingSubject ? 'Edit Subject' : 'Add New Subject'}
+                                </DialogTitle>
+                                <DialogDescription className="text-slate-500">
+                                    Define academic details for the central course catalog.
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="name" className="text-right">Name</Label>
-                                    <Input id="name" name="name" defaultValue={editingSubject?.name} className="col-span-3" required />
+                            <div className="flex flex-col gap-5 py-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name" className="text-slate-700 font-semibold">Subject Name</Label>
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        placeholder="e.g. Data Structures & Algorithms"
+                                        defaultValue={editingSubject?.name}
+                                        className="border-slate-200 focus:border-blue-500 focus:ring-blue-500 transition-all"
+                                        required
+                                    />
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="code" className="text-right">Code</Label>
-                                    <Input id="code" name="code" defaultValue={editingSubject?.code} className="col-span-3" required />
+                                <div className="space-y-2">
+                                    <Label htmlFor="code" className="text-slate-700 font-semibold">Subject Code</Label>
+                                    <Input
+                                        id="code"
+                                        name="code"
+                                        placeholder="e.g. CS301"
+                                        defaultValue={editingSubject?.code}
+                                        className="font-mono border-slate-200 focus:border-blue-500 focus:ring-blue-500 transition-all"
+                                        required
+                                    />
+                                    <p className="text-[10px] text-slate-400">Unique identifier used for mapping and result generation.</p>
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="subject_type" className="text-right">Type</Label>
-                                    <select 
-                                        id="subject_type" 
-                                        name="subject_type" 
-                                        defaultValue={editingSubject?.subject_type || SubjectType.THEORY}
-                                        className="col-span-3 flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        {Object.values(SubjectType).map(type => (
-                                            <option key={type} value={type}>{type}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="evaluation_type" className="text-right">Evaluation</Label>
-                                    <select 
-                                        id="evaluation_type" 
-                                        name="evaluation_type" 
-                                        defaultValue={editingSubject?.evaluation_type || EvaluationType.THEORY_ONLY}
-                                        className="col-span-3 flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        {Object.values(EvaluationType).map(type => (
-                                            <option key={type} value={type}>{type.replace(/_/g, ' ')}</option>
-                                        ))}
-                                    </select>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="subject_type" className="text-slate-700 font-semibold">Type</Label>
+                                        <Select value={subjectType} onValueChange={(v) => setSubjectType(v as SubjectType)}>
+                                            <SelectTrigger className="border-slate-200 focus:border-blue-500 focus:ring-blue-500">
+                                                <SelectValue placeholder="Select type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.values(SubjectType).map(type => (
+                                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="evaluation_type" className="text-slate-700 font-semibold">Evaluation</Label>
+                                        <Select value={evaluationType} onValueChange={(v) => setEvaluationType(v as EvaluationType)}>
+                                            <SelectTrigger className="border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-xs">
+                                                <SelectValue placeholder="Select eval" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.values(EvaluationType).map(type => (
+                                                    <SelectItem key={type} value={type}>{type.replace(/_/g, ' ')}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all active:scale-95"
+                                    disabled={createMutation.isPending || updateMutation.isPending}
+                                >
                                     {editingSubject ? 'Update Subject' : 'Create Subject'}
                                 </Button>
                             </DialogFooter>
@@ -206,8 +248,8 @@ export function SubjectMaster() {
                                             {sub.evaluation_type.replace(/_/g, ' ')}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button 
-                                                variant="ghost" 
+                                            <Button
+                                                variant="ghost"
                                                 size="icon"
                                                 onClick={() => {
                                                     setEditingSubject(sub);
@@ -216,9 +258,9 @@ export function SubjectMaster() {
                                             >
                                                 <Edit className="h-4 w-4 text-slate-500" />
                                             </Button>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 className="text-red-500 hover:text-red-600 hover:bg-red-50"
                                                 onClick={() => handleDelete(sub.id)}
                                             >

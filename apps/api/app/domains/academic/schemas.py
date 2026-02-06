@@ -6,11 +6,17 @@ Note: This is a simplified version. Full schemas can be added as needed.
 """
 
 from pydantic import BaseModel
+from sqlmodel import SQLModel
 from typing import Optional, List
 from datetime import datetime, date
 
 
-from app.shared.enums import ProgramType, ProgramStatus
+from app.shared.enums import (
+    ProgramType, ProgramStatus, DayOfWeek, SlotType, 
+    AdjustmentStatus, AttendanceStatus, SessionStatus,
+    SubjectType, EvaluationType, PromotionRuleType,
+    RegulationStatus, BatchStatus, SemesterStatus
+)
 
 # ----------------------------------------------------------------------
 # Program Schemas
@@ -239,7 +245,6 @@ class RegulationCreate(RegulationBase):
 # Timetable & Operations Schemas
 # ----------------------------------------------------------------------
 
-from app.shared.enums import DayOfWeek, SlotType, AdjustmentStatus
 
 class TimeSlotBase(BaseModel):
     name: str
@@ -568,7 +573,6 @@ class BulkAttendanceMark(BaseModel):
 # Timetable Schemas
 # ----------------------------------------------------------------------
 
-from app.shared.enums import DayOfWeek, SlotType
 
 class TimetableSlotBase(BaseModel):
     day_of_week: DayOfWeek

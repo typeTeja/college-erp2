@@ -5,6 +5,7 @@ from app.shared.enums import ActivityType
 
 if TYPE_CHECKING:
     from .application import Application
+    from app.domains.auth.models import AuthUser
 
 class ApplicationActivityLog(SQLModel, table=True):
     """Activity log for tracking all changes to an application"""
@@ -19,3 +20,4 @@ class ApplicationActivityLog(SQLModel, table=True):
     
     # Relationships
     application: "Application" = Relationship(back_populates="activity_logs")
+    performer: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "ApplicationActivityLog.performed_by"})

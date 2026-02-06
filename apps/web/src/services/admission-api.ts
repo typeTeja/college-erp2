@@ -50,7 +50,7 @@ export const admissionApi = {
     search?: string;
     show_deleted?: boolean;
   }): Promise<ApplicationRead[]> => {
-    const response = await api.get(`${BASE_URL}/applications`, { params: filters });
+    const response = await api.get(`${BASE_URL}/admin/applications`, { params: filters });
     return response.data;
   },
 
@@ -90,7 +90,7 @@ export const admissionApi = {
    * Bulk cleanup of test data
    */
   cleanupTestData: async (): Promise<{ deleted_count: number; message: string }> => {
-    const response = await api.post(`${BASE_URL}/v2/applications/cleanup/test-data`);
+    const response = await api.delete(`${BASE_URL}/admin/cleanup/test-data`);
     return response.data;
   },
 
@@ -108,9 +108,9 @@ export const admissionApi = {
   ): Promise<ApplicationDocument> => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('document_type', documentType);
 
-    const response = await api.post(`${BASE_URL}/applications/${id}/documents`, formData, {
+    const response = await api.post(`${BASE_URL}/${id}/documents/upload`, formData, {
+      params: { document_type: documentType },
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
@@ -177,7 +177,15 @@ export const admissionApi = {
     id: number,
     data: OfflinePaymentVerifyRequest
   ): Promise<ApplicationRead> => {
-    const response = await api.post(`${BASE_URL}/${id}/payment/offline-verify`, data);
+    const response = await api.post(`${BASE_URL}/admin/${id}/payment/offline-verify`, data);
+    return response.data;
+  },
+
+  /**
+   * Confirm admission (Triggers student creation)
+   */
+  confirmAdmission: async (id: number): Promise<ApplicationRead> => {
+    const response = await api.post(`${BASE_URL}/admin/${id}/confirm`);
     return response.data;
   },
 
@@ -199,7 +207,7 @@ export const admissionApi = {
    * Get application activity log
    */
   getActivity: async (id: number): Promise<ActivityLog[]> => {
-    const response = await api.get(`${BASE_URL}/applications/${id}/activity`);
+    const response = await api.get(`${BASE_URL}/${id}/timeline`);
     return response.data;
   },
 
@@ -270,6 +278,14 @@ export const admissionApi = {
     portal_base_url?: string;
   }): Promise<{ message: string }> => {
     const response = await api.patch(`${BASE_URL}/settings`, data);
+    return response.data;
+  },
+
+  /**
+   * Get public programs for admission
+   */
+  getPublicPrograms: async (): Promise<any[]> => {
+    const response = await api.get(`${BASE_URL}/public/programs`);
     return response.data;
   },
 

@@ -35,6 +35,7 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
     const [currentStep, setCurrentStep] = useState<WizardStep>('program');
     const [loading, setLoading] = useState(false);
     const [creationStep, setCreationStep] = useState<string>('');
+    const [confirmFreeze, setConfirmFreeze] = useState(false);
 
     const currentYear = new Date().getFullYear();
 
@@ -106,6 +107,10 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
             }
             setCurrentStep('freeze');
         } else if (currentStep === 'freeze') {
+            if (!confirmFreeze) {
+                toast.error('Please confirm you have reviewed the academic freeze terms');
+                return;
+            }
             setCurrentStep('review');
         }
     };
@@ -234,7 +239,7 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                 <div className="text-sm mt-2 font-medium capitalize">{step}</div>
                             </div>
                             {index < 4 && (
-                                <div className={`h-1 flex-1 mx-2 transition-colors ${index < (['program', 'regulation', 'configuration', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600' : 'bg-gray-200'
+                                <div className={`h-1 flex-1 mx-2 transition-colors ${index < (['program', 'regulation', 'configuration', 'freeze', 'review'] as WizardStep[]).indexOf(currentStep) ? 'bg-green-600' : 'bg-gray-200'
                                     }`} />
                             )}
                         </div>
@@ -391,8 +396,14 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                             </div>
 
                             <div className="flex items-center space-x-2 p-2">
-                                <input type="checkbox" id="confirm-freeze" className="rounded border-gray-300" />
-                                <Label htmlFor="confirm-freeze" className="text-xs text-slate-600">
+                                <input
+                                    type="checkbox"
+                                    id="confirm-freeze"
+                                    className="rounded border-gray-300 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                    checked={confirmFreeze}
+                                    onChange={(e) => setConfirmFreeze(e.target.checked)}
+                                />
+                                <Label htmlFor="confirm-freeze" className="text-xs text-slate-600 cursor-pointer">
                                     I understand that these academic rules will be frozen and immutable for this cohort.
                                 </Label>
                             </div>

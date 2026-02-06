@@ -396,3 +396,42 @@ class SystemService:
         department = self.get_department(department_id)
         self.session.delete(department)
         self.session.commit()
+
+    # ----------------------------------------------------------------------
+    # Institute Information
+    # ----------------------------------------------------------------------
+
+    def get_institute_info(self) -> InstituteInfo:
+        """Get institute info (singleton)"""
+        statement = select(InstituteInfo)
+        info = self.session.exec(statement).first()
+        
+        if not info:
+            # Create a default record if none exists
+            info = InstituteInfo(
+                name="New Institute",
+                short_code="NEW",
+                address="Update Address",
+                contact_email="admin@example.com",
+                contact_phone="+91 0000000000"
+            )
+            self.session.add(info)
+            self.session.commit()
+            self.session.refresh(info)
+            
+        return info
+
+    def update_institute_info(self, data: Any) -> InstituteInfo:
+        """Update institute info (singleton)"""
+        info = self.get_institute_info()
+        
+        update_data = data.model_dump(exclude_unset=True) if hasattr(data, "model_dump") else data
+        
+        for key, value in update_data.items():
+            if hasattr(info, key):
+                setattr(info, key, value)
+                
+        self.session.add(info)
+        self.session.commit()
+        self.session.refresh(info)
+        return info

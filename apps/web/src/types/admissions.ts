@@ -320,6 +320,11 @@ export interface ApplicationPaymentCreate {
 // Response Schemas (Read)
 // ============================================================================
 
+export interface ProgramShort {
+  id: number;
+  name: string;
+}
+
 export interface ApplicationRead {
   id: number;
   application_number: string;
@@ -328,6 +333,8 @@ export interface ApplicationRead {
   phone: string;
   gender: string;
   program_id: number;
+  program?: ProgramShort;
+  payment_status?: string;
   state: string;
   board: string;
   group_of_study: string;

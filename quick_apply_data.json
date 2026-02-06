@@ -1,0 +1,11 @@
+{
+    "name": "Teja Vihaan",
+    "email": "tejavihaan@gmail.com",
+    "phone": "9876543210",
+    "gender": "MALE",
+    "program_id": 1,
+    "state": "Telangana",
+    "board": "CBSE",
+    "group_of_study": "MPC",
+    "payment_mode": "ONLINE"
+}

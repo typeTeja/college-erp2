@@ -5,6 +5,7 @@ from app.config.settings import settings
 # Import domain routers
 from app.domains.auth.router import router as auth_router
 from app.domains.system.router import router as system_router
+from app.domains.system.institute_router import router as institute_router
 from app.domains.hr.router import router as hr_router
 from app.domains.academic.router import router as academic_router
 from app.domains.student.router import router as student_router
@@ -50,6 +51,7 @@ app.add_middleware(
 # Include domain routers
 app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 app.include_router(system_router, prefix=f"{settings.API_V1_STR}/system", tags=["system"])
+app.include_router(institute_router, prefix=f"{settings.API_V1_STR}/institute", tags=["institute"])
 app.include_router(hr_router, prefix=f"{settings.API_V1_STR}/hr", tags=["hr"])
 app.include_router(academic_router, prefix=f"{settings.API_V1_STR}/academic", tags=["academic"])
 app.include_router(student_router, prefix=f"{settings.API_V1_STR}/students", tags=["students"])
@@ -66,7 +68,7 @@ def api_v1_health_check():
 async def root():
     return {
         "message": "College ERP API",
-        "version": "2.0",
+        "version": "2.1",
         "docs": "/docs",
         "domains": [
             "auth", "system", "hr", "academic",

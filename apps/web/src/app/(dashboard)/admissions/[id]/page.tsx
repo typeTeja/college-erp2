@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ApplicationStatus, FeeMode } from '@/types/admissions'
+import { ApplicationStatus, PaymentMode } from '@/types/admissions'
 import DocumentUpload from '@/components/admissions/DocumentUpload'
 import DocumentVerification from '@/components/admissions/DocumentVerification'
 import ActivityTimeline from '@/components/admissions/ActivityTimeline'
@@ -73,9 +73,10 @@ export default function ApplicationDetailPage() {
             <div className="flex items-start justify-between">
                 <div>
                     <h1 className="text-3xl font-bold">{application.name}</h1>
-                    <p className="text-muted-foreground mt-1">
-                        Application #{application.application_number}
-                    </p>
+                    <div className="flex flex-col gap-1 mt-1">
+                        <p className="text-muted-foreground">Application #{application.application_number}</p>
+                        {application.program && <Badge variant="outline" className="w-fit">{application.program.name}</Badge>}
+                    </div>
                 </div>
                 <Badge variant={getStatusColor(application.status)} className="text-lg px-4 py-2">
                     {application.status.replace(/_/g, ' ')}
@@ -105,7 +106,7 @@ export default function ApplicationDetailPage() {
                     <CardContent>
                         <div className="text-sm">
                             <p className="font-medium">{application.fee_mode}</p>
-                            {application.fee_mode === FeeMode.OFFLINE && (
+                            {application.fee_mode === PaymentMode.OFFLINE && (
                                 <p className="text-muted-foreground">
                                     {application.offline_payment_verified ? 'Verified ✓' : 'Pending'}
                                 </p>

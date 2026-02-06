@@ -23,6 +23,7 @@ from app.shared.enums import (
 
 if TYPE_CHECKING:
     from .application import Application
+    from app.domains.auth.models import AuthUser
 
 
 # ======================================================================
@@ -166,6 +167,7 @@ class ApplicationBankDetails(SQLModel, table=True):
     
     # Relationships
     application: "Application" = Relationship(back_populates="bank_details")
+    verifier: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "ApplicationBankDetails.verified_by"})
 
 
 # ======================================================================

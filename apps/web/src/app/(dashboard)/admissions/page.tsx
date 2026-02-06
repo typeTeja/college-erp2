@@ -36,12 +36,12 @@ import { useAdmissions, useConfirmAdmission, useDeleteApplication, useRestoreApp
 import admissionApi from '@/services/admission-api'
 import AddOfflineApplicationDialog from '@/components/admissions/AddOfflineApplicationDialog'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
@@ -138,19 +138,22 @@ export default function AdmissionsDashboard() {
     const handleConfirmVerify = async () => {
         if (!verifyingId) return;
         if (verifyMode === 'ONLINE' && !verifyTxnId) {
-             toast({ title: "Error", description: "Transaction ID is required for online payment.", variant: "destructive" })
-             return;
+            toast({ title: "Error", description: "Transaction ID is required for online payment.", variant: "destructive" })
+            return;
         }
-        
+
         try {
-            // @ts-ignore - signature update might take time to propagate in TS server
-            await admissionApi.verifyOfflinePayment(verifyingId, true, undefined, verifyMode, verifyTxnId)
+            await admissionApi.verifyOfflinePayment(verifyingId, {
+                verified: true,
+                mode: verifyMode as any,
+                transaction_id: verifyTxnId
+            })
             toast({
                 title: "Payment Verified",
                 description: "Payment marked as paid and credentials sent.",
             })
             setVerifyDialogOpen(false)
-            window.location.reload() 
+            window.location.reload()
         } catch (error) {
             toast({
                 title: "Error",
@@ -211,10 +214,10 @@ export default function AdmissionsDashboard() {
                         {verifyMode === 'ONLINE' && (
                             <div className="space-y-2">
                                 <Label htmlFor="txn-id">Transaction ID / Reference No</Label>
-                                <Input 
-                                    id="txn-id" 
-                                    value={verifyTxnId} 
-                                    onChange={(e) => setVerifyTxnId(e.target.value)} 
+                                <Input
+                                    id="txn-id"
+                                    value={verifyTxnId}
+                                    onChange={(e) => setVerifyTxnId(e.target.value)}
                                     placeholder="e.g. UTR123456789"
                                 />
                             </div>
@@ -303,6 +306,7 @@ export default function AdmissionsDashboard() {
                                 <TableHead>Program</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead>Payment</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -319,13 +323,19 @@ export default function AdmissionsDashboard() {
                                             <div className="flex flex-col">
                                                 <span>{app.name}</span>
                                                 <span className="text-xs text-muted-foreground">{app.email}</span>
+                                                <span className="text-xs text-muted-foreground">{app.phone}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell>Program ID: {app.program_id}</TableCell>
+                                        <TableCell>{app.program?.name || `Program ID: ${app.program_id}`}</TableCell>
                                         <TableCell>{new Date(app.created_at).toLocaleDateString()}</TableCell>
                                         <TableCell>
                                             <Badge variant={getStatusColor(app.status) as any}>
                                                 {app.status.replace('_', ' ')}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={app.payment_status === 'SUCCESS' || app.payment_status === 'success' ? 'success' : 'outline'}>
+                                                {app.payment_status?.toUpperCase() || 'PENDING'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right space-x-2">
@@ -341,10 +351,12 @@ export default function AdmissionsDashboard() {
                                                 </Button>
                                             ) : (
                                                 <>
-                                                    <Link href={`/admissions/${app.id}`}>
-                                                        <Button variant="outline" size="sm" title="View Details" className="h-8 w-8 p-0">
-                                                            <Eye className="h-4 w-4" />
-                                                        </Button>
+                                                    <Link
+                                                        href={`/admissions/${app.id}`}
+                                                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
+                                                        title="View Details"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
                                                     </Link>
                                                     {app.status === ApplicationStatus.FORM_COMPLETED && (
                                                         <Button
@@ -360,9 +372,9 @@ export default function AdmissionsDashboard() {
                                                     )}
                                                     {/* Verify Payment Button - Only for Offline Pending */}
                                                     {app.status === ApplicationStatus.PENDING_PAYMENT && app.fee_mode === 'OFFLINE' && !app.offline_payment_verified && (
-                                                        <Button 
-                                                            variant="outline" 
-                                                            size="sm" 
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
                                                             className="text-green-600 border-green-200 hover:bg-green-50"
                                                             title="Verify Payment (Offline)"
                                                             onClick={() => handleVerifyClick(app.id)}
@@ -373,7 +385,7 @@ export default function AdmissionsDashboard() {
                                                     )}
                                                     {/* Soft Delete for non-admitted/paid apps */}
                                                     {app.status !== ApplicationStatus.PAID && app.status !== ApplicationStatus.ADMITTED && (
-                                                         <Button
+                                                        <Button
                                                             variant="outline"
                                                             size="sm"
                                                             className="text-red-600 h-8 w-8 p-0"

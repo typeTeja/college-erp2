@@ -4,7 +4,7 @@ from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import JSON, Text
 
 if TYPE_CHECKING:
-    from app.models import User
+    from app.domains.auth.models import AuthUser
     from app.domains.finance.models import ScholarshipSlab
     from .application import Application
     from ....schemas.json_fields import EntranceTestSubject, SubjectMarksEntry
@@ -106,3 +106,7 @@ class EntranceExamResult(SQLModel, table=True):
     admission: "Application" = Relationship(back_populates="entrance_result")
     test_config: EntranceTestConfig = Relationship(back_populates="results")
     scholarship_slab: Optional["ScholarshipSlab"] = Relationship(back_populates="results")
+    
+    # Explicit User Relationships
+    entry_user: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "EntranceExamResult.entered_by"})
+    verifier: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "EntranceExamResult.verified_by"})

@@ -5,6 +5,7 @@ from app.shared.enums import DocumentType, DocumentStatus
 
 if TYPE_CHECKING:
     from .application import Application
+    from app.domains.auth.models import AuthUser
 
 class ApplicationDocument(SQLModel, table=True):
     """Documents uploaded by applicants for verification"""
@@ -24,3 +25,4 @@ class ApplicationDocument(SQLModel, table=True):
     
     # Relationships
     application: "Application" = Relationship(back_populates="documents")
+    verifier: Optional["AuthUser"] = Relationship(sa_relationship_kwargs={"foreign_keys": "ApplicationDocument.verified_by"})
