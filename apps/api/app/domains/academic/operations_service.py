@@ -9,7 +9,8 @@ from .schemas import (
     TimeSlotCreate, 
     ClassroomCreate, 
     ClassScheduleCreate,
-    StudentSectionAssignmentCreate
+    StudentSectionAssignmentCreate,
+    AutoAssignRequest
 )
 
 class AcademicOperationsService:
@@ -118,7 +119,10 @@ class AcademicOperationsService:
     @staticmethod
     def assign_student_to_section(session: Session, data: StudentSectionAssignmentCreate, user_id: Optional[int] = None) -> StudentSectionAssignment:
         """Assign or move a student to a section"""
-        # Check if already assigned
+        from app.domains.student.models import Student
+
+        # 1. Deactivate existing active assignment for this student/semester context
+        # Note: We assume one section per semester.
         existing = session.exec(
             select(StudentSectionAssignment).where(
                 and_(
@@ -126,19 +130,133 @@ class AcademicOperationsService:
                     StudentSectionAssignment.is_active == True
                 )
             )
-        ).first()
+        ).all()
 
-        if existing:
-            existing.is_active = False
-            session.add(existing)
+        for assignment in existing:
+            assignment.is_active = False
+            session.add(assignment)
 
+        # 2. Create new assignment history log
         db_assignment = StudentSectionAssignment(**data.model_dump())
         if user_id:
             db_assignment.assigned_by = user_id
         
         session.add(db_assignment)
+
+        # 3. CRITICAL: Update the Student Entity to reflect current section
+        student = session.get(Student, data.student_id)
+        if student:
+            student.section_id = data.section_id
+            # We assume the section belongs to the correct batch_semester. 
+            # Ideally we should validate this or fetch from section -> batch_semester
+            from app.domains.academic.models.setup import Section
+            section = session.get(Section, data.section_id)
+            if section:
+                student.batch_semester_id = section.batch_semester_id
+            
+            session.add(student)
+        
         session.commit()
         session.refresh(db_assignment)
         return db_assignment
+
+    @staticmethod
+    def auto_assign_students(session: Session, batch_id: int, semester_no: int, user_id: Optional[int] = None) -> dict:
+        """
+        Auto-assign unassigned students to sections in a round-robin fashion.
+        """
+        from app.domains.student.models import Student
+        from app.domains.academic.models.setup import Section
+        from app.domains.academic.models.batch import BatchSemester
+        
+        # 1. Find the BatchSemester for this batch + semester_no
+        batch_semester = session.exec(
+            select(BatchSemester).where(
+                and_(
+                    BatchSemester.batch_id == batch_id,
+                    BatchSemester.semester_no == semester_no
+                )
+            )
+        ).first()
+
+        if not batch_semester:
+            raise HTTPException(status_code=404, detail="Batch Semester not found")
+
+        # 2. Get available sections
+        sections = session.exec(
+            select(Section).where(
+                and_(
+                    Section.batch_semester_id == batch_semester.id,
+                    Section.is_active == True
+                )
+            )
+        ).all()
+
+        if not sections:
+            raise HTTPException(status_code=400, detail="No active sections found for this semester")
+
+        # 3. Get unassigned students in this batch
+        # Logic: Active students in batch, having NO section_id OR section_id not in current semester sections?
+        # Simpler: Student.batch_id == batch_id AND Student.section_id IS NULL
+        students = session.exec(
+            select(Student).where(
+                and_(
+                    Student.batch_id == batch_id,
+                    Student.status == "ACTIVE",
+                    Student.section_id == None
+                )
+            ).order_by(Student.name) # Alphabetical or Roll No
+        ).all()
+
+        if not students:
+            return {"message": "No unassigned students found", "assigned_count": 0}
+
+        # 4. Round Robin Assignment
+        assigned_count = 0
+        section_count = len(sections)
+        
+        for i, student in enumerate(students):
+            target_section = sections[i % section_count]
+            
+            # Create Assignment Record
+            assignment = StudentSectionAssignment(
+                student_id=student.id,
+                section_id=target_section.id,
+                assignment_type="AUTO",
+                assigned_by=user_id
+            )
+            session.add(assignment)
+
+            # Update Student Record
+            student.section_id = target_section.id
+            student.batch_semester_id = batch_semester.id
+            session.add(student)
+            
+            assigned_count += 1
+
+        session.commit()
+
+        return {
+            "message": "Auto-assignment completed successfully", 
+            "assigned_count": assigned_count,
+            "unassigned_count": 0
+        }
+
+    @staticmethod
+    def get_unassigned_students_count(session: Session, batch_id: int, semester_no: int) -> int:
+        """Count unassigned students for a batch"""
+        from app.domains.student.models import Student
+        
+        count = session.exec(
+            select(Student).where(
+                and_(
+                    Student.batch_id == batch_id,
+                    Student.status == "ACTIVE",
+                    Student.section_id == None
+                )
+            )
+        ).all()
+        
+        return len(count)
 
 academic_operations_service = AcademicOperationsService()

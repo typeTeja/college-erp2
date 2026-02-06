@@ -46,6 +46,7 @@ from app.domains.academic.schemas import (
     ClassroomCreate, ClassroomRead,
     ClassScheduleCreate, ClassScheduleRead,
     StudentSectionAssignmentCreate, StudentSectionAssignmentRead,
+    AutoAssignRequest, UnassignedStudentsResponse,
     UniversityExamCreate, UniversityExamRead,
     UniversityExamRegistrationCreate, UniversityExamRegistrationRead,
     UniversityExamResultCreate, UniversityExamResultRead,
@@ -589,6 +590,29 @@ def assign_student_to_section(
 ):
     """Assign a student to a section"""
     return academic_operations_service.assign_student_to_section(session, data, user_id=current_user.id)
+
+@router.post("/assignments/sections/auto-assign", response_model=dict)
+def auto_assign_students(
+    data: AutoAssignRequest,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Auto-assign students to sections"""
+    return academic_operations_service.auto_assign_students(
+        session, data.batch_id, data.semester_no, user_id=current_user.id
+    )
+
+
+@router.get("/assignments/batches/{batch_id}/unassigned", response_model=UnassignedStudentsResponse)
+def get_unassigned_students(
+    batch_id: int,
+    semester_no: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get count of unassigned students"""
+    count = academic_operations_service.get_unassigned_students_count(session, batch_id, semester_no)
+    return UnassignedStudentsResponse(count=count, batch_id=batch_id, semester_no=semester_no)
 
 
 # ----------------------------------------------------------------------

@@ -247,6 +247,14 @@ class TimeSlotBase(BaseModel):
     end_time: str # "HH:MM"
     type: SlotType = SlotType.THEORY
     is_active: bool = True
+class AutoAssignRequest(SQLModel):
+    batch_id: int
+    semester_no: int
+
+class UnassignedStudentsResponse(SQLModel):
+    count: int
+    batch_id: int
+    semester_no: int
 
 class TimeSlotCreate(TimeSlotBase):
     pass

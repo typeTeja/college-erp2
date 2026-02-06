@@ -66,5 +66,5 @@ export interface UnassignedStudentsResponse {
     batch_id: number;
     semester_no: number;
     count: number;
-    students: UnassignedStudent[];
+    students?: UnassignedStudent[];
 }
