@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ConfigPageTemplate } from '@/components/layout/ConfigPageTemplate';
-import AcademicStructureTab from '@/components/academics/AcademicStructureTab';
+import { StructureExplorer } from '@/components/academics/structure-tree/StructureExplorer';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function AcademicStructurePage() {
             badge="config"
             movedFrom="Settings > Academic Structure"
         >
-            <AcademicStructureTab />
+            <StructureExplorer />
         </ConfigPageTemplate>
     );
 }
