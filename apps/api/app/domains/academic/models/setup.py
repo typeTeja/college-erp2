@@ -12,7 +12,7 @@ class AcademicYear(SQLModel, table=True):
     __tablename__ = "academic_year"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(unique=True, index=True)  # e.g., "2024-2025"
+    year: str = Field(unique=True, index=True)  # e.g., "2024-2025"
     start_date: date
     end_date: date
     status: AcademicYearStatus = Field(default=AcademicYearStatus.UPCOMING)

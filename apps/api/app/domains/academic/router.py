@@ -28,6 +28,7 @@ from app.domains.academic.schemas import (
     AcademicYearCreate, AcademicYearRead,
     BatchCreate, BatchRead,
     RegulationCreate, RegulationRead,
+    ProgramCreate, ProgramRead,
     SectionCreate, SectionRead,
     BatchSemesterCreate, BatchSemesterRead,
     PracticalBatchCreate, PracticalBatchRead,
@@ -65,6 +66,30 @@ def list_programs(
 ):
     """List all academic programs"""
     return ProgramService.get_programs(session)
+
+
+@router.post("/programs", response_model=ProgramRead, status_code=status.HTTP_201_CREATED)
+def create_program(
+    data: ProgramCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new academic program"""
+    return ProgramService.create_program(session, data)
+
+
+@router.put("/programs/{program_id}", response_model=ProgramRead)
+def update_program(
+    program_id: int,
+    data: ProgramCreate, # Using ProgramCreate for simplicity or a dedicated ProgramUpdate
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Update an academic program"""
+    program = ProgramService.get_program(session, program_id)
+    if not program:
+        raise HTTPException(status_code=404, detail="Program not found")
+    return ProgramService.update_program(session, program_id, data)
 
 
 @router.get("/departments", response_model=List[DepartmentRead])

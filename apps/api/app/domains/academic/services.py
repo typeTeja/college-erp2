@@ -101,41 +101,18 @@ class AcademicService:
             statement = statement.where(BatchSemester.semester_number == semester_no)
         return list(self.session.exec(statement).all())
     
-    def create_batch(self, batch_data: BatchCreate) -> AcademicBatch:
+    def create_batch(self, data: BatchCreate) -> AcademicBatch:
         """Create a new academic batch"""
-        # Map schema fields to model if necessary
-        # Note: AcademicBatch model uses 'name' while schema uses 'batch_name'
-        # and 'admission_year_id' while schema uses 'joining_year' (requires lookup or direct use)
+        # Create batch with provided data
+        batch = AcademicBatch(**data.model_dump())
         
-        # For now, we assume the schema might be slightly ahead/behind and try to be robust
-        data = batch_data.model_dump()
-        
-        # Simple mapping for mismatched names
-        if "batch_name" in data and "name" not in data:
-            data["name"] = data.pop("batch_name")
-        
-        # Fallback for admission_year_id if joining_year is provided
-        # This is a bit risky but we need to satisfy the contract
-        if "joining_year" in data and "admission_year_id" not in data:
-            # Try to find an academic year with that name or year
-            # For simplicity in this contract fix, we'll try to use it directly if it looks like an ID
-            # but ideally we should have a better mapping.
-            # Assuming joining_year in schema refers to the year number, we might need to find the ID.
-            year_stmt = select(AcademicYear).where(AcademicYear.name.contains(str(data["joining_year"])))
+        # Ensure admission_year_id is set if not provided but joining_year is
+        if not getattr(batch, 'admission_year_id', None) and data.joining_year:
+            year_stmt = select(AcademicYear).where(AcademicYear.year.contains(str(data.joining_year)))
             year = self.session.exec(year_stmt).first()
             if year:
-                data["admission_year_id"] = year.id
-            else:
-                # If not found, we might have to fail or use a default
-                # But let's assume valid ID for now or skip if not in model
-                pass
-            data.pop("joining_year")
-            
-        # Remove fields not in model
-        model_fields = AcademicBatch.__fields__.keys()
-        final_data = {k: v for k, v in data.items() if k in model_fields}
-        
-        batch = AcademicBatch(**final_data)
+                batch.admission_year_id = year.id
+
         self.session.add(batch)
         self.session.commit()
         self.session.refresh(batch)
@@ -298,25 +275,59 @@ academic_validation_service = AcademicValidationService()
 
 class ProgramService:
     @staticmethod
+    def _calculate_semesters(duration_years: int, semester_system: bool) -> int:
+        """Centralized semester calculation logic"""
+        if not semester_system:
+            return 0
+        return duration_years * 2
+
+    @staticmethod
     def create_program(session: Session, program_in: ProgramCreate) -> Program:
         """Create a new program"""
-        
         # Check for existing code
         existing = session.exec(select(Program).where(Program.code == program_in.code)).first()
         if existing:
             raise HTTPException(status_code=400, detail="Program with this code already exists")
             
         # Create Program
-        program_data = program_in.dict()
+        program_data = program_in.model_dump()
+        
+        # Apply semester logic
+        program_data["number_of_semesters"] = ProgramService._calculate_semesters(
+            program_data["duration_years"], 
+            program_data["semester_system"]
+        )
+        
         program = Program(**program_data)
         session.add(program)
         session.commit()
         session.refresh(program)
         
-        # RELOAD with department for response schema
-        return session.exec(
-            select(Program).where(Program.id == program.id)
-        ).one()
+        # RELOAD with department for response schema if needed
+        return program
+
+    @staticmethod
+    def update_program(session: Session, program_id: int, program_in: ProgramCreate) -> Program:
+        """Update an existing program"""
+        program = session.get(Program, program_id)
+        if not program:
+            raise HTTPException(status_code=404, detail="Program not found")
+            
+        update_data = program_in.model_dump(exclude_unset=True)
+        
+        # Apply semester logic if duration or toggle changed
+        if "duration_years" in update_data or "semester_system" in update_data:
+            duration = update_data.get("duration_years", program.duration_years)
+            system = update_data.get("semester_system", program.semester_system)
+            update_data["number_of_semesters"] = ProgramService._calculate_semesters(duration, system)
+            
+        for key, value in update_data.items():
+            setattr(program, key, value)
+            
+        session.add(program)
+        session.commit()
+        session.refresh(program)
+        return program
 
     @staticmethod
     def get_program(session: Session, program_id: int) -> Optional[Program]:

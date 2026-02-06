@@ -27,8 +27,12 @@ class AcademicBatch(SQLModel, table=True):
     __tablename__ = "academic_batches"
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(unique=True, index=True) # "2024-2028 CSE"
+    batch_name: str = Field(unique=True, index=True) # "2024-2028 CSE"
+    batch_code: str = Field(unique=True, index=True) # "CSE-2024"
     admission_year_id: int = Field(foreign_key="academic_year.id")
+    joining_year: int = Field(default=2024)
+    start_year: int = Field(default=2024)
+    end_year: int = Field(default=2028)
     
     # Links
     program_id: int = Field(foreign_key="program.id", index=True)
@@ -36,6 +40,7 @@ class AcademicBatch(SQLModel, table=True):
     
     current_year: int = Field(default=1)
     current_semester: int = Field(default=1)
+    total_students: int = Field(default=0)
     
     status: BatchStatus = Field(default=BatchStatus.ACTIVE)
     is_active: bool = Field(default=True)

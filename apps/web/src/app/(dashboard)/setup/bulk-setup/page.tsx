@@ -16,8 +16,8 @@ export default function BulkSetupPage() {
         const fetchData = async () => {
             try {
                 const [programsRes, regulationsRes] = await Promise.all([
-                    api.get<Program[]>('/master/programs-list'),
-                    api.get<Regulation[]>('/regulations/'),
+                    api.get<Program[]>('/academic/programs'),
+                    api.get<Regulation[]>('/academic/regulations'),
                 ]);
 
                 setPrograms(programsRes.data);

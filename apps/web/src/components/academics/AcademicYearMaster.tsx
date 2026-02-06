@@ -52,7 +52,11 @@ export function AcademicYearMaster() {
             setIsCreateOpen(false);
             setEditingYear(null);
         } catch (error: any) {
-            toast.error(error.response?.data?.detail || 'Failed to save academic year');
+            const detail = error.response?.data?.detail;
+            const message = Array.isArray(detail) 
+                ? detail.map((d: any) => d.msg).join(", ") 
+                : typeof detail === 'string' ? detail : 'Failed to save academic year';
+            toast.error(message);
         }
     };
 
@@ -67,64 +71,129 @@ export function AcademicYearMaster() {
     };
 
     if (isLoading) {
-        return <div className="p-8 text-center animate-pulse text-slate-500">Loading academic years...</div>;
+        return <div className="p-8 text-center animate-pulse text-slate-500 font-medium tracking-tight">Loading academic years...</div>;
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex justify-end bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+        <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div>
+                    <h3 className="text-lg font-bold text-slate-900">Academic Calendar</h3>
+                    <p className="text-sm text-slate-500">Manage institutional academic periods and current active year.</p>
+                </div>
                 <Dialog open={isCreateOpen} onOpenChange={(open) => {
                     setIsCreateOpen(open);
                     if (!open) setEditingYear(null);
                 }}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Button className="bg-blue-600 hover:bg-blue-700 h-11 px-6 shadow-md transition-all active:scale-95">
                             <Plus className="h-4 w-4 mr-2" />
                             Add Academic Year
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-[600px] gap-0 p-0 overflow-hidden">
                         <form onSubmit={handleSave}>
-                            <DialogHeader>
-                                <DialogTitle>{editingYear ? 'Edit Academic Year' : 'Add New Academic Year'}</DialogTitle>
-                                <DialogDescription>
-                                    Define the start and end dates for a new academic year.
+                            <DialogHeader className="p-6 bg-slate-50 border-b border-slate-200">
+                                <DialogTitle className="text-xl font-bold text-slate-900">
+                                    {editingYear ? 'Update Academic Year' : 'New Academic Year'}
+                                </DialogTitle>
+                                <DialogDescription className="text-slate-500">
+                                    Define the duration and current status of this academic period.
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="year" className="text-right">Year Name</Label>
-                                    <Input id="year" name="year" placeholder="e.g. 2024-25" defaultValue={editingYear?.year} className="col-span-3" required />
+
+                            <div className="p-6 grid grid-cols-2 gap-x-8 gap-y-6">
+                                {/* Row 1: Year Name (Full Width) */}
+                                <div className="col-span-2 space-y-2">
+                                    <Label htmlFor="year" className="text-sm font-semibold text-slate-700">Year Name <span className="text-red-500">*</span></Label>
+                                    <Input 
+                                        id="year" 
+                                        name="year" 
+                                        placeholder="e.g. 2024-25" 
+                                        defaultValue={editingYear?.year} 
+                                        required 
+                                        className="h-11 border-slate-200 focus:ring-blue-500" 
+                                    />
+                                    <p className="text-[11px] text-slate-400 italic">Unique identifier for this period (e.g. 2025-26)</p>
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="start_date" className="text-right">Start Date</Label>
-                                    <Input id="start_date" name="start_date" type="date" defaultValue={editingYear?.start_date ? format(new Date(editingYear.start_date), 'yyyy-MM-dd') : ''} className="col-span-3" required />
+
+                                {/* Row 2: Start & End Dates */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="start_date" className="text-sm font-semibold text-slate-700">Start Date <span className="text-red-500">*</span></Label>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <Input 
+                                            id="start_date" 
+                                            name="start_date" 
+                                            type="date" 
+                                            defaultValue={editingYear?.start_date ? format(new Date(editingYear.start_date), 'yyyy-MM-dd') : ''} 
+                                            required 
+                                            className="h-11 pl-10 border-slate-200 focus:ring-blue-500" 
+                                        />
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="end_date" className="text-right">End Date</Label>
-                                    <Input id="end_date" name="end_date" type="date" defaultValue={editingYear?.end_date ? format(new Date(editingYear.end_date), 'yyyy-MM-dd') : ''} className="col-span-3" required />
+                                <div className="space-y-2">
+                                    <Label htmlFor="end_date" className="text-sm font-semibold text-slate-700">End Date <span className="text-red-500">*</span></Label>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <Input 
+                                            id="end_date" 
+                                            name="end_date" 
+                                            type="date" 
+                                            defaultValue={editingYear?.end_date ? format(new Date(editingYear.end_date), 'yyyy-MM-dd') : ''} 
+                                            required 
+                                            className="h-11 pl-10 border-slate-200 focus:ring-blue-500" 
+                                        />
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="status" className="text-right">Status</Label>
+
+                                {/* Row 3: Status & Logic */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="status" className="text-sm font-semibold text-slate-700">Phase Status</Label>
                                     <select 
                                         id="status" 
                                         name="status" 
                                         defaultValue={editingYear?.status || AcademicYearStatus.UPCOMING}
-                                        className="col-span-3 flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full h-11 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         {Object.values(AcademicYearStatus).map(s => (
                                             <option key={s} value={s}>{s}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <div className="flex items-center space-x-2 ml-auto">
-                                    <Switch id="is_current" name="is_current" defaultChecked={editingYear?.is_current} />
-                                    <Label htmlFor="is_current">Set as Current Active Year</Label>
+
+                                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="is_current" className="text-xs font-bold text-slate-900">Active Year</Label>
+                                        <p className="text-[10px] text-slate-500 leading-tight">Set as default for dashboard & sessions</p>
+                                    </div>
+                                    <Switch 
+                                        id="is_current" 
+                                        name="is_current" 
+                                        defaultChecked={editingYear?.is_current}
+                                        className="data-[state=checked]:bg-blue-600"
+                                    />
                                 </div>
                             </div>
-                            <DialogFooter>
-                                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                                    {editingYear ? 'Update Year' : 'Create Year'}
+
+                            <DialogFooter className="p-6 bg-slate-50 border-t border-slate-200">
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={() => {
+                                        setIsCreateOpen(false);
+                                        setEditingYear(null);
+                                    }}
+                                    className="border-slate-300 h-11"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button 
+                                    type="submit" 
+                                    disabled={createMutation.isPending || updateMutation.isPending}
+                                    className="bg-blue-600 hover:bg-blue-700 h-11 min-w-[140px]"
+                                >
+                                    {editingYear ? 'Update Academic Year' : 'Create Year'}
                                 </Button>
                             </DialogFooter>
                         </form>
@@ -132,72 +201,80 @@ export function AcademicYearMaster() {
                 </Dialog>
             </div>
 
-            <Card>
+            <Card className="rounded-xl overflow-hidden shadow-sm border-slate-200">
                 <CardContent className="p-0">
                     <Table>
-                        <TableHeader>
+                        <TableHeader className="bg-slate-50">
                             <TableRow>
-                                <TableHead>Academic Year</TableHead>
-                                <TableHead>Start Date</TableHead>
-                                <TableHead>End Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="font-bold py-4 pl-6">Academic Period</TableHead>
+                                <TableHead className="font-bold py-4">Timeline</TableHead>
+                                <TableHead className="font-bold py-4">Status</TableHead>
+                                <TableHead className="text-right py-4 pr-6">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {years.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-12 text-slate-500">
-                                        <div className="flex flex-col items-center">
-                                            <Calendar className="h-10 w-10 text-slate-300 mb-2" />
-                                            <p>No academic years defined.</p>
-                                        </div>
+                                    <TableCell colSpan={4} className="text-center py-20 text-slate-400 font-medium">
+                                        <Calendar className="h-10 w-10 mx-auto text-slate-200 mb-2" />
+                                        No academic years defined yet.
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 years.map((year) => (
-                                    <TableRow key={year.id} className={year.is_current ? "bg-blue-50/50" : ""}>
-                                        <TableCell>
-                                            <div className="flex items-center">
-                                                <span className="font-semibold text-slate-900">{year.year}</span>
-                                                {year.is_current && (
-                                                    <Badge className="ml-2 bg-blue-600 hover:bg-blue-600">
-                                                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                                                        Current
-                                                    </Badge>
-                                                )}
+                                    <TableRow key={year.id} className={`hover:bg-slate-50/50 transition-colors ${year.is_current ? "bg-blue-50/30" : ""}`}>
+                                        <TableCell className="py-4 pl-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-lg ${year.is_current ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                    <Calendar className="h-5 w-5" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-900 text-base">{year.year}</span>
+                                                    {year.is_current && (
+                                                        <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">Default Global Year</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{format(new Date(year.start_date), 'dd MMM yyyy')}</TableCell>
-                                        <TableCell>{format(new Date(year.end_date), 'dd MMM yyyy')}</TableCell>
                                         <TableCell>
-                                            <Badge className={
-                                                year.status === AcademicYearStatus.ACTIVE ? "bg-green-100 text-green-700" : 
-                                                year.status === AcademicYearStatus.COMPLETED ? "bg-slate-100 text-slate-700" :
-                                                "bg-blue-100 text-blue-700"
-                                            }>
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="text-sm font-medium text-slate-700">
+                                                    {format(new Date(year.start_date), 'MMM dd, yyyy')} – {format(new Date(year.end_date), 'MMM dd, yyyy')}
+                                                </span>
+                                                <span className="text-[10px] text-slate-500">12 Month Duration</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="secondary" className={`font-bold text-[10px] px-2.5 py-0.5 ${
+                                                year.status === AcademicYearStatus.ACTIVE ? "bg-green-100 text-green-700 border-green-200" : 
+                                                year.status === AcademicYearStatus.COMPLETED ? "bg-slate-100 text-slate-700 border-slate-200" :
+                                                "bg-blue-50 text-blue-700 border-blue-100"
+                                            }`}>
                                                 {year.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon"
-                                                onClick={() => {
-                                                    setEditingYear(year);
-                                                    setIsCreateOpen(true);
-                                                }}
-                                            >
-                                                <Edit className="h-4 w-4 text-slate-500" />
-                                            </Button>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                onClick={() => handleDelete(year.id)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                        <TableCell className="text-right pr-6">
+                                            <div className="flex justify-end gap-1">
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon"
+                                                    className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
+                                                    onClick={() => {
+                                                        setEditingYear(year);
+                                                        setIsCreateOpen(true);
+                                                    }}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                                                    onClick={() => handleDelete(year.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))

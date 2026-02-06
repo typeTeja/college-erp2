@@ -31,7 +31,12 @@ class Program(SQLModel, table=True):
     
     # Duration
     duration_years: int = Field(default=4, ge=1, le=6)
-    number_of_semesters: int = Field(default=8, ge=1, le=12)
+    number_of_semesters: int = Field(default=8, ge=0, le=12)
+    
+    # Logic Toggles (Strict spec)
+    semester_system: bool = Field(default=True)
+    rnet_required: bool = Field(default=True)
+    allow_installments: bool = Field(default=True)
     
     # Status
     status: ProgramStatus = Field(default=ProgramStatus.ACTIVE)

@@ -74,6 +74,7 @@ class ProgramType(str, Enum):
 class ProgramStatus(str, Enum):
     DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
     ARCHIVED = "ARCHIVED"
 
 

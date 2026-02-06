@@ -14,6 +14,7 @@ export enum ProgramType {
 export enum ProgramStatus {
   DRAFT = "DRAFT",
   ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
   ARCHIVED = "ARCHIVED"
 }
 

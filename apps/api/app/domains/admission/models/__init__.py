@@ -20,6 +20,12 @@ from .application_details import (
     ApplicationHealth
 )
 
+from .masters import (
+    Board,
+    LeadSource,
+    ReservationCategory
+)
+
 # Import enums from shared
 from app.shared.enums import (
     ApplicationStatus,
@@ -48,6 +54,9 @@ __all__ = [
     "ApplicationAddress",
     "ApplicationBankDetails",
     "ApplicationHealth",
+    "Board",
+    "LeadSource",
+    "ReservationCategory",
     # Enums
     "ApplicationStatus",
     "FeeMode",

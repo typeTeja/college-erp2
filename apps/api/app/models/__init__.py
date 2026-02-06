@@ -88,6 +88,9 @@ from app.domains.admission.models import (
     ScholarshipCalculation,
     EntranceTestConfig,
     EntranceExamResult,
+    Board as AdmissionBoard,
+    LeadSource as AdmissionLeadSource,
+    ReservationCategory as AdmissionReservationCategory,
 )
 
 # Finance Domain Models
@@ -221,6 +224,9 @@ __all__ = [
     "ScholarshipCalculation",
     "EntranceTestConfig",
     "EntranceExamResult",
+    "AdmissionBoard",
+    "AdmissionLeadSource",
+    "AdmissionReservationCategory",
     # Finance
     "FeeHead",
     "InstallmentPlan",

@@ -10,19 +10,31 @@ from typing import Optional, List
 from datetime import datetime, date
 
 
+from app.shared.enums import ProgramType, ProgramStatus
+
 # ----------------------------------------------------------------------
 # Program Schemas
 # ----------------------------------------------------------------------
 
 class ProgramBase(BaseModel):
-    code: str
     name: str
+    code: str
     alias: Optional[str] = None
-    program_type: str  # UG, PG, DIPLOMA, CERTIFICATE
+    program_type: ProgramType = ProgramType.UG
     department_id: Optional[int] = None
+    
+    # Duration Rules
     duration_years: int
-    number_of_semesters: int
-    status: str = "ACTIVE"  # ACTIVE, INACTIVE, ARCHIVED
+    number_of_semesters: Optional[int] = 0
+    
+    # Logic Toggles (Strict spec)
+    semester_system: bool = True
+    rnet_required: bool = True
+    allow_installments: bool = True
+    
+    # Status
+    status: ProgramStatus = ProgramStatus.ACTIVE
+    is_active: bool = True
 
 class ProgramCreate(ProgramBase):
     pass

@@ -286,8 +286,8 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                 <Input
                                     id="joining_year"
                                     type="number"
-                                    value={formData.joining_year}
-                                    onChange={(e) => setFormData({ ...formData, joining_year: parseInt(e.target.value) })}
+                                    value={formData.joining_year ?? ''}
+                                    onChange={(e) => setFormData({ ...formData, joining_year: parseInt(e.target.value) || currentYear })}
                                 />
                             </div>
                         </div>
@@ -319,8 +319,8 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                 <Input
                                     id="sections"
                                     type="number"
-                                    value={formData.sections_per_semester}
-                                    onChange={(e) => setFormData({ ...formData, sections_per_semester: parseInt(e.target.value) })}
+                                    value={formData.sections_per_semester ?? ''}
+                                    onChange={(e) => setFormData({ ...formData, sections_per_semester: parseInt(e.target.value) || 0 })}
                                 />
                             </div>
                             <div>
@@ -328,8 +328,8 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                 <Input
                                     id="capacity"
                                     type="number"
-                                    value={formData.section_capacity}
-                                    onChange={(e) => setFormData({ ...formData, section_capacity: parseInt(e.target.value) })}
+                                    value={formData.section_capacity ?? ''}
+                                    onChange={(e) => setFormData({ ...formData, section_capacity: parseInt(e.target.value) || 0 })}
                                 />
                             </div>
                             <div>
@@ -346,8 +346,8 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                 <Input
                                     id="lab_capacity"
                                     type="number"
-                                    value={formData.lab_capacity}
-                                    onChange={(e) => setFormData({ ...formData, lab_capacity: parseInt(e.target.value) })}
+                                    value={formData.lab_capacity ?? ''}
+                                    onChange={(e) => setFormData({ ...formData, lab_capacity: parseInt(e.target.value) || 0 })}
                                     disabled={!formData.labs_per_semester}
                                 />
                             </div>
