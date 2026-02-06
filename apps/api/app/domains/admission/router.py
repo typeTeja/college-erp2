@@ -7,6 +7,7 @@ Consolidated from routers/ subdirectory.
 
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request, BackgroundTasks
 from sqlmodel import Session, select, func
+from sqlalchemy.orm import selectinload
 from app.db.session import get_session
 from app.api.deps import get_current_user, get_current_active_superuser
 from app.models import User
@@ -39,9 +40,25 @@ from datetime import datetime
 import random
 import string
 from app.shared.enums import ApplicationStatus as SharedApplicationStatus
+from app.config.settings import settings
 
 
 router = APIRouter()
+
+
+# ======================================================================
+# Public Endpoints (No Auth Required)
+# ======================================================================
+
+@router.get("/public/programs", response_model=List[ProgramShort])
+async def list_public_programs(
+    session: Session = Depends(get_session)
+):
+    """
+    List academic programs open for admission.
+    Publicly accessible for the quick apply form.
+    """
+    return AdmissionService.get_active_programs_for_admission(session)
 
 
 # ======================================================================
@@ -83,7 +100,6 @@ async def get_payment_config(
     )
 
 @router.post("/quick-apply", response_model=ApplicationRead)
-@limiter.limit("5/minute")
 async def quick_apply(
     data: ApplicationCreate,
     request: Request,
@@ -93,7 +109,7 @@ async def quick_apply(
     application = Application(
         **data.dict(),
         application_number=app_number,
-        status=ApplicationStatus.PENDING_PAYMENT
+        status=ApplicationStatus.APPLIED
     )
     session.add(application)
     session.flush()
@@ -110,7 +126,6 @@ async def quick_apply(
     return application
 
 @router.post("/v2/quick-apply", response_model=QuickApplyResponse)
-@limiter.limit("5/minute")
 async def quick_apply_v2(
     data: QuickApplyCreate,
     request: Request,
@@ -199,6 +214,42 @@ async def get_my_application(
     application = session.exec(statement).first()
     if not application:
         raise HTTPException(status_code=404, detail="No application found")
+    return application
+
+@router.put("/my-application/complete", response_model=ApplicationRead)
+async def complete_my_application(
+    data: ApplicationCompleteUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Complete full application form (Stage 2/3)"""
+    statement = select(Application).where(Application.portal_user_id == current_user.id).order_by(Application.created_at.desc())
+    application = session.exec(statement).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="No application found")
+    
+    try:
+        return AdmissionService.complete_my_application(session, application.id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{id}", response_model=ApplicationRead)
+async def get_application(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get application by ID"""
+    statement = select(Application).where(Application.id == id).options(selectinload(Application.program))
+    application = session.exec(statement).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Check permissions
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles)
+    if not is_admin and application.portal_user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
     return application
 
 @router.put("/{id}", response_model=ApplicationRead)
@@ -346,7 +397,7 @@ async def list_applications(
     status: Optional[ApplicationStatus] = None,
     show_deleted: bool = False
 ):
-    statement = select(Application)
+    statement = select(Application).options(selectinload(Application.program))
     if show_deleted:
         statement = statement.where(Application.is_deleted == True)
     else:
@@ -525,7 +576,7 @@ async def initiate_application_payment(
             error=response.get("error", "Payment initiation failed")
         )
 
-@router.post("/payment/success")
+@router.api_route("/payment/success", methods=["GET", "POST"])
 async def payment_success(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -533,8 +584,11 @@ async def payment_success(
 ):
     """Handle successful payment callback"""
     from app.domains.finance.services import easebuzz_service
-    data = await request.form()
-    data_dict = dict(data)
+    if request.method == "POST":
+        data = await request.form()
+        data_dict = dict(data)
+    else:
+        data_dict = dict(request.query_params)
     
     # Verify Hash (Critical)
     # expected_hash = easebuzz_service.generate_hash(session, data_dict) # Logic differs for reverse hash
@@ -584,19 +638,21 @@ async def payment_success(
              
     # Redirect to Frontend Success Page
     from fastapi.responses import RedirectResponse
-    from app.config.settings import settings
     return RedirectResponse(
         url=f"{settings.PORTAL_BASE_URL}/apply/success?status=success&txnid={txnid}",
         status_code=303
     )
 
-@router.post("/payment/failure")
+@router.api_route("/payment/failure", methods=["GET", "POST"])
 async def payment_failure(
     request: Request,
     session: Session = Depends(get_session)
 ):
     from fastapi.responses import RedirectResponse
-    from app.config.settings import settings
+    return RedirectResponse(
+        url=f"{settings.PORTAL_BASE_URL}/apply/failure?status=failed",
+        status_code=303
+    )
 @router.get("/v2/public/receipt/{application_number}/download")
 async def download_receipt_pdf(
     application_number: str,

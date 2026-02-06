@@ -61,6 +61,30 @@ export function proxy(request: NextRequest) {
     // XSS Protection (legacy but still useful)
     response.headers.set('X-XSS-Protection', '1; mode=block');
 
+    // --- Authentication & Redirection ---
+    const token = request.cookies.get('access_token')?.value;
+    const { pathname } = request.nextUrl;
+
+    // Define public paths that don't require auth
+    const isPublicPath = pathname === '/login' ||
+        pathname === '/forgot-password' ||
+        pathname.startsWith('/apply');
+
+    // 1. Redirect unauthenticated users to login
+    if (!token && !isPublicPath) {
+        const loginUrl = new URL('/login', request.url);
+        // Store the original path to redirect back after login (optional, but good UX)
+        if (pathname !== '/') {
+            loginUrl.searchParams.set('callbackUrl', pathname);
+        }
+        return NextResponse.redirect(loginUrl);
+    }
+
+    // 2. Redirect authenticated users away from login
+    if (token && pathname === '/login') {
+        return NextResponse.redirect(new URL('/', request.url));
+    }
+
     return response;
 }
 

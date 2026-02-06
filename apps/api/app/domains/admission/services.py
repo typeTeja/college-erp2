@@ -19,6 +19,10 @@ from .models import (
     EntranceTestConfig, EntranceExamResult,
     ScholarshipCalculation, TentativeAdmission, TentativeAdmissionStatus
 )
+from .models.application_details import (
+    ApplicationParent, ApplicationEducation, ApplicationAddress, 
+    ApplicationBankDetails, ApplicationHealth
+)
 from .models.masters import Board, LeadSource, ReservationCategory
 from app.models import User, Role
 from app.config.settings import settings
@@ -107,6 +111,13 @@ class AdmissionService:
         session.commit()
         session.refresh(settings_obj)
         return settings_obj
+
+    @staticmethod
+    def get_active_programs_for_admission(session: Session) -> List[Any]:
+        from app.domains.academic.models import Program
+        # For now, return all programs. In a real scenario, filter by status.
+        statement = select(Program).where(Program.is_active == True)
+        return session.exec(statement).all()
 
     @staticmethod
     def generate_application_number(session: Session) -> str:
@@ -233,6 +244,87 @@ class AdmissionService:
         return portal_username, portal_password, is_new_account
 
     @staticmethod
+    def complete_my_application(
+        session: Session,
+        application_id: int,
+        data: Any # ApplicationCompleteUpdate
+    ) -> Application:
+        application = session.get(Application, application_id)
+        if not application:
+            raise ValueError("Application not found")
+
+        # 1. Update Basic Application Fields
+        # We can use exclude={'parents', 'education_history', 'addresses', 'bank_details', 'health_info'}
+        update_dict = data.dict(exclude_unset=True, exclude={'parents', 'education_history', 'addresses', 'bank_details', 'health_info'})
+        for key, value in update_dict.items():
+            setattr(application, key, value)
+        
+        # 2. Update Parents
+        if data.parents is not None:
+            # Simple strategy: Delete existing and recreate
+            # In a production app, we might want to update by ID if present
+            session.exec(col(ApplicationParent.application_id) == application_id).delete()
+            for parent_data in data.parents:
+                parent = ApplicationParent(**parent_data.dict(), application_id=application_id)
+                session.add(parent)
+
+        # 3. Update Education History
+        if data.education_history is not None:
+            session.exec(col(ApplicationEducation.application_id) == application_id).delete()
+            for edu_data in data.education_history:
+                edu = ApplicationEducation(**edu_data.dict(), application_id=application_id)
+                session.add(edu)
+
+        # 4. Update Addresses
+        if data.addresses is not None:
+            session.exec(col(ApplicationAddress.application_id) == application_id).delete()
+            for addr_data in data.addresses:
+                addr = ApplicationAddress(**addr_data.dict(), application_id=application_id)
+                session.add(addr)
+
+        # 5. Update Bank Details
+        if data.bank_details is not None:
+            stmt = select(ApplicationBankDetails).where(ApplicationBankDetails.application_id == application_id)
+            bank = session.exec(stmt).first()
+            if bank:
+                for key, value in data.bank_details.dict(exclude_unset=True).items():
+                    setattr(bank, key, value)
+                bank.updated_at = datetime.utcnow()
+                session.add(bank)
+            else:
+                bank = ApplicationBankDetails(**data.bank_details.dict(), application_id=application_id)
+                session.add(bank)
+
+        # 6. Update Health Info
+        if data.health_info is not None:
+            stmt = select(ApplicationHealth).where(ApplicationHealth.application_id == application_id)
+            health = session.exec(stmt).first()
+            if health:
+                for key, value in data.health_info.dict(exclude_unset=True).items():
+                    setattr(health, key, value)
+                health.updated_at = datetime.utcnow()
+                session.add(health)
+            else:
+                health = ApplicationHealth(**data.health_info.dict(), application_id=application_id)
+                session.add(health)
+
+        # Update status
+        application.status = ApplicationStatus.UNDER_REVIEW
+        application.updated_at = datetime.utcnow()
+        session.add(application)
+        
+        log_activity(
+            session=session,
+            application_id=application.id,
+            activity_type=ActivityType.FORM_COMPLETED,
+            description="Full application form completed and submitted"
+        )
+        
+        session.commit()
+        session.refresh(application)
+        return application
+
+    @staticmethod
     def process_payment_completion(
         session: Session, application_id: int, transaction_id: str,
         amount: float, payment_date: datetime = None,
@@ -244,7 +336,7 @@ class AdmissionService:
             if not application: return False
             
             application.status = ApplicationStatus.APPLIED
-            application.payment_status = 'PAID'
+            application.payment_status = ApplicationPaymentStatus.SUCCESS
             application.payment_id = transaction_id
             application.payment_date = payment_date or datetime.utcnow()
             session.add(application)
