@@ -35,13 +35,13 @@ export function ApplicantLayout({ children }: { children: React.ReactNode }) {
                         {/* User Info & Logout */}
                         <div className="flex items-center gap-4">
                             <div className="hidden sm:block text-right">
-                                <p className="text-sm font-medium text-gray-900">{user.name || user.email}</p>
+                                <p className="text-sm font-medium text-gray-900">{user.full_name || user.email}</p>
                                 <p className="text-xs text-gray-500">{user.email}</p>
                             </div>
 
-                            <Button 
-                                variant="ghost" 
-                                size="sm" 
+                            <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={handleLogout}
                                 className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                             >

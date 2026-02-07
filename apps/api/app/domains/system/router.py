@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from typing import List, Optional
 
-from app.api.deps import get_session, get_current_user
+from app.api.deps import get_session, get_current_user, get_current_active_superuser
 from app.domains.system.services import SystemService
 from app.domains.system.schemas import (
     UserCreate, UserUpdate, UserResponse,
@@ -44,7 +44,7 @@ def list_users(
     skip: int = 0,
     limit: int = 100,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """List all users"""
     service = SystemService(session)
@@ -71,7 +71,7 @@ def get_user(
 def create_user(
     user_data: UserCreate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """Create a new user"""
     service = SystemService(session)
@@ -89,7 +89,7 @@ def create_user(
 @router.get("/roles", response_model=List[RoleRead])
 def list_roles(
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """List all roles"""
     service = SystemService(session)
@@ -101,7 +101,7 @@ def list_roles(
 def create_role(
     role_data: RoleCreate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """Create a new role"""
     service = SystemService(session)
@@ -116,7 +116,7 @@ def create_role(
 @router.get("/permissions", response_model=List[PermissionRead])
 def list_permissions(
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """List all permissions"""
     service = SystemService(session)
@@ -132,7 +132,7 @@ def list_permissions(
 def list_settings(
     group: Optional[str] = None,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """List all settings"""
     service = SystemService(session)
@@ -147,7 +147,7 @@ def list_audit_logs(
     skip: int = 0,
     limit: int = 100,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """List audit logs"""
     service = SystemService(session)
@@ -162,7 +162,7 @@ def list_audit_logs(
 @router.get("/departments", response_model=List[DepartmentRead])
 def list_departments(
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """List all departments"""
     service = SystemService(session)
@@ -172,7 +172,7 @@ def list_departments(
 def get_department(
     department_id: int,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """Get department by ID"""
     service = SystemService(session)
@@ -186,8 +186,8 @@ def get_department(
 def create_department(
     data: DepartmentCreate,
     session: Session = Depends(get_session),
-    # Only Admin/Principal should create departments - forcing strict permission check could be done here or in service
-    current_user: User = Depends(get_current_user)
+    # Only Admin/Principal should create departments
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """Create a new department"""
     service = SystemService(session)
@@ -202,7 +202,7 @@ def update_department(
     department_id: int,
     data: DepartmentUpdate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """Update a department"""
     service = SystemService(session)
@@ -218,7 +218,7 @@ def update_department(
 def delete_department(
     department_id: int,
     session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_superuser)
 ):
     """Delete a department"""
     service = SystemService(session)
