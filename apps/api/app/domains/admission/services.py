@@ -358,9 +358,28 @@ class AdmissionService:
 
             session.commit()
             
+            # Create Portal Account
+            portal_username, portal_password, is_new_account = AdmissionService.create_portal_account_after_payment(session, application)
+            
             if background_tasks:
-                # Add background tasks for emails
-                pass
+                # Add background tasks for emails/SMS
+                background_tasks.add_task(
+                    AdmissionService.send_credentials_email,
+                    email=application.email,
+                    username=portal_username,
+                    password=portal_password,
+                    name=application.name,
+                    portal_url=settings.PORTAL_BASE_URL
+                )
+                if application.phone:
+                     background_tasks.add_task(
+                        AdmissionService.send_credentials_sms,
+                        phone=application.phone,
+                        username=portal_username,
+                        password=portal_password,
+                        name=application.name,
+                        portal_url=settings.PORTAL_BASE_URL
+                    )
             return True
         except Exception:
             return False
