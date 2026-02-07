@@ -1,45 +1,24 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/use-auth-store';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { AdminDashboard } from '@/components/dashboard/AdminDashboard';
-import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
-import { FacultyDashboard } from '@/components/dashboard/FacultyDashboard';
 
-export default function DashboardPage() {
+export default function RootPage() {
+  const router = useRouter();
   const { user, hasHydrated } = useAuthStore();
 
-  // Loading state for hydration
-  if (!hasHydrated) {
-    return (
-      <DashboardLayout>
-        <div className="flex h-[50vh] w-full items-center justify-center">
-          <div className="text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
-            <p className="mt-2 text-sm text-slate-500">Loading dashboard...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  useEffect(() => {
+    if (!hasHydrated) return;
 
-  // Default to nothing if no role found to prevent flashing unauthorized content
-  const userRole = user?.roles?.[0]?.toUpperCase();
+    if (!user) {
+      router.push('/login');
+      return;
+    }
 
-  if (!userRole) {
-    return (
-      <DashboardLayout>
-        <div className="flex h-[50vh] w-full items-center justify-center">
-          <div className="text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
-            <p className="mt-2 text-sm text-slate-500">Verifying session...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+    const userRole = user?.roles?.[0]?.toUpperCase();
 
-  const renderDashboard = () => {
+    // Redirect based on role
     switch (userRole) {
       case 'SUPER_ADMIN':
       case 'ADMIN':
@@ -49,19 +28,25 @@ export default function DashboardPage() {
       case 'ACCOUNTS':
       case 'LIBRARIAN':
       case 'WARDEN':
-        return <AdminDashboard />;
       case 'FACULTY':
-        return <FacultyDashboard />;
+        // Admin and faculty go to dashboard
+        router.push('/dashboard');
+        break;
       case 'STUDENT':
-        return <StudentDashboard />;
       default:
-        return <StudentDashboard />;
+        // Students/applicants go to applicant portal
+        router.push('/applicant');
+        break;
     }
-  };
+  }, [user, hasHydrated, router]);
 
+  // Loading state
   return (
-    <DashboardLayout>
-      {renderDashboard()}
-    </DashboardLayout>
+    <div className="flex h-screen w-full items-center justify-center">
+      <div className="text-center">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+        <p className="mt-2 text-sm text-slate-500">Loading...</p>
+      </div>
+    </div>
   );
 }
