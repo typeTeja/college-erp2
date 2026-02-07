@@ -81,7 +81,7 @@ export default function ActivityTimeline({ applicationId }: ActivityTimelineProp
                                                         View details
                                                     </summary>
                                                     <pre className="text-xs mt-1 p-2 bg-muted rounded overflow-x-auto">
-                                                        {JSON.stringify(JSON.parse(activity.extra_data), null, 2)}
+                                                        {JSON.stringify(activity.extra_data, null, 2)}
                                                     </pre>
                                                 </details>
                                             )}

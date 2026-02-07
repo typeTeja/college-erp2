@@ -11,6 +11,9 @@ from sqlalchemy.orm import selectinload
 from app.db.session import get_session
 from app.api.deps import get_current_user, get_current_active_superuser
 from app.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 from .models import (
     Application, ApplicationStatus, ApplicationPayment, ApplicationPaymentStatus,
     ApplicationDocument, DocumentType, DocumentStatus, ApplicationActivityLog,
@@ -98,6 +101,34 @@ async def get_payment_config(
         offline_enabled=settings.offline_payment_enabled,
         payment_gateway=settings.payment_gateway
     )
+
+@router.get("/public/application/{application_number}")
+async def get_application_by_number_public(
+    application_number: str,
+    session: Session = Depends(get_session)
+):
+    """
+    Public endpoint to retrieve basic application info by application number.
+    Used for fallback when sessionStorage is unavailable (e.g., page refresh).
+    Returns only non-sensitive data.
+    """
+    application = session.exec(
+        select(Application).where(Application.application_number == application_number)
+    ).first()
+    
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Return only non-sensitive data
+    return {
+        "application_number": application.application_number,
+        "name": application.name,
+        "email": application.email,
+        "status": application.status,
+        "payment_status": application.payment_status,
+        "program_id": application.program_id,
+        "created_at": application.created_at
+    }
 
 @router.post("/quick-apply", response_model=ApplicationRead)
 async def quick_apply(
@@ -232,6 +263,40 @@ async def complete_my_application(
         return AdmissionService.complete_my_application(session, application.id, data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+
+
+@router.get("/settings", response_model=AdmissionSettingsRead)
+def get_admission_settings(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """Get global admission settings"""
+    try:
+        settings_obj = AdmissionService.get_admission_settings(session)
+        
+        # Manually construct the response dict with explicit None checks
+        response_dict = {
+            "id": settings_obj.id,
+            "application_fee_enabled": settings_obj.application_fee_enabled if settings_obj.application_fee_enabled is not None else True,
+            "application_fee_amount": settings_obj.application_fee_amount if settings_obj.application_fee_amount is not None else 0.0,
+            "online_payment_enabled": settings_obj.online_payment_enabled if settings_obj.online_payment_enabled is not None else True,
+            "offline_payment_enabled": settings_obj.offline_payment_enabled if settings_obj.offline_payment_enabled is not None else True,
+            "payment_gateway": settings_obj.payment_gateway if settings_obj.payment_gateway else "easebuzz",
+            "send_credentials_email": settings_obj.send_credentials_email if settings_obj.send_credentials_email is not None else True,
+            "send_credentials_sms": settings_obj.send_credentials_sms if settings_obj.send_credentials_sms is not None else False,
+            "auto_create_student_account": settings_obj.auto_create_student_account if settings_obj.auto_create_student_account is not None else True,
+            "portal_base_url": settings_obj.portal_base_url if settings_obj.portal_base_url else "http://localhost:3000",
+            "updated_at": settings_obj.updated_at if settings_obj.updated_at else datetime.utcnow(),
+        }
+        
+        # logger.info(f"Admission settings response: {response_dict}")
+        return response_dict
+    except Exception as e:
+        logger.error(f"Error getting admission settings: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 @router.get("/{id}", response_model=ApplicationRead)
 async def get_application(
@@ -485,7 +550,9 @@ async def confirm_admission(
 
 
 
+
 @router.post("/applications/{id}/payment/initiate", response_model=PaymentInitiateResponse)
+@limiter.limit("5/minute")  # Max 5 payment initiations per minute per IP
 async def initiate_application_payment(
     id: int,
     request: Request,
@@ -590,10 +657,14 @@ async def payment_success(
     else:
         data_dict = dict(request.query_params)
     
-    # Verify Hash (Critical)
-    # expected_hash = easebuzz_service.generate_hash(session, data_dict) # Logic differs for reverse hash
-    # For now, we trust the status match and logic. Easebuzz verification usually involves verifying reverse hash.
-    # IMPORTANT: Real implementation must verify hash.
+    # CRITICAL: Verify Hash to prevent payment fraud
+    is_valid_hash = easebuzz_service.verify_response_hash(session, data_dict)
+    if not is_valid_hash:
+        logger.error(f"Hash verification failed for payment callback: {data_dict.get('txnid')}")
+        raise HTTPException(
+            status_code=400, 
+            detail="Invalid payment signature. This incident has been logged."
+        )
     
     status = data_dict.get("status")
     txnid = data_dict.get("txnid")
@@ -741,7 +812,29 @@ def get_admission_settings(
     current_user: User = Depends(get_current_active_superuser)
 ):
     """Get global admission settings"""
-    return AdmissionService.get_admission_settings(session)
+    try:
+        settings_obj = AdmissionService.get_admission_settings(session)
+        
+        # Manually construct the response dict with explicit None checks
+        response_dict = {
+            "id": settings_obj.id,
+            "application_fee_enabled": settings_obj.application_fee_enabled if settings_obj.application_fee_enabled is not None else True,
+            "application_fee_amount": settings_obj.application_fee_amount if settings_obj.application_fee_amount is not None else 0.0,
+            "online_payment_enabled": settings_obj.online_payment_enabled if settings_obj.online_payment_enabled is not None else True,
+            "offline_payment_enabled": settings_obj.offline_payment_enabled if settings_obj.offline_payment_enabled is not None else True,
+            "payment_gateway": settings_obj.payment_gateway if settings_obj.payment_gateway else "easebuzz",
+            "send_credentials_email": settings_obj.send_credentials_email if settings_obj.send_credentials_email is not None else True,
+            "send_credentials_sms": settings_obj.send_credentials_sms if settings_obj.send_credentials_sms is not None else False,
+            "auto_create_student_account": settings_obj.auto_create_student_account if settings_obj.auto_create_student_account is not None else True,
+            "portal_base_url": settings_obj.portal_base_url if settings_obj.portal_base_url else "http://localhost:3000",
+            "updated_at": settings_obj.updated_at if settings_obj.updated_at else datetime.utcnow(),
+        }
+        
+        # logger.info(f"Admission settings response: {response_dict}")
+        return response_dict
+    except Exception as e:
+        logger.error(f"Error getting admission settings: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to load settings: {str(e)}")
 
 @router.patch("/settings", response_model=AdmissionSettingsRead)
 def update_admission_settings(

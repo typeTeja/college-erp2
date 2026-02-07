@@ -198,7 +198,7 @@ function ApplySuccessContent() {
                                                     description: "Please wait while we redirect you to the payment gateway...",
                                                 });
 
-                                                const paymentResponse = await admissionApi.initiatePayment(response.id, response.fee_amount);
+                                                const paymentResponse = await admissionApi.initiatePayment(response.id);
                                                 
                                                 if (paymentResponse.payment_url) {
                                                     window.location.href = paymentResponse.payment_url;

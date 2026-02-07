@@ -340,6 +340,7 @@ export interface ApplicationRead {
   group_of_study: string;
   status: ApplicationStatus;
   fee_mode: PaymentMode;
+  application_fee: number;
 
   // Basic Legacy Fields
   aadhaar_number?: string;
@@ -370,6 +371,7 @@ export interface ApplicationRead {
   // Payment info
   payment_proof_url?: string;
   offline_payment_verified: boolean;
+  documents_verified: boolean;
   offline_payment_verified_by?: number;
   offline_payment_verified_at?: string;
 

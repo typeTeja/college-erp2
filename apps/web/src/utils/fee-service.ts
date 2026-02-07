@@ -1,11 +1,11 @@
 import { api } from './api';
 import type {
-    FeeStructure,
+    FeeStructureRead,
     FeeStructureCreate,
     StudentFee,
     StudentFeeCreate,
     StudentFeeSummary,
-    FeePayment,
+    FeePaymentRead,
     FeePaymentCreate,
     PaymentInitiateRequest,
     PaymentInitiateResponse,
@@ -24,8 +24,8 @@ export const feeStructureApi = {
     /**
      * Create a new fee structure
      */
-    create: async (data: FeeStructureCreate): Promise<FeeStructure> => {
-        const response = await api.post<FeeStructure>('/fees/structures', data);
+    create: async (data: FeeStructureCreate): Promise<FeeStructureRead> => {
+        const response = await api.post<FeeStructureRead>('/fees/structures', data);
         return response.data;
     },
 
@@ -35,16 +35,16 @@ export const feeStructureApi = {
     list: async (params?: {
         program_id?: number;
         academic_year?: string;
-    }): Promise<FeeStructure[]> => {
-        const response = await api.get<FeeStructure[]>('/fees/structures', { params });
+    }): Promise<FeeStructureRead[]> => {
+        const response = await api.get<FeeStructureRead[]>('/fees/structures', { params });
         return response.data;
     },
 
     /**
      * Get a specific fee structure by ID
      */
-    get: async (structureId: number): Promise<FeeStructure> => {
-        const response = await api.get<FeeStructure>(`/fees/structures/${structureId}`);
+    get: async (structureId: number): Promise<FeeStructureRead> => {
+        const response = await api.get<FeeStructureRead>(`/fees/structures/${structureId}`);
         return response.data;
     },
 };
@@ -86,8 +86,8 @@ export const paymentApi = {
     /**
      * Record an offline/manual fee payment
      */
-    recordPayment: async (data: FeePaymentCreate): Promise<FeePayment> => {
-        const response = await api.post<FeePayment>('/fees/payments', data);
+    recordPayment: async (data: FeePaymentCreate): Promise<FeePaymentRead> => {
+        const response = await api.post<FeePaymentRead>('/fees/payments', data);
         return response.data;
     },
 

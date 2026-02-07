@@ -13,7 +13,6 @@ import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 import logging
-import json
 
 from app.config.settings import settings
 
@@ -78,33 +77,7 @@ class StorageService:
         except Exception as e:
             logger.error(f"Error checking/creating buckets: {e}")
             
-        # Ensure public policy for images bucket
-        if self.bucket_images in buckets:
-            self._set_public_policy(self.bucket_images)
     
-    def _set_public_policy(self, bucket_name: str):
-        """Set public read policy for a bucket"""
-        try:
-            policy = {
-                "Version": "2012-10-17",
-                "Statement": [
-                    {
-                        "Sid": "PublicReadGetObject",
-                        "Effect": "Allow",
-                        "Principal": "*",
-                        "Action": "s3:GetObject",
-                        "Resource": f"arn:aws:s3:::{bucket_name}/*"
-                    }
-                ]
-            }
-            self.s3_client.put_bucket_policy(
-                Bucket=bucket_name,
-                Policy=json.dumps(policy)
-            )
-            logger.info(f"Applied public read policy to bucket: {bucket_name}")
-        except ClientError as e:
-            # Ignore if policy update fails (might not have permissions)
-            logger.warning(f"Could not set public policy for {bucket_name}: {e}")
     
     async def upload_file(
         self, 

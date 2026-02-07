@@ -25,8 +25,12 @@ export function FeeDashboard({ studentId, academicYear }: FeeDashboardProps) {
 
         try {
             const response = await feeService.payments.initiatePayment({
-                student_fee_id: feeSummary.student_id,
+                student_id: feeSummary.student_id,
+                student_fee_id: feeSummary.student_fee_id,
                 amount: feeSummary.balance,
+                customer_name: feeSummary.student_name,
+                customer_email: feeSummary.customer_email,
+                customer_phone: feeSummary.customer_phone,
             });
 
             // Redirect to payment gateway

@@ -5,6 +5,7 @@
  * Refreshes every 5 minutes to show updated student progress.
  */
 
+import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '@/services/dashboard-api';
 
 export const useParentDashboard = () => {

@@ -33,6 +33,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
         academic_year: '2024-2025',
         year: 1,
         category: 'GENERAL' as FeeCategory,
+        tuition_fee: 0,
         components: [
             { name: 'Tuition Fee', amount: 0, is_refundable: false },
         ],
@@ -105,7 +106,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
         setFormData({
             ...formData,
             components: [
-                ...formData.components,
+                ...(formData.components || []),
                 { name: '', amount: 0, is_refundable: false },
             ],
         });
@@ -114,12 +115,12 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
     const removeComponent = (index: number) => {
         setFormData({
             ...formData,
-            components: formData.components.filter((_, i) => i !== index),
+            components: (formData.components || []).filter((_, i) => i !== index),
         });
     };
 
     const updateComponent = (index: number, field: keyof FeeComponent, value: any) => {
-        const updated = [...formData.components];
+        const updated = [...(formData.components || [])];
         updated[index] = { ...updated[index], [field]: value };
         setFormData({ ...formData, components: updated });
     };
@@ -138,10 +139,10 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
 
         // Save original components if not already saved
         if (originalComponents.length === 0) {
-            setOriginalComponents([...formData.components]);
+            setOriginalComponents([...(formData.components || [])]);
         }
 
-        const updatedComponents = formData.components.map(component => {
+        const updatedComponents = (formData.components || []).map(component => {
             // Check if this fee head is applicable for discount
             const componentFeeHeadId = (component as any).fee_head_id;
             const isApplicable = slab.applicable_fee_heads.length === 0 ||
@@ -172,9 +173,9 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
         setFormData({
             ...formData,
             installments: [
-                ...formData.installments,
+                ...(formData.installments || []),
                 {
-                    installment_number: formData.installments.length + 1,
+                    installment_number: (formData.installments || []).length + 1,
                     amount: 0,
                     due_date: ''
                 },
@@ -183,7 +184,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
     };
 
     const generateInstallments = (count: number) => {
-        const totalAmount = formData.components.reduce((sum, c) => sum + Number(c.amount), 0);
+        const totalAmount = (formData.components || []).reduce((sum, c) => sum + Number(c.amount), 0);
         const installmentAmount = Math.floor(totalAmount / count);
         const remainder = totalAmount - (installmentAmount * count);
 
@@ -208,12 +209,12 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
     const removeInstallment = (index: number) => {
         setFormData({
             ...formData,
-            installments: formData.installments.filter((_, i) => i !== index),
+            installments: (formData.installments || []).filter((_, i) => i !== index),
         });
     };
 
     const updateInstallment = (index: number, field: keyof FeeInstallment, value: any) => {
-        const updated = [...formData.installments];
+        const updated = [...(formData.installments || [])];
         updated[index] = { ...updated[index], [field]: value };
         setFormData({ ...formData, installments: updated });
     };
@@ -227,12 +228,12 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
             return;
         }
 
-        if (formData.components.length === 0) {
+        if ((formData.components || []).length === 0) {
             alert('Please add at least one fee component');
             return;
         }
 
-        if (formData.installments.length === 0) {
+        if ((formData.installments || []).length === 0) {
             alert('Please add at least one installment');
             return;
         }
@@ -240,8 +241,8 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
         createMutation.mutate(formData);
     };
 
-    const totalAmount = formData.components.reduce((sum, c) => sum + Number(c.amount), 0);
-    const totalInstallments = formData.installments.reduce((sum, i) => sum + Number(i.amount), 0);
+    const totalAmount = (formData.components || []).reduce((sum, c) => sum + Number(c.amount), 0);
+    const totalInstallments = (formData.installments || []).reduce((sum, i) => sum + Number(i.amount), 0);
     const isBalanced = totalAmount === totalInstallments;
 
     // Calculate discount summary
@@ -391,7 +392,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                         </div>
                     </div>
                     <div className="space-y-3">
-                        {formData.components.map((component, index) => (
+                        {(formData.components || []).map((component, index) => (
                             <div key={index} className="p-3 bg-gray-50 rounded-lg space-y-3">
                                 <div className="flex items-center space-x-3">
                                     <div className="flex-1">
@@ -403,7 +404,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                                             onChange={(e) => {
                                                 const feeHeadId = e.target.value ? parseInt(e.target.value) : null;
                                                 const selectedHead = feeHeads.find(h => h.id === feeHeadId);
-                                                const updated = [...formData.components];
+                                                const updated = [...(formData.components || [])];
                                                 updated[index] = {
                                                     ...updated[index],
                                                     fee_head_id: feeHeadId,
@@ -454,7 +455,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                                             <span>Refundable</span>
                                         </label>
                                     </div>
-                                    {formData.components.length > 1 && (
+                                    {(formData.components || []).length > 1 && (
                                         <div className="flex items-end pb-2">
                                             <Button
                                                 type="button"
@@ -537,7 +538,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                         </div>
                     </div>
                     <div className="space-y-3">
-                        {formData.installments.map((installment, index) => (
+                        {(formData.installments || []).map((installment, index) => (
                             <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                                 <div className="w-32">
                                     <p className="text-sm font-medium text-gray-700">Installment {installment.installment_number}</p>
@@ -557,7 +558,7 @@ export function FeeStructureForm({ onSuccess }: FeeStructureFormProps) {
                                     className="flex-1"
                                     required
                                 />
-                                {formData.installments.length > 1 && (
+                                {(formData.installments || []).length > 1 && (
                                     <Button
                                         type="button"
                                         onClick={() => removeInstallment(index)}

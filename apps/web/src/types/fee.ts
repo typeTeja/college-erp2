@@ -240,6 +240,9 @@ export interface StudentFeeSummary {
   paid_amount: number;
   balance: number;
   is_blocked: boolean;
+  student_fee_id: number;
+  customer_email: string;
+  customer_phone: string;
   installments: InstallmentDetail[];
   payments: PaymentDetail[];
 }

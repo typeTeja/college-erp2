@@ -14,7 +14,8 @@ import {
     Search,
     Filter,
     Plus,
-    ExternalLink
+    ExternalLink,
+    FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -59,7 +60,7 @@ export function BatchDetail({ batchId }: BatchDetailProps) {
     }
 
     const program = programs.find(p => p.id === batch.program_id);
-    const currentSemester = semesters.find(s => s.semester_no === batch.current_semester);
+    const currentSemester = semesters.find(s => s.semester_number === batch.current_semester);
 
     return (
         <div className="space-y-6">
@@ -252,7 +253,7 @@ export function BatchDetail({ batchId }: BatchDetailProps) {
                         <TableBody>
                             {semesters.map((sem) => (
                                 <TableRow key={sem.id}>
-                                    <TableCell className="font-bold">Semester {sem.semester_no}</TableCell>
+                                    <TableCell className="font-bold">Semester {sem.semester_number}</TableCell>
                                     <TableCell className="text-sm">
                                         {sem.start_date || '--'} to {sem.end_date || '--'}
                                     </TableCell>

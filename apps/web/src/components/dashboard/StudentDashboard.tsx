@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { admissionApi } from '@/services/admission-api'
+import { ApplicationStatus } from '@/types/admissions'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -29,15 +30,15 @@ export function StudentDashboard() {
     // Helper statuses
     const isOnlinePaid = application?.payment_status === 'SUCCESS' || application?.payment_status === 'PAID'
     const isOfflinePaid = application?.fee_mode === 'OFFLINE' && application?.offline_payment_verified
-    const isPaid = isOnlinePaid || isOfflinePaid || application?.status === 'PAID' || application?.status === 'FORM_COMPLETED' || application?.status === 'ADMITTED' || application?.status === 'APPROVED'
+    const isPaid = isOnlinePaid || isOfflinePaid || application?.status === ApplicationStatus.PAID || application?.status === ApplicationStatus.FORM_COMPLETED || application?.status === ApplicationStatus.ADMITTED || application?.status === ApplicationStatus.APPROVED
 
-    const isFormCompleted = application?.status === 'FORM_COMPLETED' || application?.status === 'under_review' || application?.status === 'APPROVED' || application?.status === 'ADMITTED'
+    const isFormCompleted = application?.status === ApplicationStatus.FORM_COMPLETED || application?.status === ApplicationStatus.UNDER_REVIEW || application?.status === ApplicationStatus.APPROVED || application?.status === ApplicationStatus.ADMITTED
     
     // Verification is complex: incomplete if just form submitted.
     // We assume verification is done if status is APPROVED or ADMITTED, or documents_verified is explicitly true
-    const isVerified = application?.status === 'APPROVED' || application?.status === 'ADMITTED' || application?.documents_verified
+    const isVerified = application?.status === ApplicationStatus.APPROVED || application?.status === ApplicationStatus.ADMITTED || application?.documents_verified
 
-    const isAdmitted = application?.status === 'ADMITTED'
+    const isAdmitted = application?.status === ApplicationStatus.ADMITTED
 
     // Define timeline steps based on status
     const getSteps = () => {
@@ -108,7 +109,7 @@ export function StudentDashboard() {
                         <CardContent>
                             <div className="text-2xl font-bold">{application.application_number}</div>
                             <div className="text-xs text-slate-500 mt-1">
-                                {application.program?.course_name || 'N/A'}
+                                {application.program?.name || 'N/A'}
                             </div>
                         </CardContent>
                     </Card>
@@ -214,7 +215,7 @@ export function StudentDashboard() {
             </Card>
 
             {/* Show message if waiting for verification */}
-            {application?.status === 'FORM_COMPLETED' && (
+            {application?.status === ApplicationStatus.FORM_COMPLETED && (
                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
                     <h3 className="text-lg font-semibold text-blue-900">Application Under Review</h3>
                     <p className="text-blue-700 mt-2">

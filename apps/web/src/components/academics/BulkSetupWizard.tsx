@@ -138,7 +138,12 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
 
             const admissionYear = academicYears.find(ay => ay.year.includes(formData.joining_year!.toString()));
             if (!admissionYear) {
-                throw new Error(`Academic year record for ${formData.joining_year} not found. Please setup academic years first.`);
+                const availableYears = academicYears.map(ay => ay.year).join(', ');
+                throw new Error(
+                    `Academic year record for ${formData.joining_year} not found. ` +
+                    `Available years: ${availableYears || 'None'}. ` +
+                    `Please setup academic years at /setup/academic-years first.`
+                );
             }
 
             const batchResponse = await api.post<any>('/academic/batches', {
@@ -162,7 +167,12 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                 const semYear = academicYears.find(ay => ay.year.includes(targetYear.toString()));
 
                 if (!semYear) {
-                    throw new Error(`Academic year for semester ${i} (${targetYear}) not found.`);
+                    const availableYears = academicYears.map(ay => ay.year).join(', ');
+                    throw new Error(
+                        `Academic year for semester ${i} (${targetYear}-${targetYear + 1}) not found. ` +
+                        `Available years: ${availableYears || 'None'}. ` +
+                        `Please setup all required academic years first.`
+                    );
                 }
 
                 setCreationStep(`Creating Semester ${i}...`);
@@ -295,6 +305,57 @@ export function BulkSetupWizard({ programs, regulations }: BulkSetupWizardProps)
                                     onChange={(e) => setFormData({ ...formData, joining_year: parseInt(e.target.value) || currentYear })}
                                 />
                             </div>
+                            
+                            {/* Academic Year Validation Warning */}
+                            {formData.joining_year && selectedProgram && (() => {
+                                const requiredYears = [];
+                                const missingYears = [];
+                                const duration = selectedProgram.duration_years || 4;
+                                
+                                for (let i = 0; i < duration; i++) {
+                                    const year = formData.joining_year + i;
+                                    requiredYears.push(year);
+                                    const hasYear = academicYears.some(ay => ay.year.includes(year.toString()));
+                                    if (!hasYear) {
+                                        missingYears.push(year);
+                                    }
+                                }
+                                
+                                if (missingYears.length > 0) {
+                                    return (
+                                        <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                                            <div className="flex items-start gap-2">
+                                                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                                                <div className="flex-1">
+                                                    <h4 className="font-semibold text-amber-800 mb-1">Missing Academic Years</h4>
+                                                    <p className="text-sm text-amber-700 mb-2">
+                                                        The following academic year records are required but not found:
+                                                    </p>
+                                                    <ul className="text-sm text-amber-700 list-disc list-inside mb-2">
+                                                        {missingYears.map(year => (
+                                                            <li key={year}>{year}-{year + 1}</li>
+                                                        ))}
+                                                    </ul>
+                                                    <p className="text-xs text-amber-600">
+                                                        Please <a href="/setup/academic-years" className="underline font-medium">setup academic years</a> before creating this batch.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                
+                                return (
+                                    <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <ShieldCheck className="h-4 w-4 text-green-600" />
+                                            <p className="text-sm text-green-700">
+                                                All required academic years ({requiredYears[0]}-{requiredYears[requiredYears.length - 1] + 1}) are available.
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 

@@ -23,6 +23,8 @@ import type {
   DocumentVerifyRequest,
   PaymentInitiateRequest,
   PaymentInitiateResponse,
+  AdmissionSettings,
+  AdmissionSettingsUpdate,
 } from '@/types/admissions';
 
 const BASE_URL = '/admissions';
@@ -59,6 +61,15 @@ export const admissionApi = {
    */
   get: async (id: number): Promise<ApplicationRead> => {
     const response = await api.get(`${BASE_URL}/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Get application by application number (public endpoint)
+   * Used for fallback when sessionStorage is unavailable
+   */
+  getApplicationByNumber: async (applicationNumber: string): Promise<any> => {
+    const response = await api.get(`${BASE_URL}/public/application/${applicationNumber}`);
     return response.data;
   },
 
@@ -250,16 +261,7 @@ export const admissionApi = {
   /**
    * Get admission settings (admin only)
    */
-  getSettings: async (): Promise<{
-    application_fee_enabled: boolean;
-    application_fee_amount: number;
-    online_payment_enabled: boolean;
-    offline_payment_enabled: boolean;
-    send_credentials_email: boolean;
-    send_credentials_sms: boolean;
-    auto_create_student_account: boolean;
-    portal_base_url: string;
-  }> => {
+  getSettings: async (): Promise<AdmissionSettings> => {
     const response = await api.get(`${BASE_URL}/settings`);
     return response.data;
   },
@@ -267,16 +269,7 @@ export const admissionApi = {
   /**
    * Update admission settings (admin only)
    */
-  updateSettings: async (data: {
-    application_fee_enabled?: boolean;
-    application_fee_amount?: number;
-    online_payment_enabled?: boolean;
-    offline_payment_enabled?: boolean;
-    send_credentials_email?: boolean;
-    send_credentials_sms?: boolean;
-    auto_create_student_account?: boolean;
-    portal_base_url?: string;
-  }): Promise<{ message: string }> => {
+  updateSettings: async (data: AdmissionSettingsUpdate): Promise<{ message: string }> => {
     const response = await api.patch(`${BASE_URL}/settings`, data);
     return response.data;
   },

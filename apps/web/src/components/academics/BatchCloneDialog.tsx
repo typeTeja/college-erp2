@@ -146,7 +146,7 @@ export function BatchCloneDialog({
                             >
                                 {programRegulations.map((reg) => (
                                     <option key={reg.id} value={reg.id}>
-                                        {reg.regulation_name} ({reg.regulation_code})
+                                        {reg.name}
                                     </option>
                                 ))}
                             </select>

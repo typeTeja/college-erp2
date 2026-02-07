@@ -10,6 +10,7 @@ import type {
   PrincipalDashboardData,
   ParentDashboardData,
   StudentDashboardData,
+  FacultyDashboardData,
   AnyStaffDashboardData,
   StaffRole,
 } from '@/types/dashboard';

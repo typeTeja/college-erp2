@@ -222,7 +222,7 @@ export function validateDashboardWidget(
   const contract = DASHBOARD_CONTRACTS[dashboard];
   
   // Check forbidden widgets first
-  if (contract.forbiddenWidgets.includes(widget)) {
+  if ((contract.forbiddenWidgets as readonly string[]).includes(widget)) {
     return {
       allowed: false,
       reason: `Widget "${widget}" violates ${dashboard} dashboard contract. This widget is explicitly forbidden.`
@@ -236,7 +236,7 @@ export function validateDashboardWidget(
   }
   
   // Check if widget is in allowed list
-  if ('allowedWidgets' in contract && !contract.allowedWidgets.includes(widget)) {
+  if ('allowedWidgets' in contract && !(contract.allowedWidgets as readonly string[]).includes(widget)) {
     return {
       allowed: false,
       reason: `Widget "${widget}" not in ${dashboard} allowed list. See dashboard-contracts.ts for allowed widgets.`

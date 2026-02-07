@@ -19,7 +19,7 @@ export function useFeeStructures(filters?: {
 }) {
     return useQuery({
         queryKey: queryKeys.fees.structures.list(filters),
-        queryFn: () => feeApi.structures.list(filters),
+        queryFn: () => feeApi.listFeeStructures(filters),
     });
 }
 
@@ -27,7 +27,7 @@ export function useCreateFeeStructure() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: FeeStructureCreate) => feeApi.structures.create(data),
+        mutationFn: (data: FeeStructureCreate) => feeApi.createFeeStructure(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.fees.structures.all });
             queryClient.invalidateQueries({ queryKey: queryKeys.fees.all });
@@ -42,14 +42,14 @@ export function useCreateFeeStructure() {
 export function useStudentFees(filters?: any) {
     return useQuery({
         queryKey: queryKeys.fees.studentFees.list(filters),
-        queryFn: () => feeApi.studentFees.list(filters),
+        queryFn: () => feeApi.listStudentFees(filters),
     });
 }
 
 export function useStudentFeeSummary(studentId: number) {
     return useQuery({
         queryKey: queryKeys.fees.studentFees.summary(studentId),
-        queryFn: () => feeApi.studentFees.getSummary(studentId),
+        queryFn: () => feeApi.getStudentFeeSummary(studentId),
         enabled: !!studentId,
     });
 }
@@ -58,7 +58,7 @@ export function useAssignFeeStructure() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: StudentFeeCreate) => feeApi.studentFees.assign(data),
+        mutationFn: (data: StudentFeeCreate) => feeApi.createStudentFee(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.fees.studentFees.all });
             queryClient.invalidateQueries({ queryKey: queryKeys.fees.all });
@@ -73,7 +73,7 @@ export function useAssignFeeStructure() {
 export function useFeePayments(filters?: any) {
     return useQuery({
         queryKey: queryKeys.fees.payments.list(filters),
-        queryFn: () => feeApi.payments.list(filters),
+        queryFn: () => feeApi.listPayments(filters),
     });
 }
 
@@ -81,15 +81,10 @@ export function useRecordPayment() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: FeePaymentCreate) => feeApi.payments.record(data),
+        mutationFn: (data: FeePaymentCreate) => feeApi.createPayment(data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.fees.payments.all });
             queryClient.invalidateQueries({ queryKey: queryKeys.fees.studentFees.all });
-            // Invalidate specific student fee summary
-            if (variables.student_fee_id) {
-                // We might need to map student_fee_id to student_id or invalidate all summaries
-                // For now, let's keep it simple
-            }
         },
     });
 }
@@ -102,7 +97,7 @@ export function useApplyConcession() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: FeeConcessionCreate) => feeApi.concessions.apply(data),
+        mutationFn: (data: FeeConcessionCreate) => feeApi.createConcession(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.fees.all });
         },

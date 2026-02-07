@@ -335,6 +335,64 @@ class EasebuzzService:
         hash_string = "|".join(hash_sequence)
         return hashlib.sha512(hash_string.encode('utf-8')).hexdigest()
 
+    def verify_response_hash(self, session: Session, response_data: Dict[str, Any]) -> bool:
+        """
+        Verify Easebuzz response hash for security.
+        
+        CRITICAL: This prevents payment fraud by ensuring the response
+        actually comes from Easebuzz and hasn't been tampered with.
+        
+        Response hash format (reverse of request):
+        salt|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
+        """
+        try:
+            received_hash = response_data.get('hash')
+            if not received_hash:
+                logger.error("No hash in response data")
+                return False
+            
+            config = self._get_config(session)
+            key = config["key"]
+            salt = config["salt"]
+            
+            # Build reverse hash sequence (Easebuzz response format)
+            hash_sequence = [
+                salt,
+                str(response_data.get('status', '')),
+                '',  # Additional parameter (empty)
+                '',  # Additional parameter (empty)
+                '',  # Additional parameter (empty)
+                '',  # Additional parameter (empty)
+                '',  # Additional parameter (empty)
+                str(response_data.get('udf5', '')),
+                str(response_data.get('udf4', '')),
+                str(response_data.get('udf3', '')),
+                str(response_data.get('udf2', '')),
+                str(response_data.get('udf1', '')),
+                str(response_data.get('email', '')),
+                str(response_data.get('firstname', '')),
+                str(response_data.get('productinfo', '')),
+                str(response_data.get('amount', '')),
+                str(response_data.get('txnid', '')),
+                key
+            ]
+            
+            hash_string = "|".join(hash_sequence)
+            expected_hash = hashlib.sha512(hash_string.encode('utf-8')).hexdigest()
+            
+            is_valid = received_hash.lower() == expected_hash.lower()
+            
+            if not is_valid:
+                logger.error(f"Hash verification failed for txnid: {response_data.get('txnid')}")
+                logger.error(f"Expected: {expected_hash}")
+                logger.error(f"Received: {received_hash}")
+            
+            return is_valid
+            
+        except Exception as e:
+            logger.error(f"Error verifying hash: {str(e)}")
+            return False
+
     async def initiate_payment(self, session: Session, payment_data: Dict[str, Any]) -> Dict[str, Any]:
         config = self._get_config(session)
         base_url = self.BASE_URL_TEST if config["env"].lower() == "test" else self.BASE_URL_PROD
@@ -363,11 +421,19 @@ class EasebuzzService:
             "udf5": payment_data.get('udf5', '')
         }
         
+        
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data=payload)
         
+        logger.info(f"Easebuzz API Response Status: {response.status_code}")
+        logger.info(f"Easebuzz API Response Body: {response.text[:500]}")
+        
         if response.status_code == 200:
-            return response.json()
+            json_response = response.json()
+            logger.info(f"Easebuzz JSON Response: {json_response}")
+            return json_response
+        
+        logger.error(f"Easebuzz API Error: HTTP {response.status_code}, Body: {response.text}")
         return {"status": 0, "error": f"HTTP Error: {response.status_code}"}
 
 easebuzz_service = EasebuzzService()

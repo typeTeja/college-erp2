@@ -241,11 +241,11 @@ export function SubjectMaster() {
                                         <TableCell className="font-mono text-xs">{sub.code}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="bg-slate-50">
-                                                {sub.subject_type}
+                                                {sub.subject_type || 'THEORY'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-xs text-slate-600">
-                                            {sub.evaluation_type.replace(/_/g, ' ')}
+                                            {(sub.evaluation_type || 'THEORY_ONLY').replace(/_/g, ' ')}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button

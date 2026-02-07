@@ -37,27 +37,4 @@ export function useCreateInternalExam() {
     });
 }
 
-export function useEnterMarks() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ examId, marks }: { examId: number; marks: any[] }) =>
-            internalExamApi.enterMarks(examId, marks),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.exams.internal.marks(variables.examId)
-            });
-        },
-    });
-}
-
-export function usePublishResults() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (examId: number) => internalExamApi.publishResults(examId),
-        onSuccess: (_, examId) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.exams.internal.detail(examId) });
-        },
-    });
-}
+// Note: useEnterMarks and usePublishResults removed as they were unused and referenced non-existent API methods.

@@ -25,6 +25,7 @@ const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
     [DocumentType.TRANSFER_CERTIFICATE]: "Transfer Certificate",
     [DocumentType.CASTE_CERTIFICATE]: "Caste Certificate",
     [DocumentType.INCOME_CERTIFICATE]: "Income Certificate",
+    [DocumentType.CONDUCT_CERTIFICATE]: "Conduct Certificate",
     [DocumentType.OTHER]: "Other Document"
 }
 

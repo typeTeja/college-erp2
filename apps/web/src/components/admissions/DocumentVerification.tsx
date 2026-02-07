@@ -24,6 +24,7 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
     "TRANSFER_CERTIFICATE": "Transfer Certificate",
     "CASTE_CERTIFICATE": "Caste Certificate",
     "INCOME_CERTIFICATE": "Income Certificate",
+    "CONDUCT_CERTIFICATE": "Conduct Certificate",
     "OTHER": "Other Document"
 }
 
