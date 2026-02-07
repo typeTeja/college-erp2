@@ -385,7 +385,122 @@ class AdmissionService:
             return False
 
     @staticmethod
-    def cleanup_test_applications(session: Session, performed_by: int) -> int:
+    def delete_application(
+        session: Session, application_id: int, deleted_by: int, reason: str = None
+    ) -> bool:
+        application = session.get(Application, application_id)
+        if not application:
+            raise ValueError("Application not found")
+            
+        application.is_deleted = True
+        application.deleted_at = datetime.utcnow()
+        application.deleted_by = deleted_by
+        application.delete_reason = reason
+        
+        log_activity(
+            session=session,
+            application_id=application.id,
+            activity_type=ActivityType.STATUS_CHANGED, # or create a specialized documented type
+            description=f"Application deleted (soft delete). Reason: {reason}",
+            extra_data={"deleted_by": deleted_by}
+        )
+        
+        session.add(application)
+        session.commit()
+        return True
+
+    @staticmethod
+    def restore_application(
+        session: Session, application_id: int, restored_by: int
+    ) -> Application:
+        application = session.get(Application, application_id)
+        if not application:
+            raise ValueError("Application not found")
+        
+        if not application.is_deleted:
+            return application
+            
+        application.is_deleted = False
+        application.deleted_at = None
+        application.deleted_by = None
+        application.delete_reason = None
+        
+        log_activity(
+            session=session,
+            application_id=application.id,
+            activity_type=ActivityType.STATUS_CHANGE,
+            description=f"Application restored by user {restored_by}",
+            extra_data={"restored_by": restored_by}
+        )
+        
+        session.add(application)
+        session.commit()
+        session.refresh(application)
+        return application
+
+    @staticmethod
+    def resend_credentials(
+        session: Session, application_id: int, performed_by: int, background_tasks
+    ) -> bool:
+        """
+        Resend login credentials (generate NEW password)
+        """
+        application = session.get(Application, application_id)
+        if not application:
+            raise ValueError("Application not found")
+            
+        if not application.portal_user_id:
+            raise ValueError("Portal account does not exist")
+            
+        user = session.get(User, application.portal_user_id)
+        if not user:
+            raise ValueError("User account not found")
+            
+        # Generate NEW password
+        _, new_password = AdmissionService.generate_portal_credentials()
+        
+        # Update User
+        user.hashed_password = AdmissionService.hash_password(new_password)
+        session.add(user)
+        
+        # Log
+        log_activity(
+            session=session,
+            application_id=application.id,
+            activity_type=ActivityType.COMMUNICATION_SENT,
+            description="Login credentials resent (password reset)",
+            extra_data={"performed_by": performed_by}
+        )
+        
+        session.commit()
+        
+        # Send Email/SMS
+        from app.domains.communication.services import email_service, sms_service
+        from app.config.settings import settings
+        
+        background_tasks.add_task(
+            AdmissionService.send_credentials_email,
+            email=application.email,
+            username=user.username,
+            password=new_password,
+            name=application.name,
+            portal_url=settings.PORTAL_BASE_URL
+        )
+        
+        if application.phone:
+            background_tasks.add_task(
+                AdmissionService.send_credentials_sms,
+                phone=application.phone,
+                username=user.username,
+                password=new_password,
+                name=application.name,
+                portal_url=settings.PORTAL_BASE_URL
+            )
+            
+        return True
+
+    @staticmethod
+    def cleanup_test_applications(session: Session, user_id: int) -> int:
         statement = select(Application).where(
             Application.is_deleted == False,
             or_(col(Application.name).ilike('%test%'), col(Application.email).ilike('%test%'))

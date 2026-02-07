@@ -372,6 +372,9 @@ class ApplicationRead(ApplicationBase):
     # Soft Delete
     is_deleted: bool
     deleted_at: Optional[datetime] = None
+    
+    # Portal User
+    portal_user_id: Optional[int] = None
 
     class Config:
         from_attributes = True

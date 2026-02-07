@@ -170,5 +170,18 @@ export const admissionsService = {
                 queryClient.invalidateQueries({ queryKey: ["timeline", data.id] });
             }
         });
+    },
+
+    useResendCredentials: () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: async (id: number) => {
+                const response = await api.post<{ message: string }>(`/admissions/v2/applications/${id}/resend-credentials`);
+                return response.data;
+            },
+            onSuccess: (data, id) => {
+                // Nothing to invalidate really, maybe just toast
+            }
+        });
     }
 };

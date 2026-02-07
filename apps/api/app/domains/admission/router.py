@@ -344,6 +344,55 @@ async def update_application(
     session.refresh(application)
     return application
 
+@router.delete("/v2/applications/{id}", response_model=dict)
+async def delete_application(
+    id: int,
+    reason: str = None,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """
+    Soft delete an application.
+    Requires Super Admin privileges.
+    """
+    try:
+        AdmissionService.delete_application(session, id, current_user.id, reason)
+        return {"message": "Application deleted successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/v2/applications/{id}/restore", response_model=ApplicationRead)
+async def restore_application(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """
+    Restore a soft-deleted application.
+    Requires Super Admin privileges.
+    """
+    try:
+        return AdmissionService.restore_application(session, id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/v2/applications/{id}/resend-credentials", response_model=dict)
+async def resend_credentials(
+    id: int,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """
+    Resend portal credentials (generates NEW password).
+    Requires Super Admin privileges.
+    """
+    try:
+        AdmissionService.resend_credentials(session, id, current_user.id, background_tasks)
+        return {"message": "Credentials resent successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.get("/{id}/documents", response_model=List[DocumentRead])
 async def list_documents(
     id: int,
@@ -801,8 +850,43 @@ async def get_receipt_url(
     if not payment_exists:
          raise HTTPException(status_code=404, detail="Receipt not found")
 
+    # Generate filename unique to this payment
+    filename = f"Receipt_{application.application_number}_{payment_exists.transaction_id}.pdf"
+    
+    # Check if exists in storage
+    from app.services.storage_service import storage_service
+    from app.services.pdf_service import pdf_service
+    
+    if not storage_service.file_exists(filename, bucket="receipts"):
+        # Lazy Generation
+        pdf_bytes = pdf_service.generate_receipt_bytes(
+            application_number=application.application_number,
+            applicant_name=application.name,
+            payment_id=payment_exists.transaction_id,
+            amount=float(payment_exists.amount),
+            payment_date=payment_exists.updated_at or payment_exists.created_at,
+            program_name=application.program.name if application.program else None
+        )
+        
+        if not pdf_bytes:
+            raise HTTPException(status_code=500, detail="Failed to generate receipt")
+            
+        storage_service.upload_bytes(
+            content=pdf_bytes,
+            filename=filename,
+            bucket="receipts",
+            content_type="application/pdf"
+        )
+    
+    # Generate Presigned URL
+    url = storage_service.get_presigned_url(
+        file_key=filename,
+        bucket="receipts",
+        expiration=900 # 15 minutes
+    )
+
     return {
-        "url": f"{settings.API_V1_STR}/admissions/v2/public/receipt/{application_number}/download"
+        "url": url
     }
 
 

@@ -264,6 +264,26 @@ export default function ApplicationDetailPage() {
                             </CardContent>
                         </Card>
                     )}
+
+                    {/* Resend Credentials Action */}
+                    {application.payment_status === 'SUCCESS' && application.portal_user_id && (
+                        <Card className="border-blue-200 bg-blue-50">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <User className="h-5 w-5" />
+                                    Resend Login Credentials
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    Student account exists. Verify that the student has paid the application fee.
+                                    Clicking this will generate a <strong>NEW</strong> password and send it via Email and SMS.
+                                    The old password will stop working immediately.
+                                </p>
+                                <ResendCredentialsButton applicationId={application.id} />
+                            </CardContent>
+                        </Card>
+                    )}
                 </TabsContent>
 
                 <TabsContent value="documents">
@@ -277,6 +297,42 @@ export default function ApplicationDetailPage() {
                     <ActivityTimeline applicationId={applicationId} />
                 </TabsContent>
             </Tabs>
+
+
         </div>
+    )
+}
+
+function ResendCredentialsButton({ applicationId }: { applicationId: number }) {
+    const { toast } = useToast()
+    const resendMutation = admissionsService.useResendCredentials()
+
+    const handleResend = async () => {
+        if (!confirm("Are you sure? This will reset the student's password.")) return
+
+        try {
+            await resendMutation.mutateAsync(applicationId)
+            toast({
+                title: "Success",
+                description: "New credentials sent to student via Email/SMS."
+            })
+        } catch (error: any) {
+            toast({
+                title: "Error",
+                description: error.response?.data?.detail || "Failed to resend credentials",
+                variant: "destructive"
+            })
+        }
+    }
+
+    return (
+        <Button
+            onClick={handleResend}
+            disabled={resendMutation.isPending}
+            variant="outline"
+            className="bg-white hover:bg-blue-100 text-blue-700 border-blue-300"
+        >
+            {resendMutation.isPending ? "Sending..." : "Resend Credentials"}
+        </Button>
     )
 }

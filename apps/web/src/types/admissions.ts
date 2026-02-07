@@ -341,6 +341,7 @@ export interface ApplicationRead {
   status: ApplicationStatus;
   fee_mode: PaymentMode;
   application_fee: number;
+  portal_user_id?: number;
 
   // Basic Legacy Fields
   aadhaar_number?: string;

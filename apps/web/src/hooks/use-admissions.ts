@@ -324,3 +324,15 @@ export const useVerifyOfflinePayment = (
         ...options,
     });
 };
+
+/**
+ * Resend portal credentials
+ */
+export const useResendCredentials = (
+    options?: UseMutationOptions<{ message: string }, Error, number>
+) => {
+    return useMutation({
+        mutationFn: (id: number) => admissionApi.resendCredentials(id),
+        ...options,
+    });
+};

@@ -289,6 +289,14 @@ export const admissionApi = {
     const response = await api.get(`${BASE_URL}/v2/public/receipt/${applicationNumber}`);
     return response.data;
   },
+
+  /**
+   * Resend portal credentials (Admin)
+   */
+  resendCredentials: async (id: number): Promise<{ message: string }> => {
+    const response = await api.post(`${BASE_URL}/v2/applications/${id}/resend-credentials`);
+    return response.data;
+  },
 };
 
 export default admissionApi;
