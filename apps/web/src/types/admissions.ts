@@ -13,6 +13,10 @@
 // ============================================================================
 
 export enum ApplicationStatus {
+  APPLIED = "APPLIED",
+  QUICK_APPLY_SUBMITTED = "QUICK_APPLY_SUBMITTED",
+  LOGGED_IN = "LOGGED_IN",
+  FORM_IN_PROGRESS = "FORM_IN_PROGRESS",
   PENDING_PAYMENT = "PENDING_PAYMENT",
   PAYMENT_FAILED = "PAYMENT_FAILED",
   PAID = "PAID",
@@ -172,13 +176,15 @@ export interface ApplicationAddress {
   id?: number;
   application_id?: number;
   address_type: AddressType;
-  address_line1: string;
-  address_line2?: string;
-  city: string;
+  address_line: string;
+  village_city: string;
+  district?: string;
   state: string;
-  district: string;
-  pincode: string; // 6 digits
-  is_same_as_permanent?: boolean;
+  country: string;
+  pincode: string;
+  telephone_residence?: string;
+  telephone_office?: string;
+  is_same_as_permanent?: boolean; // UI only
 }
 
 export interface ApplicationParent {
@@ -189,9 +195,12 @@ export interface ApplicationParent {
   gender?: Gender;
   mobile: string;
   email?: string;
+  qualification?: string;
   occupation?: string;
   annual_income?: number;
-  organization?: string;
+  bank_account_number?: string;
+  bank_name?: string;
+  bank_ifsc?: string;
   is_primary_contact: boolean;
 }
 
@@ -200,16 +209,17 @@ export interface ApplicationEducation {
   application_id?: number;
   level: EducationLevel;
   institution_name: string;
-  institution_address?: string; // or code, based on schema, assume text for now
+  institution_address?: string;
   institution_code?: string;
   board: EducationBoard;
   board_other?: string;
   hall_ticket_number?: string;
   year_of_passing?: number;
+  secured_marks?: number;
   total_marks?: number;
-  marks_secured?: number;
-  percentage: number;
+  percentage?: number;
   grade?: string;
+  cgpa?: number;
 }
 
 export interface ApplicationBankDetails {
@@ -226,6 +236,12 @@ export interface ApplicationBankDetails {
 export interface ApplicationHealth {
   id?: number;
   application_id?: number;
+  is_medically_fit: boolean;
+  practitioner_name?: string;
+  practitioner_registration_number?: string;
+  certificate_date?: string;
+  certificate_place?: string;
+  // UI/Extended fields (not in backend yet)
   blood_group?: BloodGroup;
   height_cm?: number;
   weight_kg?: number;
@@ -234,13 +250,8 @@ export interface ApplicationHealth {
   has_chronic_illness?: boolean;
   chronic_illness_details?: string;
   allergies?: string;
-  current_medications?: string;
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
   doctor_name?: string;
   doctor_phone?: string;
-  vaccination_status?: string;
-  insurance_details?: string;
 }
 
 // ============================================================================
@@ -296,9 +307,9 @@ export interface ApplicationCompleteSubmit {
   // Nested Lists
   parents: ApplicationParent[];
   addresses: ApplicationAddress[];
-  education: ApplicationEducation[];
+  education_history: ApplicationEducation[];
   bank_details?: ApplicationBankDetails;
-  health_details?: ApplicationHealth;
+  health_info?: ApplicationHealth;
 
   // Flags
   student_declaration_accepted: boolean;
@@ -365,9 +376,9 @@ export interface ApplicationRead {
   // Nested Relationships
   parents?: ApplicationParent[];
   addresses?: ApplicationAddress[];
-  education?: ApplicationEducation[];
+  education_history?: ApplicationEducation[];
   bank_details?: ApplicationBankDetails;
-  health_details?: ApplicationHealth;
+  health_info?: ApplicationHealth;
 
   // Payment info
   payment_proof_url?: string;
@@ -378,6 +389,8 @@ export interface ApplicationRead {
 
   // Metadata
   student_id?: number;
+  current_step: number;
+  last_saved_at: string;
   created_at: string;
   updated_at: string;
 

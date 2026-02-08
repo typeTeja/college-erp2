@@ -22,6 +22,7 @@ from .models import (
 )
 from .schemas import (
     ApplicationCreate, ApplicationUpdate, ApplicationRead,
+    ApplicationStepUpdate,
     DocumentRead, DocumentUpload,
     QuickApplyCreate, QuickApplyResponse, ApplicationCompleteUpdate,
     ActivityLogRead, EntranceTestConfigRead, EntranceTestConfigCreate,
@@ -46,7 +47,28 @@ from app.shared.enums import ApplicationStatus as SharedApplicationStatus
 from app.config.settings import settings
 
 
+
 router = APIRouter()
+
+# Helper for URL signing
+def sign_application_urls(app_read: ApplicationRead) -> ApplicationRead:
+    """Sign all document URLs in the application response"""
+    if app_read.documents:
+        for doc in app_read.documents:
+            if doc.file_url and not doc.file_url.startswith("http"):
+                 doc.file_url = storage_service.get_presigned_url(doc.file_url, bucket=storage_service.bucket_documents)
+    
+    if app_read.payment_proof_url and not app_read.payment_proof_url.startswith("http"):
+        app_read.payment_proof_url = storage_service.get_presigned_url(app_read.payment_proof_url, bucket=storage_service.bucket_documents)
+        
+    return app_read
+
+def sign_document_urls(docs: List[DocumentRead]) -> List[DocumentRead]:
+    """Sign a list of documents"""
+    for doc in docs:
+        if doc.file_url and not doc.file_url.startswith("http"):
+             doc.file_url = storage_service.get_presigned_url(doc.file_url, bucket=storage_service.bucket_documents)
+    return docs
 
 
 # ======================================================================
@@ -245,7 +267,8 @@ async def get_my_application(
     application = session.exec(statement).first()
     if not application:
         raise HTTPException(status_code=404, detail="No application found")
-    return application
+    # Convert to Pydantic and sign URLs
+    return sign_application_urls(ApplicationRead.from_orm(application))
 
 @router.put("/my-application/complete", response_model=ApplicationRead)
 async def complete_my_application(
@@ -260,7 +283,8 @@ async def complete_my_application(
         raise HTTPException(status_code=404, detail="No application found")
     
     try:
-        return AdmissionService.complete_my_application(session, application.id, data)
+        updated_app = AdmissionService.complete_my_application(session, application.id, data)
+        return sign_application_urls(ApplicationRead.from_orm(updated_app))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -305,7 +329,19 @@ async def get_application(
     current_user: User = Depends(get_current_user)
 ):
     """Get application by ID"""
-    statement = select(Application).where(Application.id == id).options(selectinload(Application.program))
+    statement = (
+        select(Application)
+        .where(Application.id == id)
+        .options(
+            selectinload(Application.program),
+            selectinload(Application.parents),
+            selectinload(Application.education_history),
+            selectinload(Application.addresses),
+            selectinload(Application.bank_details),
+            selectinload(Application.health_info),
+            selectinload(Application.documents)
+        )
+    )
     application = session.exec(statement).first()
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -393,7 +429,62 @@ async def resend_credentials(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/{id}/documents", response_model=List[DocumentRead])
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.patch("/v2/applications/{id}/step/{step}", response_model=ApplicationRead)
+async def update_application_step(
+    id: int,
+    step: int,
+    data: ApplicationStepUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update application data for a specific lifecycle step.
+    Supports partial updates and nested data (parents, education, etc.).
+    """
+    # Authorization: User must own the application or be admin
+    application = session.get(Application, id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles)
+    is_owner = current_user.email == application.email
+    # Allow portal user access if linked
+    is_portal_user = application.portal_user_id == current_user.id
+    
+    if not (is_admin or is_owner or is_portal_user):
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    try:
+        updated_app = AdmissionService.update_application_step(session, id, data, current_user.id)
+        return sign_application_urls(ApplicationRead.from_orm(updated_app))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/v2/applications/{id}/full-preview", response_model=ApplicationRead)
+async def get_application_full_preview(
+    id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get full application data including all nested relationships.
+    """
+    application = session.get(Application, id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    is_admin = any(role.name in ["SUPER_ADMIN", "ADMIN"] for role in current_user.roles)
+    is_owner = current_user.email == application.email
+    is_portal_user = application.portal_user_id == current_user.id
+    
+    if not (is_admin or is_owner or is_portal_user):
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    app = AdmissionService.get_full_application(session, id)
+    return sign_application_urls(ApplicationRead.from_orm(app))
 async def list_documents(
     id: int,
     session: Session = Depends(get_session),
@@ -411,7 +502,9 @@ async def list_documents(
     
     statement = select(ApplicationDocument).where(ApplicationDocument.application_id == id)
     documents = session.exec(statement).all()
-    return documents
+    # Convert to schema list
+    doc_reads = [DocumentRead.from_orm(d) for d in documents]
+    return sign_document_urls(doc_reads)
 
 @router.post("/{id}/documents/upload", response_model=DocumentRead)
 async def upload_document(
@@ -446,7 +539,11 @@ async def upload_document(
     session.add(document)
     session.commit()
     session.refresh(document)
-    return document
+    
+    # Return with signed URL
+    doc_read = DocumentRead.from_orm(document)
+    doc_read.file_url = storage_service.get_presigned_url(doc_read.file_url, bucket=storage_service.bucket_documents)
+    return doc_read
 
 @router.get("/{id}/timeline", response_model=List[ActivityLogRead])
 async def get_timeline(
@@ -809,7 +906,7 @@ async def download_receipt_pdf(
         applicant_name=application.name,
         payment_id=payment.transaction_id,
         amount=float(payment.amount),
-        payment_date=payment.updated_at or payment.created_at,
+        payment_date=payment.paid_at or payment.created_at,
         program_name=None # TODO: Fetch program name if available
     )
     
@@ -857,14 +954,14 @@ async def get_receipt_url(
     from app.services.storage_service import storage_service
     from app.services.pdf_service import pdf_service
     
-    if not storage_service.file_exists(filename, bucket="receipts"):
+    if not storage_service.file_exists(filename):
         # Lazy Generation
         pdf_bytes = pdf_service.generate_receipt_bytes(
             application_number=application.application_number,
             applicant_name=application.name,
             payment_id=payment_exists.transaction_id,
             amount=float(payment_exists.amount),
-            payment_date=payment_exists.updated_at or payment_exists.created_at,
+            payment_date=payment_exists.paid_at or payment_exists.created_at,
             program_name=application.program.name if application.program else None
         )
         
@@ -874,14 +971,12 @@ async def get_receipt_url(
         storage_service.upload_bytes(
             content=pdf_bytes,
             filename=filename,
-            bucket="receipts",
             content_type="application/pdf"
         )
     
     # Generate Presigned URL
     url = storage_service.get_presigned_url(
         file_key=filename,
-        bucket="receipts",
         expiration=900 # 15 minutes
     )
 

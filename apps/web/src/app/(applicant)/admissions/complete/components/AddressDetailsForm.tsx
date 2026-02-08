@@ -17,12 +17,12 @@ export function AddressDetailsForm() {
 
     useEffect(() => {
         if (isSameAsPermanent && permanentAddress) {
-            setValue('addresses.1.address_line1', permanentAddress.address_line1)
-            setValue('addresses.1.address_line2', permanentAddress.address_line2)
-            setValue('addresses.1.city', permanentAddress.city)
+            setValue('addresses.1.address_line', permanentAddress.address_line)
+            setValue('addresses.1.village_city', permanentAddress.village_city)
             setValue('addresses.1.state', permanentAddress.state)
             setValue('addresses.1.district', permanentAddress.district)
             setValue('addresses.1.pincode', permanentAddress.pincode)
+            setValue('addresses.1.country', permanentAddress.country)
         }
     }, [isSameAsPermanent, permanentAddress, setValue])
 
@@ -30,35 +30,35 @@ export function AddressDetailsForm() {
     const renderFields = (index: number, type: string, disabled: boolean = false) => (
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${disabled ? 'opacity-70 pointer-events-none' : ''}`}>
             <div className="md:col-span-2 space-y-2">
-                <Label>Address Line 1 *</Label>
-                <Input
-                    {...register(`addresses.${index}.address_line1`, { required: 'Line 1 is required' })}
-                    placeholder="House No, Street Name"
+                <Label>Address * (House No, Street, etc.)</Label>
+                <Textarea
+                    {...register(`addresses.${index}.address_line`, { required: 'Address is required' })}
+                    placeholder="Enter full address"
                     disabled={disabled}
+                    className="min-h-[80px]"
                 />
-                {errors.addresses?.[index]?.address_line1 && (
-                    <p className="text-sm text-red-500">{errors.addresses[index].address_line1.message as string}</p>
+                {errors.addresses?.[index]?.address_line && (
+                    <p className="text-sm text-red-500">{errors.addresses[index].address_line.message as string}</p>
                 )}
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-                <Label>Address Line 2</Label>
-                <Input
-                    {...register(`addresses.${index}.address_line2`)}
-                    placeholder="Apartment, Landmark, Area"
-                    disabled={disabled}
-                />
             </div>
 
             <div className="space-y-2">
-                <Label>City *</Label>
+                <Label>Village/City *</Label>
                 <Input
-                    {...register(`addresses.${index}.city`, { required: 'City is required' })}
+                    {...register(`addresses.${index}.village_city`, { required: 'Village/City is required' })}
                     disabled={disabled}
                 />
-                {errors.addresses?.[index]?.city && (
-                    <p className="text-sm text-red-500">{errors.addresses[index].city.message as string}</p>
+                {errors.addresses?.[index]?.village_city && (
+                    <p className="text-sm text-red-500">{errors.addresses[index].village_city.message as string}</p>
                 )}
+            </div>
+
+            <div className="space-y-2">
+                <Label>District *</Label>
+                <Input
+                    {...register(`addresses.${index}.district`, { required: 'District is required' })}
+                    disabled={disabled}
+                />
             </div>
 
             <div className="space-y-2">
@@ -70,14 +70,6 @@ export function AddressDetailsForm() {
                 {errors.addresses?.[index]?.state && (
                     <p className="text-sm text-red-500">{errors.addresses[index].state.message as string}</p>
                 )}
-            </div>
-
-            <div className="space-y-2">
-                <Label>District *</Label>
-                <Input
-                    {...register(`addresses.${index}.district`, { required: 'District is required' })}
-                    disabled={disabled}
-                />
             </div>
 
             <div className="space-y-2">
@@ -93,6 +85,15 @@ export function AddressDetailsForm() {
                 {errors.addresses?.[index]?.pincode && (
                     <p className="text-sm text-red-500">{errors.addresses[index].pincode.message as string}</p>
                 )}
+            </div>
+
+            <div className="space-y-2">
+                <Label>Country *</Label>
+                <Input
+                    {...register(`addresses.${index}.country`, { required: 'Country is required' })}
+                    disabled={disabled}
+                    defaultValue="India"
+                />
             </div>
 
             {/* Hidden Type Field */}

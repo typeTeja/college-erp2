@@ -253,8 +253,24 @@ export const admissionApi = {
   /**
    * Complete my application (student portal)
    */
-  completeMyApplication: async (data: ApplicationUpdate): Promise<ApplicationRead> => {
+  completeMyApplication: async (data: any) => {
+    // Complete Application (Old - Full Submit)
     const response = await api.put(`${BASE_URL}/my-application/complete`, data);
+    return response.data;
+  },
+
+  // Progressive Application Updates (New - Save & Resume)
+  updateApplicationStep: async (id: number, step: number, data: any) => {
+    const response = await api.patch(`${BASE_URL}/v2/applications/${id}/step/${step}`, {
+      ...data,
+      current_step: step,
+    });
+    return response.data;
+  },
+
+  // Get Full Preview
+  getApplicationFullPreview: async (id: number) => {
+    const response = await api.get(`${BASE_URL}/v2/applications/${id}/full-preview`);
     return response.data;
   },
 

@@ -49,10 +49,10 @@ export default function CompleteApplicationPage() {
         defaultValues: {
             parents: [],
             addresses: [
-                { address_type: AddressType.PERMANENT, address_line1: '', city: '', state: '', district: '', pincode: '' },
-                { address_type: AddressType.CURRENT, address_line1: '', city: '', state: '', district: '', pincode: '' }
+                { address_type: AddressType.PERMANENT, address_line: '', village_city: '', state: '', district: '', pincode: '' },
+                { address_type: AddressType.CURRENT, address_line: '', village_city: '', state: '', district: '', pincode: '' }
             ],
-            education: [],
+            education_history: [],
             student_declaration_accepted: false,
             parent_declaration_accepted: false
         }
@@ -60,31 +60,37 @@ export default function CompleteApplicationPage() {
 
     const { reset, trigger, handleSubmit, formState: { isSubmitting } } = methods
 
+    const [isSaving, setIsSaving] = useState(false)
+
     // Populate form when data loads
     useEffect(() => {
         if (application) {
-            // Transform application data to form structure if needed
-            // Ideally, backend returns nulls/empty arrays if not filled.
-            // We merge with defaults to ensure arrays exist.
+            // Resume from last saved step (backend 1-based -> frontend 0-based)
+            // If current_step is set, use it. Else default to 0.
+            if (application.current_step) {
+                // Ensure we don't go out of bounds if step is 7 (completed)
+                const savedStep = Math.min(Math.max(0, application.current_step - 1), STEPS.length - 1)
+                setCurrentStep(savedStep)
+            }
 
             const defaultParents = application.parents && application.parents.length > 0
                 ? application.parents
                 : [{ relation: ParentRelation.FATHER, name: application.father_name || '', mobile: application.father_phone || '', is_primary_contact: true }]
 
-            const defaultEducation = application.education && application.education.length > 0
-                ? application.education
+            const defaultEducation = application.education_history && application.education_history.length > 0
+                ? application.education_history
                 : [{ level: EducationLevel.SSC, institution_name: '', percentage: 0, board: EducationBoard.STATE_BOARD }]
 
             reset({
                 ...application, // Spread existing fields
                 parents: defaultParents,
                 addresses: application.addresses && application.addresses.length > 0 ? application.addresses : [
-                    { address_type: AddressType.PERMANENT, address_line1: application.address || '', city: '', state: '', district: '', pincode: '' },
-                    { address_type: AddressType.CURRENT, address_line1: '', city: '', state: '', district: '', pincode: '' }
+                    { address_type: AddressType.PERMANENT, address_line: application.address || '', village_city: '', state: '', district: '', pincode: '' },
+                    { address_type: AddressType.CURRENT, address_line: '', village_city: '', state: '', district: '', pincode: '' }
                 ],
-                education: defaultEducation,
+                education_history: defaultEducation,
                 bank_details: application.bank_details || {},
-                health_details: application.health_details || {},
+                health_info: application.health_info || {},
                 // Maintain legacy mappings if new fields are empty
                 aadhaar_number: application.aadhaar_number,
             } as any)
@@ -92,7 +98,7 @@ export default function CompleteApplicationPage() {
     }, [application, reset])
 
 
-    // Complete application mutation
+    // Complete application mutation (Final Submit)
     const completeMutation = useMutation({
         mutationFn: (data: ApplicationCompleteSubmit) => admissionApi.completeMyApplication(data),
         onSuccess: () => {
@@ -113,11 +119,24 @@ export default function CompleteApplicationPage() {
     })
 
     const onSubmit: SubmitHandler<ApplicationCompleteSubmit> = (data) => {
-        completeMutation.mutate(data)
+        // Transform data to match backend schema
+        const payload: any = { ...data }
+
+        if (payload.education) {
+            payload.education_history = payload.education
+            delete payload.education
+        }
+        if (payload.health_details) {
+            payload.health_info = payload.health_details
+            delete payload.health_details
+        }
+
+        completeMutation.mutate(payload)
     }
 
     const handleNext = async () => {
         let isValid = false
+        const currentHookFormValues = methods.getValues()
 
         // Validate current step fields
         switch (currentStep) {
@@ -131,16 +150,12 @@ export default function CompleteApplicationPage() {
                 isValid = await trigger('addresses')
                 break
             case 3: // Education
-                isValid = await trigger('education')
+                isValid = await trigger('education_history')
                 break
             case 4: // Bank/Health
-                // Bank and Health are mostly optional, but check if needed
                 isValid = true
                 break
             case 5: // Docs
-                // Docs upload is handled independently. We assume if they proceed, they are done. 
-                // Could check required docs here if we had access to the list from the component state.
-                // For now, allow proceed.
                 isValid = true
                 break
             case 6: // Declaration
@@ -149,8 +164,50 @@ export default function CompleteApplicationPage() {
         }
 
         if (isValid) {
-            setCurrentStep(prev => prev + 1)
-            window.scrollTo(0, 0)
+            setIsSaving(true)
+            try {
+                // Partial Save
+                const currentHookFormValues = methods.getValues()
+                let payload: any = {}
+
+                // Construct payload based on step
+                switch (currentStep) {
+                    case 0: payload = { ...currentHookFormValues }; break;
+                    case 1: payload = { parents: currentHookFormValues.parents }; break;
+                    case 2: payload = { addresses: currentHookFormValues.addresses }; break;
+                    case 3: payload = { education_history: currentHookFormValues.education_history }; break;
+                    case 4: payload = { bank_details: currentHookFormValues.bank_details, health_info: currentHookFormValues.health_info }; break;
+                    case 5: payload = {}; break;
+                    case 6: payload = { ...currentHookFormValues }; break;
+                }
+
+                // Call API
+                const stepToSave = currentStep + 2
+
+                // Don't save if in preview/submit step (last step) unless we want to draft it
+                if (currentStep < STEPS.length - 1) {
+                    await admissionApi.updateApplicationStep(application!.id, stepToSave, payload)
+                    toast({
+                        description: "Progress saved",
+                        duration: 2000,
+                    })
+                }
+
+                setCurrentStep(prev => prev + 1)
+                window.scrollTo(0, 0)
+            } catch (error) {
+                console.error("Save failed", error)
+                toast({
+                    title: "Save Failed",
+                    description: "Could not save progress, but you can proceed.",
+                    variant: "destructive"
+                })
+                // Allow proceeding even if save fails? Maybe better not to block if it's just network glitch?
+                // For now, let's block to ensure data integrity or allow? User requested robust system.
+                // Let's block.
+            } finally {
+                setIsSaving(false)
+            }
         }
     }
 
@@ -231,6 +288,11 @@ export default function CompleteApplicationPage() {
                 <div className="text-right">
                     <div className="text-sm font-medium text-blue-600">Step {currentStep + 1} of {STEPS.length}</div>
                     <div className="text-gray-900 font-semibold">{STEPS[currentStep].title}</div>
+                    {application.last_saved_at && (
+                        <div className="text-xs text-slate-400 mt-1">
+                            Last saved: {new Date(application.last_saved_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -256,7 +318,7 @@ export default function CompleteApplicationPage() {
                             type="button"
                             variant="outline"
                             onClick={handleBack}
-                            disabled={currentStep === 0 || isSubmitting}
+                            disabled={currentStep === 0 || isSubmitting || isSaving}
                         >
                             <ChevronLeft className="h-4 w-4 mr-2" />
                             Previous
@@ -267,9 +329,19 @@ export default function CompleteApplicationPage() {
                                 type="button"
                                 onClick={handleNext}
                                 className="bg-blue-600 hover:bg-blue-700"
+                                disabled={isSaving}
                             >
-                                Next
-                                <ChevronRight className="h-4 w-4 ml-2" />
+                                {isSaving ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        Save & Next
+                                        <ChevronRight className="h-4 w-4 ml-2" />
+                                    </>
+                                )}
                             </Button>
                         ) : (
                             <Button

@@ -343,6 +343,7 @@ class ActivityType(str, Enum):
     APPLICATION_RESTORED = "APPLICATION_RESTORED"
     TEST_DATA_CLEANUP = "TEST_DATA_CLEANUP"
     COMMUNICATION_SENT = "COMMUNICATION_SENT"
+    UPDATE = "UPDATE"
 
 
 class TentativeAdmissionStatus(str, Enum):

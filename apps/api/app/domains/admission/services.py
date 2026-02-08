@@ -29,6 +29,7 @@ from app.config.settings import settings
 from app.services.pdf_service import pdf_service
 from app.shared.enums import ApplicationPaymentStatus, ApplicationStatus, StudentStatus
 from app.domains.finance.models import ScholarshipSlab
+from .schemas import ApplicationStepUpdate
 
 
 # Password hashing context
@@ -254,32 +255,34 @@ class AdmissionService:
             raise ValueError("Application not found")
 
         # 1. Update Basic Application Fields
-        # We can use exclude={'parents', 'education_history', 'addresses', 'bank_details', 'health_info'}
-        update_dict = data.dict(exclude_unset=True, exclude={'parents', 'education_history', 'addresses', 'bank_details', 'health_info'})
+        # Use model_dump (Pydantic v2) instead of dict
+        update_dict = data.model_dump(exclude_unset=True, exclude={'parents', 'education_history', 'addresses', 'bank_details', 'health_info'})
         for key, value in update_dict.items():
             setattr(application, key, value)
         
         # 2. Update Parents
         if data.parents is not None:
-            # Simple strategy: Delete existing and recreate
-            # In a production app, we might want to update by ID if present
-            session.exec(col(ApplicationParent.application_id) == application_id).delete()
+            # Delete existing records using explicit delete statement
+            from sqlmodel import delete
+            session.exec(delete(ApplicationParent).where(ApplicationParent.application_id == application_id))
             for parent_data in data.parents:
-                parent = ApplicationParent(**parent_data.dict(), application_id=application_id)
+                parent = ApplicationParent(**parent_data.model_dump(), application_id=application_id)
                 session.add(parent)
 
         # 3. Update Education History
         if data.education_history is not None:
-            session.exec(col(ApplicationEducation.application_id) == application_id).delete()
+            from sqlmodel import delete
+            session.exec(delete(ApplicationEducation).where(ApplicationEducation.application_id == application_id))
             for edu_data in data.education_history:
-                edu = ApplicationEducation(**edu_data.dict(), application_id=application_id)
+                edu = ApplicationEducation(**edu_data.model_dump(), application_id=application_id)
                 session.add(edu)
 
         # 4. Update Addresses
         if data.addresses is not None:
-            session.exec(col(ApplicationAddress.application_id) == application_id).delete()
+            from sqlmodel import delete
+            session.exec(delete(ApplicationAddress).where(ApplicationAddress.application_id == application_id))
             for addr_data in data.addresses:
-                addr = ApplicationAddress(**addr_data.dict(), application_id=application_id)
+                addr = ApplicationAddress(**addr_data.model_dump(), application_id=application_id)
                 session.add(addr)
 
         # 5. Update Bank Details
@@ -287,12 +290,12 @@ class AdmissionService:
             stmt = select(ApplicationBankDetails).where(ApplicationBankDetails.application_id == application_id)
             bank = session.exec(stmt).first()
             if bank:
-                for key, value in data.bank_details.dict(exclude_unset=True).items():
+                for key, value in data.bank_details.model_dump(exclude_unset=True).items():
                     setattr(bank, key, value)
                 bank.updated_at = datetime.utcnow()
                 session.add(bank)
             else:
-                bank = ApplicationBankDetails(**data.bank_details.dict(), application_id=application_id)
+                bank = ApplicationBankDetails(**data.bank_details.model_dump(), application_id=application_id)
                 session.add(bank)
 
         # 6. Update Health Info
@@ -300,12 +303,12 @@ class AdmissionService:
             stmt = select(ApplicationHealth).where(ApplicationHealth.application_id == application_id)
             health = session.exec(stmt).first()
             if health:
-                for key, value in data.health_info.dict(exclude_unset=True).items():
+                for key, value in data.health_info.model_dump(exclude_unset=True).items():
                     setattr(health, key, value)
                 health.updated_at = datetime.utcnow()
                 session.add(health)
             else:
-                health = ApplicationHealth(**data.health_info.dict(), application_id=application_id)
+                health = ApplicationHealth(**data.health_info.model_dump(), application_id=application_id)
                 session.add(health)
 
         # Update status
@@ -363,15 +366,17 @@ class AdmissionService:
             
             if background_tasks:
                 # Add background tasks for emails/SMS
-                background_tasks.add_task(
-                    AdmissionService.send_credentials_email,
-                    email=application.email,
-                    username=portal_username,
-                    password=portal_password,
-                    name=application.name,
-                    portal_url=settings.PORTAL_BASE_URL
-                )
-                if application.phone:
+                # Only send credentials if a new password was generated
+                if portal_password:
+                    background_tasks.add_task(
+                        AdmissionService.send_credentials_email,
+                        email=application.email,
+                        username=portal_username,
+                        password=portal_password,
+                        name=application.name,
+                        portal_url=settings.PORTAL_BASE_URL
+                    )
+                if application.phone and portal_password:
                      background_tasks.add_task(
                         AdmissionService.send_credentials_sms,
                         phone=application.phone,
@@ -410,6 +415,115 @@ class AdmissionService:
         return True
 
     @staticmethod
+    def update_application_step(
+        session: Session, 
+        application_id: int, 
+        step_data: ApplicationStepUpdate, 
+        user_id: Optional[int] = None
+    ) -> Application:
+        """
+        Update application data for a specific step (Save & Resume).
+        Handles nested relationship updates.
+        """
+        db_app = session.get(Application, application_id)
+        if not db_app:
+            raise ValueError("Application not found")
+            
+        # Update scalar fields
+        app_data = step_data.model_dump(exclude_unset=True, exclude={'parents', 'education_history', 'addresses', 'bank_details', 'health_info'})
+        for key, value in app_data.items():
+            setattr(db_app, key, value)
+            
+        # Update tracking fields
+        db_app.last_saved_at = datetime.utcnow()
+        # Only advance step if the new step is greater (don't go back on resume unless explicit)
+        # Actually, we should trust the frontend's current_step, or just track the max visited.
+        # Requirement says: "Track current_step". Let's update it.
+        db_app.current_step = step_data.current_step
+        
+        # Handle Nested Relationships
+        
+        # 1. Parents
+        if step_data.parents is not None:
+            # Clear existing and replace (simplest strategy for now, or update if ID provided?)
+            # Since schema is Create, we replace.
+            # Ideally we should diff, but for "Save" it's often easier to replace list.
+            # However, this deletes IDs. Let's see if we can preserve.
+            # The schema `ApplicationParentCreate` doesn't have ID. 
+            # So we delete old and create new.
+            for parent in db_app.parents:
+                session.delete(parent)
+            db_app.parents = [] # clear relationship
+            
+            for p_data in step_data.parents:
+                parent = ApplicationParent(**p_data.model_dump(), application_id=application_id)
+                session.add(parent)
+                
+        # 2. Education
+        if step_data.education_history is not None:
+            for edu in db_app.education_history:
+                session.delete(edu)
+            db_app.education_history = []
+            
+            for e_data in step_data.education_history:
+                education = ApplicationEducation(**e_data.model_dump(), application_id=application_id)
+                session.add(education)
+                
+        # 3. Addresses
+        if step_data.addresses is not None:
+            for addr in db_app.addresses:
+                session.delete(addr)
+            db_app.addresses = []
+            
+            for a_data in step_data.addresses:
+                address = ApplicationAddress(**a_data.model_dump(), application_id=application_id)
+                session.add(address)
+                
+        # 4. Bank Details
+        if step_data.bank_details is not None:
+            if db_app.bank_details:
+                # Update existing
+                for key, value in step_data.bank_details.model_dump(exclude_unset=True).items():
+                    setattr(db_app.bank_details, key, value)
+            else:
+                # Create new
+                bank_details = ApplicationBankDetails(**step_data.bank_details.model_dump(), application_id=application_id)
+                session.add(bank_details)
+        
+        # 5. Health Info
+        if step_data.health_info is not None:
+            if db_app.health_info:
+                # Update existing
+                for key, value in step_data.health_info.model_dump(exclude_unset=True).items():
+                    setattr(db_app.health_info, key, value)
+            else:
+                # Create new
+                health = ApplicationHealth(**step_data.health_info.model_dump(), application_id=application_id)
+                session.add(health)
+        
+        # Log activity
+        log_activity(
+            session, application_id, ActivityType.UPDATE, 
+            f"Saved progress for step {step_data.current_step}", 
+            performed_by=user_id
+        )
+        
+        session.add(db_app)
+        session.commit()
+        session.refresh(db_app)
+        return db_app
+
+    @staticmethod
+    def get_full_application(session: Session, application_id: int) -> Application:
+        """Get application with all nested relations loaded"""
+        # In SQLModel/SQLAlchemy, simple get() might lazy load. 
+        # For full dump, we might want explicit eager loading if performance helps,
+        # but ApplicationRead schema will trigger lazy loads automatically if attached to session.
+        # This wrapper just ensures existence.
+        app = session.get(Application, application_id)
+        return app
+
+    @staticmethod
     def restore_application(
         session: Session, application_id: int, restored_by: int
     ) -> Application:
@@ -428,7 +542,7 @@ class AdmissionService:
         log_activity(
             session=session,
             application_id=application.id,
-            activity_type=ActivityType.STATUS_CHANGE,
+            activity_type=ActivityType.STATUS_CHANGED,
             description=f"Application restored by user {restored_by}",
             extra_data={"restored_by": restored_by}
         )

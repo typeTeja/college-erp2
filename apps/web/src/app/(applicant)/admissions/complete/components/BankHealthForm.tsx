@@ -74,7 +74,7 @@ export function BankHealthForm() {
                             <Input
                                 type="number"
                                 placeholder="e.g. 175"
-                                {...register('health_details.height_cm', { valueAsNumber: true })}
+                                {...register('health_info.height_cm', { valueAsNumber: true })}
                             />
                         </div>
                         <div className="space-y-2">
@@ -82,7 +82,7 @@ export function BankHealthForm() {
                             <Input
                                 type="number"
                                 placeholder="e.g. 65"
-                                {...register('health_details.weight_kg', { valueAsNumber: true })}
+                                {...register('health_info.weight_kg', { valueAsNumber: true })}
                             />
                         </div>
                     </div>
@@ -91,7 +91,7 @@ export function BankHealthForm() {
                         <Label>Allergies (if any)</Label>
                         <Input
                             placeholder="e.g. Peanuts, Penicillin"
-                            {...register('health_details.allergies')}
+                            {...register('health_info.allergies')}
                         />
                     </div>
 
@@ -99,7 +99,7 @@ export function BankHealthForm() {
                         <Label>Chronic Illness / Medical History</Label>
                         <Input
                             placeholder="Describe any chronic conditions"
-                            {...register('health_details.chronic_illness_details')}
+                            {...register('health_info.chronic_illness_details')}
                         />
                     </div>
 
@@ -108,14 +108,14 @@ export function BankHealthForm() {
                             <Label>Family Doctor Name</Label>
                             <Input
                                 placeholder="Dr. Name"
-                                {...register('health_details.doctor_name')}
+                                {...register('health_info.doctor_name')}
                             />
                         </div>
                         <div className="space-y-2">
                             <Label>Doctor's Phone</Label>
                             <Input
                                 placeholder="Emergency Contact"
-                                {...register('health_details.doctor_phone')}
+                                {...register('health_info.doctor_phone')}
                             />
                         </div>
                     </div>

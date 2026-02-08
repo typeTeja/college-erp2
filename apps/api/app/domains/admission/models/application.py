@@ -92,6 +92,8 @@ class Application(SQLModel, table=True):
     portal_last_login: Optional[datetime] = None
     
     # Application Completion Tracking
+    current_step: int = Field(default=1)
+    last_saved_at: datetime = Field(default_factory=datetime.utcnow)
     quick_apply_completed_at: Optional[datetime] = None
     full_form_started_at: Optional[datetime] = None
     full_form_completed_at: Optional[datetime] = None

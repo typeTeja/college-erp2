@@ -20,7 +20,7 @@ export function EducationDetailsForm() {
 
     const { fields, append, remove } = useFieldArray({
         control,
-        name: "education"
+        name: "education_history"
     })
 
     return (
@@ -72,7 +72,7 @@ export function EducationDetailsForm() {
                                 <Label>Level of Education *</Label>
                                 <Controller
                                     control={control}
-                                    name={`education.${index}.level`}
+                                    name={`education_history.${index}.level`}
                                     rules={{ required: 'Level is required' }}
                                     render={({ field }) => (
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -87,8 +87,8 @@ export function EducationDetailsForm() {
                                         </Select>
                                     )}
                                 />
-                                {errors.education?.[index]?.level && (
-                                    <p className="text-sm text-red-500">{errors.education[index].level.message as string}</p>
+                                {errors.education_history?.[index]?.level && (
+                                    <p className="text-sm text-red-500">{errors.education_history[index].level.message as string}</p>
                                 )}
                             </div>
 
@@ -97,10 +97,10 @@ export function EducationDetailsForm() {
                                 <Label>Institution Name *</Label>
                                 <Input
                                     placeholder="School / College Name"
-                                    {...register(`education.${index}.institution_name`, { required: 'Institution name is required' })}
+                                    {...register(`education_history.${index}.institution_name`, { required: 'Institution name is required' })}
                                 />
-                                {errors.education?.[index]?.institution_name && (
-                                    <p className="text-sm text-red-500">{errors.education[index].institution_name.message as string}</p>
+                                {errors.education_history?.[index]?.institution_name && (
+                                    <p className="text-sm text-red-500">{errors.education_history[index].institution_name.message as string}</p>
                                 )}
                             </div>
 
@@ -109,7 +109,7 @@ export function EducationDetailsForm() {
                                 <Label>Board / University *</Label>
                                 <Controller
                                     control={control}
-                                    name={`education.${index}.board`}
+                                    name={`education_history.${index}.board`}
                                     rules={{ required: 'Board is required' }}
                                     render={({ field }) => (
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -131,7 +131,7 @@ export function EducationDetailsForm() {
                                 <Label>Hall Ticket / Roll No.</Label>
                                 <Input
                                     placeholder="Roll Number"
-                                    {...register(`education.${index}.hall_ticket_number`)}
+                                    {...register(`education_history.${index}.hall_ticket_number`)}
                                 />
                             </div>
 
@@ -141,14 +141,14 @@ export function EducationDetailsForm() {
                                 <Input
                                     type="number"
                                     placeholder="YYYY"
-                                    {...register(`education.${index}.year_of_passing`, {
+                                    {...register(`education_history.${index}.year_of_passing`, {
                                         required: 'Year is required',
                                         min: { value: 1990, message: "Invalid year" },
                                         max: { value: new Date().getFullYear(), message: "Invalid year" }
                                     })}
                                 />
-                                {errors.education?.[index]?.year_of_passing && (
-                                    <p className="text-sm text-red-500">{errors.education[index].year_of_passing.message as string}</p>
+                                {errors.education_history?.[index]?.year_of_passing && (
+                                    <p className="text-sm text-red-500">{errors.education_history[index].year_of_passing.message as string}</p>
                                 )}
                             </div>
 
@@ -159,15 +159,15 @@ export function EducationDetailsForm() {
                                     type="number"
                                     step="0.01"
                                     placeholder="e.g. 85.5"
-                                    {...register(`education.${index}.percentage`, {
+                                    {...register(`education_history.${index}.percentage`, {
                                         required: 'Percentage is required',
                                         min: 0,
                                         max: 100,
                                         valueAsNumber: true
                                     })}
                                 />
-                                {errors.education?.[index]?.percentage && (
-                                    <p className="text-sm text-red-500">{errors.education[index].percentage.message as string}</p>
+                                {errors.education_history?.[index]?.percentage && (
+                                    <p className="text-sm text-red-500">{errors.education_history[index].percentage.message as string}</p>
                                 )}
                             </div>
                         </CardContent>

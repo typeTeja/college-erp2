@@ -92,6 +92,8 @@ class ApplicationUpdate(BaseModel):
     status: Optional[ApplicationStatus] = None
 
 
+
+
 # ======================================================================
 # Nested Data Schemas for Application Details
 # ======================================================================
@@ -214,6 +216,18 @@ class ApplicationHealthRead(ApplicationHealthCreate):
     
     class Config:
         from_attributes = True
+
+
+class ApplicationStepUpdate(ApplicationUpdate):
+    """Schema for partial step updates"""
+    current_step: int = Field(..., ge=1, le=7)
+    
+    # Allow nested updates for specific steps
+    parents: Optional[List[ApplicationParentCreate]] = None
+    education_history: Optional[List[ApplicationEducationCreate]] = None
+    addresses: Optional[List[ApplicationAddressCreate]] = None
+    bank_details: Optional[ApplicationBankDetailsCreate] = None
+    health_info: Optional[ApplicationHealthCreate] = None
 
 
 class ApplicationCompleteUpdate(BaseModel):
@@ -340,7 +354,12 @@ class ApplicationRead(ApplicationBase):
     offline_payment_verified_by: Optional[int] = None
     offline_payment_verified_at: Optional[datetime] = None
     created_at: datetime
+    created_at: datetime
     updated_at: datetime
+    
+    # Progress Tracking
+    current_step: Optional[int] = 1
+    last_saved_at: Optional[datetime] = None
     
     # Extra fields for full view
     aadhaar_number: Optional[str] = None
