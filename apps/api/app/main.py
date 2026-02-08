@@ -18,10 +18,22 @@ from app.core.rbac import seed_permissions
 from app.db.session import engine, init_db
 from sqlmodel import Session
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    print(f"❌ 422 Validation Error at {request.url}")
+    print(f"Details: {exc.errors()}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
 
 @app.on_event("startup")
 def on_startup():

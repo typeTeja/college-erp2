@@ -184,7 +184,19 @@ class ApplicationHealth(SQLModel, table=True):
     # Medical Fitness
     is_medically_fit: bool = Field(default=False)
     
-    # Practitioner Details
+    # Biometrics
+    height_cm: Optional[float] = None
+    weight_kg: Optional[float] = None
+    
+    # Medical Details
+    allergies: Optional[str] = Field(default=None, sa_column=Column(Text))
+    chronic_illness_details: Optional[str] = Field(default=None, sa_column=Column(Text))
+    
+    # Emergency Contact / Family Doctor
+    doctor_name: Optional[str] = Field(default=None, max_length=200)
+    doctor_phone: Optional[str] = Field(default=None, max_length=15)
+    
+    # Practitioner Details (for official certificate)
     practitioner_name: Optional[str] = Field(default=None, max_length=200)
     practitioner_registration_number: Optional[str] = Field(default=None, max_length=100)
     certificate_date: Optional[date] = None

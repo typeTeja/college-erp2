@@ -200,7 +200,21 @@ class ApplicationBankDetailsRead(ApplicationBankDetailsCreate):
 
 class ApplicationHealthCreate(BaseModel):
     """Schema for creating health/medical fitness information"""
-    is_medically_fit: bool
+    is_medically_fit: bool = Field(default=True) # Default to true for better UX
+    
+    # Biometrics
+    height_cm: Optional[float] = None
+    weight_kg: Optional[float] = None
+    
+    # Medical Details
+    allergies: Optional[str] = None
+    chronic_illness_details: Optional[str] = None
+    
+    # Emergency Contact / Family Doctor
+    doctor_name: Optional[str] = Field(None, max_length=200)
+    doctor_phone: Optional[str] = Field(None, max_length=15)
+    
+    # Practitioner Details (for official certificate)
     practitioner_name: Optional[str] = Field(None, max_length=200)
     practitioner_registration_number: Optional[str] = Field(None, max_length=100)
     certificate_date: Optional[date] = None
