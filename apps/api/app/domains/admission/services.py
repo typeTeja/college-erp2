@@ -386,7 +386,12 @@ class AdmissionService:
                         portal_url=settings.PORTAL_BASE_URL
                     )
             return True
-        except Exception:
+        except Exception as e:
+            import traceback
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error processing payment completion for app {application_id}: {str(e)}")
+            logger.error(traceback.format_exc())
             return False
 
     @staticmethod
@@ -638,8 +643,12 @@ class AdmissionService:
                 mobile=phone, name=name, username=username,
                 password=password, portal_url=portal_url
             )
-        except Exception:
-            pass
+        except Exception as e:
+            import traceback
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error sending SMS credentials to {phone}: {str(e)}")
+            logger.error(traceback.format_exc())
 
     @staticmethod
     async def send_credentials_email(email: str, username: str, password: str, name: str = "", portal_url: str = ""):
@@ -649,8 +658,12 @@ class AdmissionService:
                 to_email=email, name=name, username=username,
                 password=password, portal_url=portal_url
             )
-        except Exception:
-            pass
+        except Exception as e:
+            import traceback
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error sending Email credentials to {email}: {str(e)}")
+            logger.error(traceback.format_exc())
 
     @staticmethod
     def confirm_admission(session: Session, application_id: int, confirmed_by: int) -> Application:

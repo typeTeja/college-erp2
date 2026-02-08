@@ -817,7 +817,7 @@ async def payment_success(
     udf1 = data_dict.get("udf1") # Application ID
     
     if status == "success":
-        AdmissionService.process_payment_completion(
+        success = AdmissionService.process_payment_completion(
             session=session,
             application_id=int(udf1),
             transaction_id=txnid,
@@ -825,33 +825,13 @@ async def payment_success(
             background_tasks=background_tasks,
             payment_method="ONLINE-EASEBUZZ"
         )
-        # Create Portal Account Logic is triggered inside process_payment_completion? 
-        # No, created inside AdmissionService or explicitly here.
-        # process_payment_completion updates status to APPLIED/PAID.
         
-        # Trigger Account Creation
-        application = session.get(Application, int(udf1))
-        if application and not application.portal_user_id:
-             portal_username, portal_password, _ = AdmissionService.create_portal_account_after_payment(session, application)
-             
-             # Send SMS/Email with creds if new account created with password
-             if portal_password:
-                 background_tasks.add_task(
-                     AdmissionService.send_credentials_email,
-                     email=application.email,
-                     username=portal_username,
-                     password=portal_password,
-                     name=application.name,
-                     portal_url=settings.PORTAL_BASE_URL
-                 )
-                 background_tasks.add_task(
-                     AdmissionService.send_credentials_sms,
-                     phone=application.phone,
-                     username=portal_username,
-                     password=portal_password,
-                     name=application.name,
-                     portal_url=settings.PORTAL_BASE_URL
-                 )
+        if not success:
+            logger.error(f"Payment completion processing failed for txnid: {txnid}")
+            # We still redirect to success because the payment WAS successful at gateway, 
+            # but internal update failed. Admin needs to reconcile.
+            # Alternatively, redirect to a "Verify" page.
+            # For now, let's allow redirect but log error.
              
     # Redirect to Frontend Success Page
     from fastapi.responses import RedirectResponse
