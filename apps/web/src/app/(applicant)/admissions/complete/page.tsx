@@ -50,7 +50,7 @@ export default function CompleteApplicationPage() {
             parents: [],
             addresses: [
                 { address_type: AddressType.PERMANENT, address_line: '', village_city: '', state: '', district: '', pincode: '' },
-                { address_type: AddressType.CURRENT, address_line: '', village_city: '', state: '', district: '', pincode: '' }
+                { address_type: AddressType.PRESENT, address_line: '', village_city: '', state: '', district: '', pincode: '' }
             ],
             education_history: [],
             student_declaration_accepted: false,
@@ -86,7 +86,7 @@ export default function CompleteApplicationPage() {
                 parents: defaultParents,
                 addresses: application.addresses && application.addresses.length > 0 ? application.addresses : [
                     { address_type: AddressType.PERMANENT, address_line: application.address || '', village_city: '', state: '', district: '', pincode: '' },
-                    { address_type: AddressType.CURRENT, address_line: '', village_city: '', state: '', district: '', pincode: '' }
+                    { address_type: AddressType.PRESENT, address_line: '', village_city: '', state: '', district: '', pincode: '' }
                 ],
                 education_history: defaultEducation,
                 bank_details: application.bank_details || {},
@@ -170,9 +170,53 @@ export default function CompleteApplicationPage() {
                 const currentHookFormValues = methods.getValues()
                 let payload: any = {}
 
+                // Helper to clean payload
+                const cleanPayload = (obj: any) => {
+                    const cleaned: any = {}
+                    Object.keys(obj).forEach(key => {
+                        const value = obj[key]
+                        if (value !== null && value !== undefined && value !== '') {
+                            // If it's an array, clean each item if they are objects
+                            if (Array.isArray(value)) {
+                                cleaned[key] = value.map(item => typeof item === 'object' ? cleanPayload(item) : item)
+                                    .filter(item => item !== null && (typeof item !== 'object' || Object.keys(item).length > 0))
+                            } else if (typeof value === 'object' && !(value instanceof Date)) {
+                                const subCleaned = cleanPayload(value)
+                                if (Object.keys(subCleaned).length > 0) {
+                                    cleaned[key] = subCleaned
+                                }
+                            } else {
+                                cleaned[key] = value
+                            }
+                        }
+                    })
+                    return cleaned
+                }
+
                 // Construct payload based on step
+                const {
+                    parents,
+                    addresses,
+                    education_history,
+                    bank_details,
+                    health_info,
+                    ...personalFields
+                } = currentHookFormValues
+
                 switch (currentStep) {
-                    case 0: payload = { ...currentHookFormValues }; break;
+                    case 0:
+                        // Only send fields relevant to Personal Details
+                        const {
+                            aadhaar_number, date_of_birth, gender, blood_group,
+                            religion, caste_category, nationality, mother_tongue,
+                            identification_mark_1, identification_mark_2
+                        } = personalFields
+                        payload = {
+                            aadhaar_number, date_of_birth, gender, blood_group,
+                            religion, caste_category, nationality,
+                            identification_mark_1, identification_mark_2
+                        }
+                        break
                     case 1: payload = { parents: currentHookFormValues.parents }; break;
                     case 2: payload = { addresses: currentHookFormValues.addresses }; break;
                     case 3: payload = { education_history: currentHookFormValues.education_history }; break;
@@ -181,12 +225,15 @@ export default function CompleteApplicationPage() {
                     case 6: payload = { ...currentHookFormValues }; break;
                 }
 
+                // Strip empty/null before sending
+                const finalPayload = cleanPayload(payload)
+
                 // Call API
                 const stepToSave = currentStep + 2
 
                 // Don't save if in preview/submit step (last step) unless we want to draft it
                 if (currentStep < STEPS.length - 1) {
-                    await admissionApi.updateApplicationStep(application!.id, stepToSave, payload)
+                    await admissionApi.updateApplicationStep(application!.id, stepToSave, finalPayload)
                     toast({
                         description: "Progress saved",
                         duration: 2000,

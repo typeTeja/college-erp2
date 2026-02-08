@@ -49,8 +49,16 @@ export function BankHealthForm() {
                             placeholder="SBIN0001234"
                             maxLength={11}
                             className="uppercase"
-                            {...register('bank_details.ifsc_code')}
+                            {...register('bank_details.ifsc_code', {
+                                pattern: {
+                                    value: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+                                    message: "Invalid IFSC format (e.g., SBIN0001234)"
+                                }
+                            })}
                         />
+                        {errors.bank_details?.ifsc_code && (
+                            <p className="text-sm text-red-500">{errors.bank_details.ifsc_code.message as string}</p>
+                        )}
                     </div>
                     <div className="md:col-span-2 space-y-2">
                         <Label>Account Number</Label>
@@ -68,6 +76,17 @@ export function BankHealthForm() {
                     <CardTitle className="text-base font-medium">Health & Medical Record</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2 pb-4 border-b">
+                        <Checkbox
+                            id="is_medically_fit"
+                            {...register('health_info.is_medically_fit')}
+                            defaultChecked={true}
+                        />
+                        <Label htmlFor="is_medically_fit" className="font-medium cursor-pointer">
+                            I declare that I am medically fit for the program *
+                        </Label>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Height (cm)</Label>

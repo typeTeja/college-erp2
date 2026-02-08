@@ -128,7 +128,7 @@ export function AddressDetailsForm() {
                         </Label>
                     </div>
                 </div>
-                {renderFields(1, AddressType.CURRENT, isSameAsPermanent)}
+                {renderFields(1, AddressType.PRESENT, isSameAsPermanent)}
             </div>
         </div>
     )
